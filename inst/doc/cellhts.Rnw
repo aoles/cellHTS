@@ -362,7 +362,7 @@ x = annotate(x, geneIDFile)
 @ 
 %% Create the example table:
 <<geneIDsTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(geneIDFile, "gene ID")
+cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6)
 @ 
 %
 %---------------------------------------------------------------
