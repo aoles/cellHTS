@@ -512,15 +512,17 @@ this we use the category analysis from Robert Gentleman's
 categorizations, for example chromosome location, pathway membership,
 or categorical phenotypes from other studies.
 
-First we create the category matrix. This a matrix with one column for
+Now we can create the category matrix. This a matrix with one column for
 each probe and one row for each category. The matrix element
 \Robject{[i,j]} is \Robject{1} if probe \Robject{j} belongs to the
 \Robject{j}-th category, and \Robject{0} if not.
 %
 <<cat1>>=
-sel = (bm3$"go_id" != "")
+names(x$score) = x$geneAnno$GeneID
+selsc = !is.na(x$score)
+selbm = (bm3$gene_stable_id %in% names(which(selsc))) & (bm3$go_id != "")
 categs = cellHTS:::cache("categs",
-   cateGOry(bm3$"gene_stable_id"[sel], bm3$"go_id"[sel]))
+   cateGOry(bm3$"gene_stable_id"[selbm], bm3$"go_id"[selbm]))
 @ 
 % 
 We will selected only those categories that contain at least 3 and no more than 1000 genes.
@@ -533,8 +535,7 @@ As the statistic for the category analysis we use the $z$-score. After
 selecting the subset of genes that actually have GO annotation,
 %
 <<cat3>>=
-names(x$score) = x$geneAnno$GeneID
-stats = x$score[ (names(x$score) %in% nodes(categs)) & !is.na(x$score) ]
+stats = x$score[ selsc & (names(x$score) %in% nodes(categs)) ]
 @
 %
 we are ready to call the category summary functions:
