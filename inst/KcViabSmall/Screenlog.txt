@@ -1,0 +1,7 @@
+Filename	Well	Flag	Comment
+FT01-G01.txt	A01	NA	Contamination
+FT01-G02.txt	A02	NA	Contamination
+FT02-G01.txt	A01	NA	Contamination
+FT02-G02.txt	A02	NA	Contamination
+FT03-G01.txt	A01	NA	Contamination
+FT03-G02.txt	A02	NA	Contamination

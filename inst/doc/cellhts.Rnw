@@ -1,0 +1,636 @@
+%\VignetteIndexEntry{End-to-end analysis of cell-based screens}
+%\VignetteKeywords{Cell based assays}
+%\VignettePackage{cellHTS}
+
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rfunction}[1]{\textit{#1}}
+\newcommand{\Rclass}[1]{\textit{#1}}
+
+\newcommand{\myincfig}[3]{%
+  \begin{figure}[tp]
+    \begin{center}
+      \includegraphics[width=#2]{#1}
+      \caption{\label{#1}#3}
+    \end{center}
+  \end{figure}
+}
+
+\begin{document}
+
+%------------------------------------------------------------
+\title{End-to-end analysis of cell-based screens: from raw intensity readings
+  to the annotated hit list}
+%------------------------------------------------------------
+\author{Michael Boutros, L\'igia Br\'as and Wolfgang Huber}
+\maketitle
+\tableofcontents
+
+
+\section{Introduction}
+This is a technical report that demonstrates the use of the
+\Rpackage{cellHTS} package. Its scope is a complete basic analysis of
+a cell-based high-throughput screen (HTS), from raw intensity readings
+to an annotated hit list.
+
+This text has been produced as a reproducible
+document~\cite{Gentleman2004RepRes}. It contains the actual computer
+instructions for the method it describes, and these in turn produce
+all results, including the figures and tables that are shown here. The
+computer instructions are given in the language R, thus, in order to
+reproduce the computations shown here, you will need an installation
+of R (version 2.2 or greater) together with the package
+\Rpackage{cellHTS} and a number of other add-on packages.
+First, we load the required libraries.
+%
+<<setup1, results=hide>>=
+library("cellHTS")
+library("xtable")
+library("vsn")
+library("biomaRt")
+library("Category")
+library("GO")
+library("annotate")
+@ 
+%
+<<setup2, echo=FALSE, results=hide>>=
+## package versions
+stopifnot(package.version("biomaRt") >= package_version("1.5.3"))
+stopifnot(package.version("Category") >= package_version("1.3.2"))
+
+## this for debugging:
+options(error=recover)
+
+## this for software development, when we do not want to install 
+##    the package after each minor change:
+##   for(f in dir("~/huber/projects/Rpacks/cellHTS/R", full.names=TRUE, pattern=".R$"))source(f)
+@ 
+%
+%------------------------------------------------------------
+\section{Reading the intensity data}
+\label{sec:read}
+%------------------------------------------------------------
+We consider a cell-based screen that was conducted in microtiter plate
+format. Each of the wells in the plates contains either a
+gene-specific probe, a control, or it can be empty. Two or perhaps
+more replicates may have been performed for each plate, and there may
+be readings from one or more color channels, corresponding to
+different reporters. Usually, the measurements from each replicate and
+each color channel come in individual result files. The set of
+available result files and the information about them (which plate,
+which replicate, which channel) is contained in a spreadsheet, which
+we call the \emph{plate list file}. The first few lines of an example
+plate list file are shown in Table~\ref{tab:platelist}.
+\input{cellhts-platelist}
+
+The first step of the analysis is to read the plate list file, to read
+all the intensity files, and to assemble the data into one
+comprehensive table that is suitable for subsequent analyses.  We now
+demonstrate the R instructions for this step. We define the path where
+the input files can be found.
+%
+<<dataPath>>=
+experimentName = "KcViab"
+dataPath=system.file(experimentName, package="cellHTS") 
+@ 
+%
+In this example, the input files are in the
+\Robject{\Sexpr{experimentName}} directory of the \Rpackage{cellHTS}
+package. Modify this accordingly to read your own data. We show the
+names of 12 files from this directory
+%
+<<dirDataPath>>=
+rev(dir(dataPath))[1:12]
+@ 
+%
+and read the data into the object \Robject{x}
+%
+<<readPlateData, results=hide>>=
+x = readPlateData("Platelist.txt", name=experimentName, path=dataPath)
+@ 
+%
+<<showX>>=
+x
+@ 
+
+%% Create the example table:
+%% it would have been nice to use the "xtable" package but it insists on 
+%%   adding row numbers, which we don't like.
+<<plateFileTable, results=hide, echo=FALSE>>=
+cellHTS:::tableOutput(file.path(dataPath, "Platelist.txt"), "plate list")
+cellHTS:::tableOutput(file.path(dataPath, names(x$intensityFiles)[1]), "signal intensity",
+        header=FALSE, dropColumns=1)
+@ 
+
+%------------------------------------------------------------
+\section{The \Rclass{cellHTS} class and reports}
+%------------------------------------------------------------
+The basic data structure of the package is the class
+\Rclass{cellHTS}. In the previous section, we have created the
+object \Robject{x}, which is an instance of this class. All subsequent
+analyses, such as normalization, gene selection and annotation, will
+add their results into this object. Thus, the complete analysis
+project is contained in this object, and a complete dataset can be
+shared with others and stored for subsequent computational analyses in
+the form of such an object. In addition, the package offers export
+functions for generating human-readable reports, which consist of
+linked HTML pages with tables and plots. The final scored hit list
+is written as a tab-delimited format suitable for reading
+by spreadsheet programs.
+
+To create a report, use the function \Rfunction{writeReport}. It will
+create a directory of the name given by \Robject{x\$name} in the
+working directory. Alternatively, the argument \Robject{outdir} can be
+specified to direct the output to another directory. 
+%
+<<writeReport1Show, eval=FALSE>>=
+writeReport(x)
+@ 
+<<writeReport1Do, echo=FALSE, results=hide>>=
+writeReport(x, force=TRUE)
+@ 
+%
+After this function has finished, the index page of the report will be
+in the file \Robject{\Sexpr{file.path(x$name, "index.html")}}, and you
+can view it by directing a web browser to it.
+%
+<<browseReport1, eval=FALSE>>=
+browseURL(file.path(x$name, "index.html"))
+@ 
+
+%------------------------------------------------------------
+\section{Annotating the plate results}
+%------------------------------------------------------------
+\input{cellhts-plateconfiguration} 
+\input{cellhts-screenlog} 
+The next step of the analysis is to annotate the measured data with
+information on controls and to flag invalid measurements. The software
+expects the information on the controls in a so-called \emph{plate
+configuration file} (see Section~\ref{sec:plateconf}).  This is a
+tab-delimited file with one row per well.
+%
+<<confFile>>=
+confFile = file.path(dataPath, "Plateconf.txt")
+@ 
+%
+Selected lines of this file are shown in Table~\ref{tab:plateconfiguration}. 
+Individual measurements can be flagged as invalid in the so-called
+\emph{screen log file} (see Section~\ref{sec:screenlog}). 
+%
+<<logFile>>=
+logFile  = file.path(dataPath, "Screenlog.txt")
+@ 
+%
+The first 5 lines of this file are shown in Table~\ref{tab:screenlog}. 
+We now apply this information to the data object \Robject{x}.
+<<annotatePlateRes>>=
+x = configure(x, confFile, logFile)
+@ 
+%
+Note that the function \Rfunction{configure}\footnote{More precisely,
+\Rfunction{configure} is a method for the S3 class \Rclass{cellHTS}.}
+takes \Robject{x}, the result from Section~\ref{sec:read}, as an
+argument, and we then overwrite \Robject{x} with the result of
+this function.
+%%
+%% Create the example table for plateConf and screenLog
+<<plateConfscreenLogTable, results=hide, echo=FALSE>>=
+cellHTS:::tableOutput(confFile, "plate configuration", selRows=25:28)
+cellHTS:::tableOutput(logFile, "screen log")
+@ 
+
+%%--------------------------------------------------
+\subsection{Format of the plate configuration file}
+\label{sec:plateconf}
+%%--------------------------------------------------
+The software expects this to be a rectangular table in a tabulator
+delimited text file, with mandatory columns \emph{Batch}, \emph{Pos},
+\emph{Well}, \emph{Content}. The \emph{Pos} column runs from 1 to the
+number of wells in the plate (in the example,
+\Sexpr{max(x$plateConf$Pos)}), and \emph{Well} is the name of the
+corresponding well in letter-number format (in this case, \Robject{A01} to \Robject{P24}). 
+The \emph{Content} column
+can contain one of the following: \textit{sample} (for wells that
+contain genes of interest), \textit{pos} (for positive controls),
+\textit{neg} (for negative controls), \textit{empty} (for empty
+wells), and \textit{other} (for anything that does not fit into the
+four other categories). Note that these annotations are used by the
+software in the normalization, quality control, and gene selection
+calculations. Data from wells that are annotated as \textit{empty} are
+ignored, i.\,e.\ they are set to \Robject{NA}.  Here we look at the frequency of
+each well annotation in the example data:
+%
+<<>>=
+table(x$plateConf$Content)
+@ 
+%
+\subsubsection{Multiple plate configurations}
+Although it is good practice to use the same plate configuration for
+the whole experiment, sometimes this does not work out, and there are
+different parts of the experiment with different plate
+configurations. It is possible to specify multiple plate
+configurations simply by appending them to each other in the plate
+configuration file, and marking them with different numbers in the
+column \emph{Batch}. 
+
+Note that replicated experiments per plate have to use the same plate
+configuration.
+
+%%--------------------------------------------------
+\subsection{Format of the screen log file}
+\label{sec:screenlog}
+%%--------------------------------------------------
+The screen log file is a tabulator delimited file with mandatory
+columns \emph{Filename}, \emph{Well}, \emph{Flag}. In addition, it can 
+contain arbitrary optional columns. Each row corresponds to one flagged
+measurement, identified by the filename and the well identifier. The
+type of flag is specified in the column \emph{Flag}. Most commonly,
+this will have the value ``NA'', indicating that the measurement
+should be discarded and regarded as missing.
+
+%------------------------------------------------------------
+\section{Normalization}
+%------------------------------------------------------------ 
+The function \Rfunction{normalizePlateMedian} adjusts for plate
+effects by dividing each value in each plate by the median of values
+in the plate:
+\begin{eqnarray} 
+x'_{ki} &=& \frac{x_{ki}}{M_i}\quad\quad\forall k,i\\
+M_i&=&\mathop{\operatorname{median}}_{m\in\,\mbox{\scriptsize samples}} x_{mi} 
+\end{eqnarray}
+where $x_{ki}$ is the raw intensity for the $k$-th well in the $i$-th
+result file and $x'_{ki}$ is the normalized intensity. The median is calculated 
+across the wells annotated as \textit{sample} in the $i$-th result file.
+This is achieved by calling:
+%
+<<normalizePlateMedian>>=
+x = normalizePlateMedian(x) 
+@ 
+%
+after which the normalized intensities are stored in the slot
+\Robject{x\$xnorm}. This is an array of the same size as
+\Robject{x\$xraw}.
+
+It is easy to define alternative normalization methods, for example,
+to adjust for additional experimental biases besides the plate effect.
+
+%------------------------------------------------------------
+\section{Scoring}
+\label{sec:scoring}
+%------------------------------------------------------------
+We can now score the genes. For this, we summarize the replicate values 
+for each gene and calculate the $z$-score:
+\begin{eqnarray}
+y_k &=&  \max_{i} x'_{ki} \label{eq:replicatesSummary}\\
+z_k &=& -\frac{y_k-\hat{\mu}}{\hat{\sigma}}. \label{eq:defz}
+\end{eqnarray}
+Here, the summary is taken over all replicates $i$ for gene $k$. In
+the case of the example data, we are looking at an inhibitor assay,
+where an effect results in a decrease of the signal. By using
+the maximum as the summary function in Equation
+\eqref{eq:replicatesSummary}, the analysis is particularly
+conservative: all replicate values have to be small in order for $y_k$
+to be small. Depending on the type of assay and the intended
+stringency of the analysis, other plausible choices of summary
+function are the mean and the minimum. 
+$\hat{\mu}$ and $\hat{\sigma}$ are the estimated mean and standard deviation
+of the summarized values, $y_k$, annotated as \textit{sample}. 
+We use robust estimates for the mean and the standard deviation, 
+namely, the median for
+$\hat{\mu}$ and the median absolute deviation (mad) for $\hat{\sigma}$.
+The minus sign on the right hand side of Equation~\eqref{eq:defz}
+reflects that we are looking at an inhibitor assay: large positive
+values of $z$ correspond to a strong effect. For an activator assay,
+the minus sign is omitted.
+%
+<<calcZscore>>=
+x = calcZscore(x, summary="max", sign="-")
+@ 
+% 
+Boxplots of the $z$-scores for the different types of probes are shown
+in Figure~\ref{cellhts-boxplotzscore}.
+%
+<<boxplotzscore, fig=TRUE, include=FALSE, width=4.5, height=5.5>>=
+ylim = quantile(x$score, c(0.001, 0.999), na.rm=TRUE)
+boxplot(x$score ~ x$wellAnno, col="lightblue", outline=FALSE, ylim=ylim)
+@ 
+%
+\myincfig{cellhts-boxplotzscore}{0.5\textwidth}{Boxplots of $z$-scores 
+for the different types of probes.}
+%
+%------------------------------------------------------------
+\section{Annotation}
+%------------------------------------------------------------
+\input{cellhts-geneID} 
+
+Up to now, the assayed genes have been identified solely by the
+identifiers of the plate and the well that contains the probe for
+them. The \emph{annotation file} contains additional annotation, such
+as the probe sequence, references to the probe sequence in public
+databases, the gene name, gene ontology annotation, and so forth.
+Mandatory columns of the annotation file are \textit{Plate},
+\textit{Well}, and \textit{GeneID}, and it has one row for each
+well. The content of the \textit{GeneID} column will be species- or
+project-specific. The first 5 lines of the example file are shown in
+Table~\ref{tab:geneID}, where we have associated each probe with
+CG-identifiers for the genes of \textit{Drosophila melanogaster}.
+%
+<<geneIDs>>=
+geneIDFile = file.path(dataPath, "GeneIDs.txt")
+x = annotate(x, geneIDFile)
+@ 
+%% Create the example table:
+<<geneIDsTable, results=hide, echo=FALSE>>=
+cellHTS:::tableOutput(geneIDFile, "gene ID")
+@ 
+%
+%---------------------------------------------------------------
+\subsection{Adding additional annotation from public databases}
+%---------------------------------------------------------------
+The package \Rpackage{biomaRt} can be used to obtain additional
+annotation from public databases. First, we load the R package
+\Rpackage{biomaRt}~\cite{biomaRt2005}, and check which are the 
+BioMart databases that it currently covers:
+%
+<<biomaRt, results=hide>>=
+library("biomaRt")
+@ 
+%
+<<listMarts>>=
+listMarts()
+@
+%
+In this example, we will use the Ensembl database, from which we select the
+\textit{D. melanogaster} dataset.
+%
+<<useMart, results=hide>>=
+mart = useMart("ensembl")
+@
+% 
+<<listDatasets>>=
+listDatasets(mart = mart)
+@ 
+<<checkDatasets, results=hide, echo=FALSE>>=
+stopifnot("dmelanogaster_gene_ensembl" %in% listDatasets(mart = mart)[,1])
+@ 
+%
+<<selectDataset, results=hide>>=
+mart = useDataset("dmelanogaster_gene_ensembl", mart)
+@ 
+%
+We can query the available gene attributes and filters for the selected dataset using the following functions.
+<<>>=
+attrs = listAttributes(mart)
+filts = listFilters(mart)
+@
+%
+In the BioMart system~\cite{Kasprzyk2004}, a \emph{filter} is a
+property that can be used to select a gene or a set of genes (the
+``where'' clause in an SQL query), and an \emph{attribute} is a
+property that can be queried (the ``select'' clause in an SQL
+query). We use the \Rfunction{getBM} function of the package
+\Rpackage{biomaRt} to obtain the gene annotation from Ensembl:
+%
+<<getBM>>=
+myGetBM = function(att)
+  getBM(attributes=att, filter="gene_stable_id", 
+        values=unique(x$geneAnno$GeneID), mart=mart)
+bm1 = myGetBM(c("gene_stable_id", "chr_name", "chrom_start", "chrom_end", "description"))
+bm2 = myGetBM(c("gene_stable_id", "flybase_name"))
+bm3 = myGetBM(c("gene_stable_id", "go_id", "go_description"))
+##
+unique(setdiff(x$geneAnno$GeneID, bm1$gene_stable_id)) 
+table(table(bm1$gene_stable_id))
+table(table(bm2$gene_stable_id))
+table(table(bm2$gene_stable_id))
+@ 
+%
+In the code above, although it would be possible to run a single query
+for all of the attributes, we run three separate queries, in order to
+avoid enormous blow-up of the result table due to the 1:many mapping
+especially from gene ID to GO categories.  Below, we add the results
+to the dataframe \Robject{x$geneAnno}. Since the tables \Robject{bm1},
+\Robject{bm2}, and \Robject{bm3} contain zero, one or several rows for
+each gene ID, but in \Robject{x$geneAnno} we want exactly one row per
+gene ID, the function \Rfunction{format} does the somewhat tedious
+task of reformatting the tables: multiple entries are collapsed
+into a single comma-separated string, and empty rows are inserted
+where necessary.
+%
+<<addBMdata>>=
+format = function(ids, x) {
+  stopifnot(all(x[,1] %in% ids))
+  d = lapply(2:ncol(x), function(i) {
+    r  = character(length(ids))
+    v  = sapply(split(x[,i], x[,1]), unique)
+    v  = sapply(v, paste, collapse=", ")
+    mt = match(names(v), ids)
+    r[mt] = v
+    r[r==""] = NA
+    return(I(r))
+  })
+  names(d) = colnames(x)[2:ncol(x)]
+  res = do.call("data.frame", d)
+}
+x$geneAnno = cbind(x$geneAnno,
+   format(x$geneAnno$GeneID, bm1),
+   format(x$geneAnno$GeneID, bm2),
+   format(x$geneAnno$GeneID, bm3))
+@ 
+%
+
+%------------------------------------------------------------
+\subsection{Report}
+%------------------------------------------------------------
+We have now completed the analysis tasks: the dataset has been read, 
+configured, normalized, scored, and annotated:
+%
+<<printxagain>>=
+x
+@
+%
+We can now save the data set to a file. 
+%
+<<savex>>=
+save(x, file=paste(experimentName, ".rda", sep=""))
+@ 
+% 
+The dataset can be loaded again for subsequent analysis, or passed
+on to others. To produce a comprehensive report, we can call the
+function \Rfunction{writeReport} again,
+%
+<<writeReport2, results=hide>>=
+writeReport(x, force=TRUE, 
+  plotPlateArgs = list(xrange=c(0.6, 1.4)),
+  imageScreenArgs = list(zrange=c(-2, 6.5), ar=1)) 
+@ 
+%
+and use a web browser to view the resulting report
+<<browseReport2, eval=FALSE>>=
+browseURL(file.path(x$name, "index.html"))
+@ 
+% 
+Now, the report contains a quality report for each plate, and also for the whole
+screening assays. The experiment-wide report presents the $Z'$-factor
+determined for each experiment (replicate) using the positive and negative
+controls, the boxplots with raw and normalized intensities for the different plates,
+and the screen-wide plot with the $z$-scores in every well position of each plate.
+
+At this point we are finished with the basic analysis of the
+screen. As one example for how one could continue to further mine the
+screen results for biologically relevant patterns, we demonstrate an
+application of category analysis:
+
+%------------------------------------------------------------
+\section{Category analysis}
+%------------------------------------------------------------
+We would like to see whether there are Gene Ontology categories
+overrepresented among the probes with a high score. For
+this we use the category analysis from Robert Gentleman's
+\Rpackage{Category} package. Similar analyses could be done for other
+categorizations, for example chromosome location, pathway membership,
+or categorical phenotypes from other studies.
+
+First we create the category matrix. This a matrix with one column for
+each probe and one row for each category. The matrix element
+\Robject{[i,j]} is \Robject{1} if probe \Robject{j} belongs to the
+\Robject{j}-th category, and \Robject{0} if not.
+%
+<<cat1>>=
+sel = (bm3$"go_id" != "")
+categs = cellHTS:::cache("categs",
+   cateGOry(bm3$"gene_stable_id"[sel], bm3$"go_id"[sel]))
+@ 
+% 
+We will selected only those categories that contain at least 3 and no more than 1000 genes.
+<<cat2>>=
+nrMem = listLen(edges(categs))
+categs = subGraph(nodes(categs)[nrMem>=3 & nrMem<=1000], categs)
+@ 
+%
+As the statistic for the category analysis we use the $z$-score. After
+selecting the subset of genes that actually have GO annotation,
+%
+<<cat3>>=
+names(x$score) = x$geneAnno$GeneID
+stats = x$score[ names(x$score) %in% nodes(categs) ]
+@
+%
+<<cat4, results=hide, echo=FALSE>>= 
+stopifnot(!any(is.na(stats)))
+@ 
+%
+we are ready to call the category summary functions:
+%
+<<cat6>>=
+acMean  = applyByCategory(stats, categs)
+acTtest = applyByCategory(stats, categs, FUN=function(v) t.test(v, x$score)$p.value)
+acNum   = applyByCategory(stats, categs, FUN=length)
+isEnriched = (acTtest<=1e-3) & (acMean>0.5)
+@ 
+%
+A volcano plot of the $-\log_{10}$ of the $p$-value \Robject{acTtest} versus
+the per category mean $z$-score \Robject{acMean} is shown in
+Figure~\ref{cellhts-volcano}. The $p$-value is calculated from the 
+$t$-test against the null hypothesis $H_0: z=0$. 
+To select the enriched categories (\Robject{isEnriched}), we considered a significance
+level of $0.1\%$ for the $t$-test, and a per category mean $z$-score greater
+than $0.5$. This led to the \Sexpr{sum(isEnriched)} categories marked in red in
+Figure~\ref{cellhts-volcano} are listed in Table~\ref{tab:enrichedGoCateg}.
+
+ 
+%
+\input{cellhts-enrichedGoCateg} 
+%
+\myincfig{cellhts-volcano}{0.5\textwidth}{Volcano plot of the $t$-test
+  $p$-values and the mean $z$-values of the category analysis for Gene
+  Ontology categories. The top categories are shown in red.}
+%
+<<volcano, fig=TRUE, echo=FALSE, results=hide, include=FALSE, width=3.2, height=3.2>>=
+par(mai=c(0.9,0.9,0.1,0.1))
+px = cbind(acMean, -log10(acTtest))
+plot(px, main='', xlab=expression(z[mean]), 
+     ylab=expression(-log[10]~p), pch=".", col="black")
+points(px[isEnriched, ], pch=16, col="red", cex=0.7)
+stopifnot(identical(names(acMean), names(acTtest)),  
+          identical(names(acMean), names(acNum))) 
+@ 
+%
+<<enrichedGoCateg, echo=FALSE, results=hide>>=
+enrichedGOCateg = names(which(isEnriched))
+
+res = data.frame(
+   "$n$" = acNum[isEnriched], 
+    "$z_{\\mbox{\\scriptsize mean}}$" = signif(acMean[isEnriched],2), 
+    "$p$" = signif(acTtest[isEnriched],2),
+    "GOID" = I(enrichedGOCateg),
+    "Ontology" = I(sapply(enrichedGOCateg, function(x) Ontology(get(x, GOTERM)))),
+    "description" = I(sapply(enrichedGOCateg, function(x) Term(get(x, GOTERM)))),
+    check.names=FALSE)
+
+mt = match(res$Ontology, c("CC", "BP", "MF"))
+stopifnot(!any(is.na(mt)))
+res = res[order(mt, res$"$p$"), ]
+
+cellHTS:::dataframeOutput(res, header=TRUE, 
+  caption=sprintf("Top %d Gene Ontology categories with respect to $z$-score.", nrow(res)),
+  label="enrichedGoCateg")
+@ 
+%
+%------------------------------------------------------------
+\section*{Appendix: Data transformation}
+%------------------------------------------------------------
+\myincfig{cellhts-transfplots}{0.95\textwidth}{Comparison between untransformed (left) and 
+logarithmically (base 2) transformed (right), normalized data. 
+Upper: histogram of intensity values of replicate 1. 
+Middle: scatterplots of standard deviation versus mean of the two replicates. 
+Bottom: Normal quantile-quantile plots.}
+
+An obvious question is whether to do the statistical analyses on the
+original intensity scale or on a transformed scale such as the
+logarithmic one.  Many statistical analysis methods, as well as
+visualizations work better if (to sufficient approximation)
+\begin{itemize}
+\item replicate values are normally distributed,
+\item the data are evenly distributed along their dynamic range, 
+\item the variance is homogeneous along the dynamic range~\cite{Huber2002ismb}.
+\end{itemize}
+
+Figure~\ref{cellhts-transfplots} compares these properties for
+untransformed and log-transformed normalized data, showing that the difference is small. 
+Intuitively, this can be explained by the fact that for
+small $x$,
+\[
+\log(1+x)\approx x
+\]
+and that indeed the range of the untransformed data is mostly not far
+from 1.  Hence, for the data examined here, the choice between
+original scale and logarithmic scale is one of taste, rather
+than necessity.
+%
+<<transfplots, fig=TRUE, include=FALSE, width=6.5, height=9>>=
+par(mfcol=c(3,2))
+myPlots=function(z,...) {
+  hist(z[,1], 100, col="lightblue", xlab="",...)
+  meanSdPlot(z, ylim=c(0, quantile(abs(z[,2]-z[,1]), 0.95, na.rm=TRUE)), ...)
+  qqnorm(z[,1], pch='.', ...)
+  qqline(z[,1], col='blue')
+}
+dv = matrix(x$xnorm, nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
+myPlots(dv, main="untransformed")
+myPlots(log2(dv), main="log2")
+@ 
+
+
+%------------------------------------------------------------
+%Bibliography
+%------------------------------------------------------------
+\bibliography{cellhts}
+\bibliographystyle{plain}
+
+\end{document}
+
+

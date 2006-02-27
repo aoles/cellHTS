@@ -1,0 +1,21 @@
+export("readPlateData",
+       "annotate",
+       "configure",
+       "normalizePlateMedian",
+       "calcZscore",           
+       "summarizeZscore",
+       "writeReport",
+       "ROC")
+
+## The standard method for S3-style UseMethod dispatching might fail to locate methods defined
+## in a package that is imported but not attached to the search path. To ensure that these methods
+## are available the packages defining the methods should ensure that the generics are imported
+## and register the methods using S3method directives. 
+
+S3method("annotate", "cellHTS")   
+S3method("configure", "cellHTS")
+S3method("print", "cellHTS")
+
+S3method("lines", "ROC")
+S3method("plot", "ROC")
+
