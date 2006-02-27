@@ -187,9 +187,18 @@ logFile  = file.path(dataPath, "Screenlog.txt")
 @ 
 %
 The first 5 lines of this file are shown in Table~\ref{tab:screenlog}. 
+
+The \emph{screen description} file contains a general description of
+the screen, its goal, the conditions under which it was performed,
+references, and any other information that is pertinent to the
+biological interpretation of the experiments. 
+<<descripFile>>=
+descripFile  = file.path(dataPath, "Description.txt")
+@ 
+%
 We now apply this information to the data object \Robject{x}.
 <<annotatePlateRes>>=
-x = configure(x, confFile, logFile)
+x = configure(x, confFile, logFile, descripFile)
 @ 
 %
 Moreover, we will also read the screen description 
@@ -525,12 +534,8 @@ selecting the subset of genes that actually have GO annotation,
 %
 <<cat3>>=
 names(x$score) = x$geneAnno$GeneID
-stats = x$score[ names(x$score) %in% nodes(categs) ]
+stats = x$score[ (names(x$score) %in% nodes(categs)) & !is.na(x$score) ]
 @
-%
-<<cat4, results=hide, echo=FALSE>>= 
-stopifnot(!any(is.na(stats)))
-@ 
 %
 we are ready to call the category summary functions:
 %

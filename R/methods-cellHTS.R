@@ -54,9 +54,12 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
   checkColumns(conf, confFile, mandatory=c("Batch", "Pos", "Well", "Content"),
                numeric=c("Pos"))
 
-# Check if the screen log file is empty
-if (!dim(slog)[1]) slog = NULL else checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
-               numeric=character(0))
+  ## Check if the screen log file is empty
+  if (!dim(slog)[1])
+    slog = NULL
+  else
+    checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
+                 numeric=character(0))
 
   ## check consistency between 'Pos' and 'Well' columns
   badRows = which(conf$Pos!=pos2i(conf$Well, x$pdim))
@@ -100,28 +103,29 @@ if (!dim(slog)[1]) slog = NULL else checkColumns(slog, logFile, mandatory=c("Fil
   }
   x$wellAnno=wellAnno
   
-  ## Process screenlog
-
-if (!is.null(slog)) {
-
-  mt = match(slog$Filename, x$plateList$Filename)
-  if(any(is.na(mt)))
-    stop(paste("'Filename' column in the screen log file '", logFile, "' contains invalid entries\n",
-               "(i.e. files that were not listed in the plateList file):\n",
-               paste(slog$Filename[is.na(mt)], collapse=", "), "\n", sep=""))
-  ipl  = x$plateList$Plate[mt]
-  irep = x$plateList$Replicate[mt]
-  ich  = x$plateList$Channel[mt]
-  ipos = pos2i(slog$Well, x$pdim)
-  stopifnot(!any(is.na(ipl)), !any(is.na(irep)), !any(is.na(ich)))
-  x$xraw[cbind(ipos, ipl, irep, ich)] = NA 
-  # create an additional slot called "finalWellAnno", with "pos", "neg", "empty", "other", "sample" and "flagged" 
-  # (this is in order to take into account the wells that were flagged using the screen log file information)
+  ## create an additional slot called "finalWellAnno", with "pos", "neg", "empty", "other", "sample" and "flagged" 
+  ## (this is in order to take into account the wells that were flagged using the screen log file information)
   finalWellAnno = array(rep(x$wellAnno, times = prod(dim(x$xraw)[3:4])), dim=dim(x$xraw))
-  finalWellAnno[cbind(ipos, ipl, irep, ich)] = "flagged"
-  x$finalWellAnno = finalWellAnno } 
 
-else {x$finalWellAnno = array(rep(x$wellAnno, times = prod(dim(x$xraw)[3:4])), dim=dim(x$xraw))}
+  ## Process screenlog
+  if (!is.null(slog)) {
+
+    mt = match(slog$Filename, x$plateList$Filename)
+    if(any(is.na(mt)))
+      stop(paste("'Filename' column in the screen log file '", logFile, "' contains invalid entries\n",
+                 "(i.e. files that were not listed in the plateList file):\n",
+                 paste(slog$Filename[is.na(mt)], collapse=", "), "\n", sep=""))
+    ipl  = x$plateList$Plate[mt]
+    irep = x$plateList$Replicate[mt]
+    ich  = x$plateList$Channel[mt]
+    ipos = pos2i(slog$Well, x$pdim)
+    stopifnot(!any(is.na(ipl)), !any(is.na(irep)), !any(is.na(ich)))
+    x$xraw[cbind(ipos, ipl, irep, ich)] = NA 
+    finalWellAnno[cbind(ipos, ipl, irep, ich)] = "flagged"
+    
+  } 
+
+  x$finalWellAnno = finalWellAnno 
   x$state["configured"] = TRUE
   return(x)
 }
