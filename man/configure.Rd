@@ -7,7 +7,7 @@
 }
 \usage{
 configure(x, \dots)
-\method{configure}{cellHTS}(x, confFile, logFile, \dots)
+\method{configure}{cellHTS}(x, confFile, logFile, descripFile, \dots)
 }
 \arguments{
   \item{x}{a cellHTS object.}
@@ -19,13 +19,17 @@ configure(x, \dots)
     This argument is just passed on to the \code{\link{read.table}}
     function, so any of the valid argument
     types for \code{\link{read.table}} are valid here, too.}
+  \item{descripFile}{the name of the screen description file (see details).
+    This argument is just passed on to the \code{\link{readLines}}
+    function, so any of the valid argument
+    types for \code{\link{readLines}} are valid here, too.}
   \item{\dots}{additional parameters - ignored.}
 }
 
 \details{
   \item{confFile}{This file is expected to be a tab-delimited file with at least four columns, and column names \code{Batch}, \code{Pos}, \code{Well} and \code{Content}. The contents of \code{Pos} are expected to be integer.}
-  \item{logFile}{This file is expected to be a tab-delimited file with at least three columns, and column names \code{Filename}, \code{Well}, and \code{Flag}.Further columns are allowed.}
-  
+  \item{logFile}{This file is expected to be a tab-delimited file with at least three columns, and column names \code{Filename}, \code{Well}, and \code{Flag}. Further columns are allowed.}
+    \item{descripFile}{This file is the screen description file with general information about the screen.}
   Data from wells that are annotated as \emph{empty} are ignored and are set to NA in \code{x} in slot \code{xraw}.  
 }
 
@@ -34,7 +38,7 @@ configure(x, \dots)
  \item{plateConf}{a data.frame containing what was read from input file \code{confFile}. The number of rows is equal to the product between the number of wells in each plate and the number of batches.}
  \item{screenLog}{a data.frame containing what was read from input file \code{logFile}.}
  \item{wellAnno}{object of class \code{factor} of length number of plates x number of wells per plate, with five possible levels: \emph{empty}, \emph{other}, \emph{neg}, \emph{sample}, and \emph{pos}, indicative of the contents of the wells.}
-
+ \item{screenDesc}{object of class \code{character} containing what was read from input file \code{descripFile}.}
 Moreover, the processing status of the \code{cellHTS} object is updated in the slot \code{state} to \code{state["configured"]=TRUE}.
 There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annotate.cellHTS}.}
 
@@ -47,6 +51,7 @@ There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annot
  x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
  confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
- x = configure(x, confFile, logFile)
+ descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
+ x = configure(x, confFile, logFile, descripFile)
 }
 \keyword{manip}

@@ -38,7 +38,8 @@ There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annot
  x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
  confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
- x = configure(x, confFile, logFile) 
+ descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
+ x = configure(x, confFile, logFile, descripFile)
  geneIDFile = system.file("KcViabSmall", "GeneIDs.txt", package="cellHTS")
  x = annotate(x, geneIDFile)
 }

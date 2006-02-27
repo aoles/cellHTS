@@ -46,9 +46,10 @@ annotate.cellHTS = function(x, geneIDFile, ...) {
 ##----------------------------------------
 ## configure
 ##----------------------------------------
-configure.cellHTS = function(x, confFile, logFile, ...) {
+configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
   conf = read.table(confFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
   slog = read.table(logFile,  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
+  descript = readLines(descripFile)
 
   checkColumns(conf, confFile, mandatory=c("Batch", "Pos", "Well", "Content"),
                numeric=c("Pos"))
@@ -83,8 +84,10 @@ if (!dim(slog)[1]) slog = NULL else checkColumns(slog, logFile, mandatory=c("Fil
 
   ## store the conf data.frame into the plateConf slot of x and
   ## slog into the screenlog slot
+  ## descript into the screenDesc slot
   x$plateConf = conf
   x$screenLog = slog
+  x$screenDesc = descript
   
   ## Process the configuration file into wellAnno slot
   ## and set all 'empty' wells to NA in x

@@ -166,6 +166,8 @@ browseURL(file.path(x$name, "index.html"))
 %------------------------------------------------------------
 \input{cellhts-plateconfiguration} 
 \input{cellhts-screenlog} 
+
+
 The next step of the analysis is to annotate the measured data with
 information on controls and to flag invalid measurements. The software
 expects the information on the controls in a so-called \emph{plate
@@ -188,6 +190,13 @@ The first 5 lines of this file are shown in Table~\ref{tab:screenlog}.
 We now apply this information to the data object \Robject{x}.
 <<annotatePlateRes>>=
 x = configure(x, confFile, logFile)
+@ 
+%
+Moreover, we will also read the screen description 
+file which contains a general description of the screen.  
+%
+<<descripFile>>=
+descripFile = file.path(dataPath, "DESCRIPTION.txt")
 @ 
 %
 Note that the function \Rfunction{configure}\footnote{More precisely,

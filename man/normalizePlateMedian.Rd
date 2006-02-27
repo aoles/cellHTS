@@ -53,7 +53,8 @@ in the slot \code{state} to \code{state["normalized"]=TRUE}.
  x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
  confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
- x = configure(x, confFile, logFile) 
+ descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
+ x = configure(x, confFile, logFile, descripFile)
  x = normalizePlateMedian(x)
 }
 \keyword{manip}

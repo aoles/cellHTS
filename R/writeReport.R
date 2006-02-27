@@ -5,6 +5,11 @@ writeheader = function(x, level, con)
     cat(sprintf("<HTML><HEAD><TITLE>%s</TITLE></HEAD>\n<BODY><CENTER><H%d>%s</H%d></CENTER>\n\n",
                 as.character(x), as.integer(level), as.character(x), as.integer(level)), file=con)
 
+
+writeExperimentHeader = function(xy, x, y, url, level, con)
+    cat(sprintf("<HTML><HEAD><TITLE>%s</TITLE></HEAD>\n<BODY><CENTER><H%d>%s<A HREF=\"%s\">%s</A></H%d></CENTER>\n\n",
+                as.character(xy), as.integer(level), as.character(x), url,  as.character(y), as.integer(level)), file=con)
+
 writetail = function(con)
     cat(sprintf("<BR><HR>%s</HTML></HEAD>\n", date()), file=con)
 
@@ -61,8 +66,15 @@ writeReport = function(x, outdir=x$name, force=FALSE,
   con = file(file.path(outdir, "index.html"), "w")
   on.exit(close(con))
 
-  writeheader(paste("Experiment report for", x$name), 1, con)
 
+  dir.create(file.path(outdir, "in"))
+  nm = file.path("in", "Description.txt")
+
+  if(x$state["configured"]) {
+  writeLines(x$screenDesc, file.path(outdir, nm))
+  writeExperimentHeader(paste("Experiment report for ", x$name), "Experiment report for ", x$name, nm, 1, con)
+  } else { writeheader(paste("Experiment report for", x$name), 1, con)}
+  
   ## QC per plate & channel
   nrWell    = dim(x$xraw)[1]
   nrPlate   = dim(x$xraw)[2]
@@ -118,7 +130,7 @@ writeReport = function(x, outdir=x$name, force=FALSE,
   }
   
   ## Report pages per plate result file 
-  dir.create(file.path(outdir, "in"))
+  #dir.create(file.path(outdir, "in"))
   wh = which(x$plateList$status=="OK")
   nm = file.path("in", names(x$intensityFiles))
   for(w in wh) {
