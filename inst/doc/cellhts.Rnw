@@ -422,9 +422,9 @@ In the code above, although it would be possible to run a single query
 for all of the attributes, we run three separate queries, in order to
 avoid enormous blow-up of the result table due to the 1:many mapping
 especially from gene ID to GO categories.  Below, we add the results
-to the dataframe \Robject{x$geneAnno}. Since the tables \Robject{bm1},
+to the dataframe \Robject{x\$geneAnno}. Since the tables \Robject{bm1},
 \Robject{bm2}, and \Robject{bm3} contain zero, one or several rows for
-each gene ID, but in \Robject{x$geneAnno} we want exactly one row per
+each gene ID, but in \Robject{x\$geneAnno} we want exactly one row per
 gene ID, the function \Rfunction{format} does the somewhat tedious
 task of reformatting the tables: multiple entries are collapsed
 into a single comma-separated string, and empty rows are inserted
