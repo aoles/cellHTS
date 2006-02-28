@@ -74,13 +74,19 @@ options(error=recover)
 \label{sec:read}
 %------------------------------------------------------------
 We consider a cell-based screen that was conducted in microtiter plate
-format. Each of the wells in the plates contains either a
-gene-specific probe, a control, or it can be empty. Two or perhaps
-more replicates may have been performed for each plate, and there may
-be readings from one or more color channels, corresponding to
-different reporters. Usually, the measurements from each replicate and
-each color channel come in individual result files. The set of
-available result files and the information about them (which plate,
+format, where a library of double-stranded RNAs was used to target the
+corresponding genes in cultured \textit{Drosophila} $K_{c167}$ 
+cells~\cite{Boutros2004}. Each of the wells in the plates contains either a
+gene-specific probe, a control, or it can be empty. 
+The experiments were done in duplicate, and the viability of the cells after
+treatment was recorded by a plate reader measuring luciferase activity, which
+is indicative of ATP levels. Although this example data corresponds to a
+single-channel screening assay, the \Rpackage{cellHTS} package can also 
+deal with cases where there are readings from more color channels, corresponding 
+to different reporters.
+Usually, the measurements from each replicate and each color channel 
+come in individual result files. The set of available result files and 
+the information about them (which plate,
 which replicate, which channel) is contained in a spreadsheet, which
 we call the \emph{plate list file}. The first few lines of an example
 plate list file are shown in Table~\ref{tab:platelist}.
@@ -115,7 +121,6 @@ x = readPlateData("Platelist.txt", name=experimentName, path=dataPath)
 <<showX>>=
 x
 @ 
-
 %% Create the example table:
 %% it would have been nice to use the "xtable" package but it insists on 
 %%   adding row numbers, which we don't like.
@@ -361,8 +366,8 @@ cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6)
 \subsection{Adding additional annotation from public databases}
 %---------------------------------------------------------------
 The package \Rpackage{biomaRt} can be used to obtain additional
-annotation from public databases. First, we load the R package
-\Rpackage{biomaRt}~\cite{biomaRt2005}, and check which are the 
+annotation from public databases~\cite{biomaRt2005}. After loading the 
+R package \Rpackage{biomaRt}, we can check which are the 
 BioMart databases that it currently covers:
 %
 <<biomaRt, results=hide>>=
@@ -373,14 +378,14 @@ library("biomaRt")
 listMarts()
 @
 %
-In this example, we will use the Ensembl database, from which we select the
+In this example, we will use the Ensembl database~\cite{Ensembl2006}, from which we select the
 \textit{D. melanogaster} dataset.
 %
 <<useMart, results=hide>>=
 mart = useMart("ensembl")
 @
 % 
-<<listDatasets>>=
+<<listDatasets, results=hide>>=
 listDatasets(mart = mart)
 @ 
 <<checkDatasets, results=hide, echo=FALSE>>=
@@ -421,7 +426,7 @@ table(table(bm2$gene_stable_id))
 In the code above, although it would be possible to run a single query
 for all of the attributes, we run three separate queries, in order to
 avoid enormous blow-up of the result table due to the 1:many mapping
-especially from gene ID to GO categories.  Below, we add the results
+especially from gene ID to GO categories~\cite{GO}.  Below, we add the results
 to the dataframe \Robject{x\$geneAnno}. Since the tables \Robject{bm1},
 \Robject{bm2}, and \Robject{bm3} contain zero, one or several rows for
 each gene ID, but in \Robject{x\$geneAnno} we want exactly one row per
@@ -465,7 +470,7 @@ x
 We can now save the data set to a file. 
 %
 <<savex>>=
-save(x, file=paste(experimentName, ".rda", sep=""))
+save(x, file=paste(experimentName, ".rda", sep=""), compress=TRUE)
 @ 
 % 
 The dataset can be loaded again for subsequent analysis, or passed
@@ -486,21 +491,21 @@ browseURL(file.path(x$name, "index.html"))
 Now, the report contains a quality report for each plate, and also for the whole
 screening assays. The experiment-wide report presents the $Z'$-factor
 determined for each experiment (replicate) using the positive and negative
-controls, the boxplots with raw and normalized intensities for the different plates,
+controls~\cite{Oldenburg1999}, the boxplots with raw and normalized intensities for the different plates,
 and the screen-wide plot with the $z$-scores in every well position of each plate.
 
 At this point we are finished with the basic analysis of the
 screen. As one example for how one could continue to further mine the
 screen results for biologically relevant patterns, we demonstrate an
-application of category analysis:
+application of category analysis.
 
 %------------------------------------------------------------
 \section{Category analysis}
 %------------------------------------------------------------
-We would like to see whether there are Gene Ontology categories
+We would like to see whether there are Gene Ontology categories~\cite{GO}
 overrepresented among the probes with a high score. For
 this we use the category analysis from Robert Gentleman's
-\Rpackage{Category} package. Similar analyses could be done for other
+\Rpackage{Category} package~\cite{GentlemanCategories}. Similar analyses could be done for other
 categorizations, for example chromosome location, pathway membership,
 or categorical phenotypes from other studies.
 
