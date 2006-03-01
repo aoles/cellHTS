@@ -1,6 +1,6 @@
 all:	pdf
 
-pdf:	cellhts.tex
+pdf:	cellhts.Rnw
 #	pdflatex cellhts
 #	pdflatex cellhts
 	make clean
