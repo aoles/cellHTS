@@ -32,7 +32,7 @@ tableOutput = function(fn, nm, header=TRUE, dropColumns, selRows=1:5) {
   shortfn = shortfn[length(shortfn)]
 
   dataframeOutput(x, header=header,
-    caption=sprintf("The first 5 lines from the example %s file \\texttt{%s}.", 
+    caption=sprintf("Selected lines from the example %s file \\texttt{%s}.", 
       nm, shortfn),
     label = gsub(" ", "", nm))
 

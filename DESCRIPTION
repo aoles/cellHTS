@@ -1,13 +1,13 @@
 Package: cellHTS
-Version: 0.9.0
-Date: 27 Feb 2006
+Version: 0.9.1
+Date: 1 Mar 2006
 Title: Analysis of cell-based screens
 Author: Wolfgang Huber <huber@ebi.ac.uk>, Ligia Bras <ligia@ebi.ac.uk>, Michael Boutros <m.boutros@dkfz.de>
 Maintainer: Wolfgang Huber <huber@ebi.ac.uk>
 Depends: R (>= 2.1.0), prada (>= 1.7.8), RColorBrewer
 Suggests: biomaRt
 Description: Analysis of cell-based high-throughput screens
-Reference: M. Boutros and W. Huber, TBA
+Reference: M. Boutros, L. Bras and W. Huber, TBA
 License: LGPL
 URL: http://www.r-project.org, http://www.dkfz.de/signaling, http://www.ebi.ac.uk/huber
 biocViews: CellBasedAssays, Preprocessing, Visualization
