@@ -58,9 +58,6 @@ library("annotate")
 %
 <<setup2, echo=FALSE, results=hide>>=
 ## package versions
-stopifnot(package.version("biomaRt") >= package_version("1.5.3"))
-stopifnot(package.version("Category") >= package_version("1.3.2"))
-
 ## this for debugging:
 options(error=recover)
 
@@ -366,13 +363,17 @@ cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6)
 \subsection{Adding additional annotation from public databases}
 %---------------------------------------------------------------
 The package \Rpackage{biomaRt} can be used to obtain additional
-annotation from public databases~\cite{biomaRt2005}. After loading the 
-R package \Rpackage{biomaRt}, we can check which are the 
-BioMart databases that it currently covers:
+annotation from public databases~\cite{biomaRt2005}.  You will need
+version 1.5.3 or later of the \Rpackage{biomaRt} package. This is
+currently (March 2006) in the development branch of Bioconductor and
+will be in the release 1.8.
 %
 <<biomaRt, results=hide>>=
 library("biomaRt")
+stopifnot(package.version("biomaRt") >= package_version("1.5.3"))
 @ 
+%
+Let's check which BioMart databases it currently covers:
 %
 <<listMarts>>=
 listMarts()
@@ -490,11 +491,13 @@ and use a web browser to view the resulting report
 browseURL(file.path(x$name, "index.html"))
 @ 
 % 
-Now, the report contains a quality report for each plate, and also for the whole
-screening assays. The experiment-wide report presents the $Z'$-factor
-determined for each experiment (replicate) using the positive and negative
-controls~\cite{Oldenburg1999}, the boxplots with raw and normalized intensities for the different plates,
-and the screen-wide plot with the $z$-scores in every well position of each plate.
+Now, the report contains a quality report for each plate, and also for
+the whole screening assays. The experiment-wide report presents the
+$Z'$-factor determined for each experiment (replicate) using the
+positive and negative controls~\cite{Oldenburg1999}, the boxplots with
+raw and normalized intensities for the different plates, and the
+screen-wide plot with the $z$-scores in every well position of each
+plate.
 
 At this point we are finished with the basic analysis of the
 screen. As one example for how one could continue to further mine the
@@ -504,13 +507,23 @@ application of category analysis.
 %------------------------------------------------------------
 \section{Category analysis}
 %------------------------------------------------------------
-We would like to see whether there are Gene Ontology categories~\cite{GO}
-overrepresented among the probes with a high score. For
-this we use the category analysis from Robert Gentleman's
-\Rpackage{Category} package~\cite{GentlemanCategories}. Similar analyses could be done for other
-categorizations, for example chromosome location, pathway membership,
-or categorical phenotypes from other studies.
+We would like to see whether there are Gene Ontology
+categories~\cite{GO} overrepresented among the probes with a high
+score. For this we use the category analysis from Robert Gentleman's
+\Rpackage{Category} package~\cite{GentlemanCategories}. Similar
+analyses could be done for other categorizations, for example
+chromosome location, pathway membership, or categorical phenotypes
+from other studies.
 
+You will need version 1.3.2 or later of the \Rpackage{Category}
+package. This is currently (March 2006) in the development branch of
+Bioconductor and will be in the release 1.8.
+%
+<<category, results=hide>>=
+library("Category")
+stopifnot(package.version("Category") >= package_version("1.3.2"))
+@ 
+%
 Now we can create the category matrix. This a matrix with one column for
 each probe and one row for each category. The matrix element
 \Robject{[i,j]} is \Robject{1} if probe \Robject{j} belongs to the
