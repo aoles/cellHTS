@@ -526,8 +526,10 @@ categs = cellHTS:::cache("categs",
 % 
 We will selected only those categories that contain at least 3 and no more than 1000 genes.
 <<cat2>>=
-nrMem = listLen(edges(categs))
-categs = subGraph(nodes(categs)[nrMem>=3 & nrMem<=1000], categs)
+remGO = which(regexpr("^GO:", nodes(categs)) > 0)
+nrMem = listLen(edges(categs)[remGO])
+remGO = remGO[nrMem>1000 | nrMem <3]
+categs = subGraph(nodes(categs)[-remGO], categs)
 @ 
 %
 As the statistic for the category analysis we use the $z$-score. After
