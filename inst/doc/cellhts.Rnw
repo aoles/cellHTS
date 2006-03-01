@@ -442,8 +442,10 @@ format = function(ids, x) {
     r  = character(length(ids))
     v  = sapply(split(x[,i], x[,1]), unique)
     v  = sapply(v, paste, collapse=", ")
-    mt = match(names(v), ids)
-    r[mt] = v
+   # mt = match(names(v), ids)
+   # r[mt] = v
+    mt = match(ids, names(v))
+    r[!is.na(mt)] = v[mt[!is.na(mt)]]
     r[r==""] = NA
     return(I(r))
   })
