@@ -556,7 +556,7 @@ we are ready to call the category summary functions:
 %
 <<cat6>>=
 acMean  = applyByCategory(stats, categs)
-acTtest = applyByCategory(stats, categs, FUN=function(v) t.test(v, x$score)$p.value)
+acTtest = applyByCategory(stats, categs, FUN=function(v) t.test(v, stats)$p.value)
 acNum   = applyByCategory(stats, categs, FUN=length)
 isEnriched = (acTtest<=1e-3) & (acMean>0.5)
 @ 
@@ -606,7 +606,7 @@ res = res[order(mt, res$"$p$"), ]
 
 cellHTS:::dataframeOutput(res, header=TRUE, 
   caption=sprintf("Top %d Gene Ontology categories with respect to $z$-score.", nrow(res)),
-  label="enrichedGoCateg")
+  label="enrichedGoCateg", gotable=TRUE)
 @ 
 %
 %------------------------------------------------------------

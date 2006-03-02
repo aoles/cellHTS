@@ -1,12 +1,14 @@
 ## output dataframe
-dataframeOutput = function(x, header, caption, label) {
+dataframeOutput = function(x, header, caption, label, gotable=FALSE) {
 
   head = c("\\begin{table}[tp]", "\\begin{center}")
   tail = c(sprintf("\\caption{%s}", caption),
     sprintf("\\label{tab:%s}", label),
     "\\end{center}", "\\end{table}")
 
-  out = paste("\\begin{tabular}{", paste(rep("r", ncol(x)), collapse=""), "}", sep="")
+if (!gotable) out = paste("\\begin{tabular}{", paste(rep("r", ncol(x)), collapse=""), "}", sep="") else out = paste("\\small\\begin{tabular}{", 
+     paste(paste(rep("r", ncol(x)-1), collapse=""),"p{0.5\\textwidth}", collapse=""), "}", sep="")
+
   if(header)
     out = c(out, paste(paste("\\textbf{", colnames(x), "}", sep="", collapse="&"), "\\\\", sep=""))
   for(i in 1:nrow(x))
@@ -37,4 +39,3 @@ tableOutput = function(fn, nm, header=TRUE, dropColumns, selRows=1:5) {
     label = gsub(" ", "", nm))
 
 }
-
