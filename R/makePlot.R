@@ -1,4 +1,4 @@
-makePlot = function(path, con, name, w, h, fun, psz=12) {
+makePlot = function(path, con, name, w, h, fun, psz=12, print=TRUE) {
   outfiles = paste(name, c("pdf", "png"), sep=".")
   nrppi = 72
   for(out in seq(along=outfiles)) {
@@ -8,6 +8,6 @@ makePlot = function(path, con, name, w, h, fun, psz=12) {
     fun()
     dev.off()
   }
-  cat(sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", outfiles[1], outfiles[2]), file=con)
+if (print) cat(sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", outfiles[1], outfiles[2]), file=con)
 }
 

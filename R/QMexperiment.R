@@ -3,12 +3,17 @@ QMexperiment = function(x, path, con) {
   posCtrls = which(x$wellAnno=="pos")
   negCtrls = which(x$wellAnno=="neg")
   nrbxp = 1+x$state["normalized"]
+  nrCh = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4]) 
 
-  for (ch in 1:(dim(x$xraw)[4])) {
+
+## Create a dataframe for the plots of each channel
+plotTable = data.frame(matrix(data = NA, nrow = 0, ncol = nrCh + 1))
+names(plotTable) = c("", paste("Channel", 1:nrCh, sep=" "))
+
+  for (ch in 1:nrCh) {
+count = 0
     for (r in 1:(dim(x$xraw)[3])) {
-      cat(sprintf("<H3>Replicate %d, channel %d</H3>", r, ch), file=con)
-      if(x$state["normalized"])
-        cat("Left: raw, right: normalized<br>", file=con)
+
       makePlot(path, con=con,
            name=sprintf("boxplot_%d_%d", r, ch), w=5*nrbxp, h=5, fun = function() {
              par(mfrow=c(1, nrbxp), mai=c(par("mai")[1:2], 0.01, 0.01))
@@ -18,7 +23,14 @@ QMexperiment = function(x, path, con) {
                xbp = x$xnorm[,,r,ch]
                boxplotwithNA(xbp, col(xbp), col="lightblue", outline=FALSE, main="")
              }
-           })
+           }, print=FALSE)
+
+if (ch ==1) {
+ if(x$state["normalized"]) 
+	plotTable[count + 1, 1] = sprintf("<H3 align=left>Replicate %d </H3><em>%s</em><br>\n", r,"Left: raw, right: normalized") else plotTable[count + 1, 1] = sprintf("<H3 align=left>Replicate %d</H3>", r)}
+
+plotTable[count + 1, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("boxplot_%d_%d.pdf", r, ch), sprintf("boxplot_%d_%d.png", r, ch)) 
+count = count + 1 
 
       if ((length(posCtrls)>0 && length(negCtrls)>0) & (x$state["normalized"])) {
         makePlot(path, con=con,
@@ -39,12 +51,21 @@ QMexperiment = function(x, path, con) {
                    zfac = 1-3*ssd/dr 
                    controlsplot(xpos, xneg, ppos, pneg, main="")
                    densityplot(xpos, xneg, zfac, main="")
-                 })
+                 }, print=FALSE)
+
+plotTable[count + 1, 1] = "<CENTER></CENTER>"
+plotTable[count + 1, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("Controls_%d_%d.pdf", r, ch), sprintf("Controls_%d_%d.png", r, ch)) 
+
       } else {
-        sprintf("<br><center><i>No controls ('pos' and 'neg') were found.</i></center><br>", file=con)
-      }
+plotTable[count + 1, 1] = "<CENTER></CENTER>"
+plotTable[count + 1, ch+1] = "<CENTER><i>No controls ('pos' and 'neg') were found.</i></CENTER>\n"
+}
+
+count = count + 1
     } ## for r
   } ## for ch
+writeHTMLtable4plots(plotTable, con=con)
+
 } ## QMexperiment
 
 

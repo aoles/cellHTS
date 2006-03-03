@@ -13,8 +13,9 @@ writeExperimentHeader = function(xy, x, y, url, level, con)
 writetail = function(con)
     cat(sprintf("<BR><HR>%s</HTML></HEAD>\n", date()), file=con)
 
+
 writeHTMLtable = function(x, url, con,
-  colors = c("#e0e0ff", "#d0d0f0", "#f0f0ff", "#e0e0f0"), center=FALSE) {
+  colors = c("#e0e0ff", "#d0d0f0", "#f0f0ff", "#e0e0f0"), center=FALSE, extra=NULL) {
 
   if(!is.data.frame(x))
     stop("'x' must be a data.frame")
@@ -26,23 +27,51 @@ writeHTMLtable = function(x, url, con,
     for(j in 1:nc)
       x[, j] = ifelse(is.na(url[, j]), x[, j], sprintf("<A HREF=\"%s\">%s</A>", url[, j], x[, j]))
   }
-  
+
+
   if(center) cat("<CENTER>\n", file=con)
-  cat("<TABLE border=0><TR>",
+if (!is.null(extra)){
+nn = nc/length(extra)
+cat("<TABLE border=0><TR>", paste(sprintf("<TH colspan=%d align=center BGCOLOR=\"%s\">%s</TH>", nn, rep(colors[1], length(extra)), extra), collapse=""), "</TR>\n", sep="", file=con)
+cat("<TR>", paste(sprintf("<TH BGCOLOR=\"%s\">%s</TH>", colors[(1:nc)%%2+1], colnames(x)[1:nn]), collapse=""),"</TR>\n", sep="", file=con)
+} else {cat("<TABLE border=0><TR>",
       paste(sprintf("<TH BGCOLOR=\"%s\">%s</TH>", colors[(1:nc)%%2+1], colnames(x)), collapse=""),
-      "</TR>\n", sep="", file=con)
+      "</TR>\n", sep="", file=con) }
+
   for(i in 1:nr)
-    cat("<TR>",
-        paste(sprintf("<TD BGCOLOR=\"%s\">%s</TD>", colors[2*(i%%2)+(1:nc)%%2+1], x[i,]), collapse=""),
+    cat("<TR>", paste(sprintf("<TD BGCOLOR=\"%s\">%s</TD>", colors[2*(i%%2)+(1:nc)%%2+1], x[i,]), collapse=""),
         "</TR>\n", sep="", file=con)
   cat("</TABLE>\n", file=con)
   if(center) cat("</CENTER>\n", file=con)
-  
 }
+
+
+writeHTMLtable4plots = function(x, con,
+  colors = c("#e0e0ff", "#d0d0f0", "#f0f0ff", "#e0e0f0")) {
+
+  nr = nrow(x)
+  nc = ncol(x)
+ 
+  cat("<CENTER><TABLE border=0><TR>",
+      paste(sprintf("<TH BGCOLOR=\"%s\">%s</TH>", colors[(1:nc)%%2+1], names(x)), collapse=""),
+      "</TR>\n", sep="", file=con)
+  
+  for(i in 1:nr) {
+  	cat("<TR>",
+        paste(sprintf("<TD BGCOLOR=\"%s\">%s</TD>", colors[2*(i%%2)+(1:nc)%%2+1], x[i,]), collapse=""),
+        "</TR>\n", sep="", file=con)
+         }
+  cat("</TABLE><CENTER>\n", file=con)
+}
+
+
+
+
+
 
 writeReport = function(x, outdir=x$name, force=FALSE,
   plotPlateArgs = FALSE, imageScreenArgs = NULL) {
-  
+ 
   if(!inherits(x, "cellHTS"))
     stop("'x' must be a 'cellHTS' object")
 
@@ -74,12 +103,13 @@ writeReport = function(x, outdir=x$name, force=FALSE,
   writeLines(x$screenDesc, file.path(outdir, nm))
   writeExperimentHeader(paste("Experiment report for ", x$name), "Experiment report for ", x$name, nm, 1, con)
   } else { writeheader(paste("Experiment report for", x$name), 1, con)}
-  
+ 
   ## QC per plate & channel
   nrWell    = dim(x$xraw)[1]
   nrPlate   = dim(x$xraw)[2]
   nrReplicate = dim(x$xraw)[3]
-  nrChannel = dim(x$xraw)[4]
+  nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
+  ####  if (x$state["normalized"]) isChRatio = dim(x$xnorm)[4] < dim(x$xraw)[4] # check if xnorm content corresponds to ratios between channels else isChRatio=FALSE
 
 
   ## Define the bins for the histograms
@@ -92,43 +122,48 @@ writeReport = function(x, outdir=x$name, force=FALSE,
     brks = seq(brks[1], brks[2], length=ceiling(nrWell/10))
   }
 
+
   ## the overview table of the plate result files in the experiment,
   ##   plus the (possible) urls for each table cell
   exptab = x$plateList
   url = matrix(as.character(NA), nrow=nrow(exptab), ncol=ncol(exptab))
   colnames(url) = colnames(exptab)
   qmHaveBeenAdded = FALSE
-  
+
   for(p in 1:nrPlate){
-    for(ch in 1:nrChannel){
-      nm = sprintf("%d_%d", p, ch)
-      wh = with(x$plateList, which(Plate==p & Channel==ch & status=="OK"))
+#    for(ch in 1:nrChannel){
+      nm = p
+      wh = with(x$plateList, which(Plate==p & status=="OK"))
       if(x$state["configured"] && (length(wh)>0)) {
         dir.create(file.path(outdir, nm))
          if(x$state["normalized"]) {
-          datPlat = x$xnorm[, p,, ch, drop=FALSE]
+          datPlat = x$xnorm[, p,,, drop=FALSE]
+  # datPlat = x$xnorm[, p,, ch, drop=FALSE]
           whatDat = "normalized"
         } else {
-          datPlat = x$xraw[, p,, ch, drop=FALSE]
+  # datPlat = x$xraw[, p,, ch, drop=FALSE]
+          datPlat = x$xraw[, p,,, drop=FALSE]
           whatDat = "unnormalized"
         }
         res = QMbyPlate(datPlat, x$wellAnno[nrWell*(p-1)+(1:nrWell)], x$pdim, 
-          name=sprintf("Plate %d Channel %d (%s)", p, ch, whatDat),
-          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,ch])
+          name=sprintf("Plate %d (%s)", p, whatDat),
+          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,])
+
 
         url[wh, "status"] = res$url
         if(!qmHaveBeenAdded) {
-          for(j in names(res$qmsummary))
-            exptab[, j] = rep(as.numeric(NA), nrow(exptab))
-          url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(res$qmsummary)))
+         resChan = res$qmsummary[[1]]
+         url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(resChan)))
+          for (j in names(resChan)) exptab[, j] = rep(as.numeric(NA), nrow(exptab))
           qmHaveBeenAdded = TRUE
         }
-        for(j in names(res$qmsummary))
-        exptab[wh, j] =res$qmsummary[j]
-      } ## if
+       for(ch in 1:length(res$qmsummary)) { # Channels
+        resCh = res$qmsummary[[ch]]
+        for(j in names(resCh)) exptab[wh[nrReplicate*(ch-1)+(1:nrReplicate)], j] =resCh[j]
+} # channel
+ } ## if
     }
-  }
-  
+
   ## Report pages per plate result file 
   #dir.create(file.path(outdir, "in"))
   wh = which(x$plateList$status=="OK")
@@ -141,22 +176,22 @@ writeReport = function(x, outdir=x$name, force=FALSE,
     writeLines(txt, file.path(outdir, nm[w]))
     url[w, "Filename"] = nm[w]
   }
-  
+
   cat("<CENTER>", file=con)
   writeHTMLtable(exptab, url=url, con=con)
   cat("</CENTER><BR><BR>", file=con)
-  
+
   ## Per experiment QC
   QMexperiment(x, outdir, con)
- 
+
   ## Score table and screen-wide QC
   if(x$state["scored"]) {
     w=1:length(x$score)
     out=data.frame(
       plate=1 + (w-1)%/% nrWell,
       pos=1+(w-1) %% nrWell,
-      score=x$score, wellAnno = x$wellAnno)
-	
+      score=x$score, wellAnno = x$wellAnno)	
+
 	for (ch in 1:nrChannel) {
          ## include also the final well annotation (after the screen log file)
          out[paste("finalWellAnno", 1:nrReplicate, ch, sep="_")] = matrix(x$finalWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
@@ -180,13 +215,12 @@ writeReport = function(x, outdir=x$name, force=FALSE,
 	 out[paste("raw/PlateMedian", 1:nrReplicate, ch, sep="_")] = signif(matrix(xn[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate), 3)
 	}
 
-############# include also scores for individual replicates (TO DO)
 
     if(x$state["annotated"]) {
           out = cbind(out, x$geneAnno)
           out = out[,!duplicated(tolower(names(out)))] }
-# consider only the wells with sample and controls, at least for one of the replicates
-toconsider = which(!apply(out[,grep("finalWellAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
+    ## consider only the wells with sample and controls, at least for one of the replicates
+    toconsider = which(!apply(out[,grep("finalWellAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
     out = out[toconsider, ]
     out = out[order(out$score, decreasing=TRUE), ]
     out$score = round(out$score, 2)
