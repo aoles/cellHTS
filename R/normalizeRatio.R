@@ -1,4 +1,4 @@
-normalizeRatio = function(x, fun=function(x,y) y/x, scmedian=FALSE, zscore=NULL){
+normalizeRatio = function(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore=NULL){
 
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
