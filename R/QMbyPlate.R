@@ -110,8 +110,8 @@ length(mtt) = nrChannel
 
   for (ch in 1:nrChannel) {
   mtt[[ch]] = mt
-  mtrep = apply(finalWellAnno[,,ch], 2, function(u) match(u, names(wellTypeColor)))
-  aa = apply(finalWellAnno[,,ch], 2, function(u) sum(u=="flagged"))
+  mtrep = apply(finalWellAnno[,,,ch, drop=FALSE], 3, function(u) match(u, names(wellTypeColor)))
+  aa = apply(finalWellAnno[,,,ch, drop=FALSE], 3, function(u) sum(u=="flagged"))
   aa = order(aa, decreasing=TRUE)
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
 
