@@ -2,7 +2,7 @@
 \alias{normalizeRatio}
 \title{Normalization of two-color data and data transformation}
 \description{
-  Normalizes and/or transforms two-channel data \code{xraw} of a given 'cellHTS' object by applying the function defined in \code{fun}. The default is to take the ratio between the 2 channels: R2 /R1.
+  Normalizes and/or transforms two-channel data \code{xraw} of a given 'cellHTS' object by applying the function defined in \code{fun}. The default is to take the ratio between the 2 channels (R2/R1).
   Plate median scaling may also be performed.
 }
 \usage{
@@ -10,9 +10,9 @@ normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore=NULL)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been configured (see details).}
-  \item{fun}{a function defined by the user to relate the signal in the two color channels \code{r1} and \code{r2}. \code {fun} takes two numeric vectors and returns a
+  \item{fun}{a function defined by the user to relate the signal in the two color channels \code{r1} and \code{r2}. \code{fun} takes two numeric vectors and returns a
     numeric vector of the same length; The default is to take the ration between the two channel.}
-  \item{scmedian}{a logical value indicating whether plate median scaling should be performed after applying \code{fun} (see details). The default is \code{scmedian = FALSE}}
+  \item{scmedian}{a logical value indicating whether plate median scaling should be performed after applying \code{fun} (see details). The default is \code{scmedian = FALSE}
   \item{zscore}{indicates if the z-scores should be determined after normalization and transformation. If set to 
     \code{NULL} (default), the data will not be scored. Otherwise, it should be a character string, either "+" for activator assays or "-" for inhibitor assays.}
 }
@@ -21,7 +21,7 @@ normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore=NULL)
 
 For each plate and replicate of a two-color experiment, the function defined in \code{fun} is applied to relate the intensity values in the two channels of the \code{cellHTS} object. The default is to calculate the ration between the second and the first channels. Another procedure could be, for example, to take the log of this ratio.
 
-If \code{scmedian} is \code{TRUE}, plate median scaling will be further performed, by dividing each measurement by the median value across the wells annotated as \code{sample} in the respective plate and replicate. The default is \code{scmedian = FALSE}.
+If \code{scmedian = TRUE}, plate median scaling will be further performed, by dividing each measurement by the median value across the wells annotated as \code{sample} in the respective plate and replicate. The default is \code{scmedian} is \code{FALSE}.
    
 If \code{zscore} is not \code{NULL}, a robust z-score for each individual measurement will be determined for each plate 
 and each well by subtracting the overall median and dividing by the overall mad. The overall median and mad are taken 
@@ -45,12 +45,11 @@ Moreover, the processing status of the \code{cellHTS} object is updated in the s
 \references{..}
 
 \examples{
-# datadir = system.file("KcViabSmall", package = "cellHTS")
-# x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-# confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-# logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-# descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
-# x = configure(x, confFile, logFile, descripFile)
-# x = normalizePlateMedian(x)
+#datadir = system.file("KcViabSmall", package = "cellHTS")
+#x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
+#confFile = system.file("KcViabSmall", "Plateconf.txt", #package="cellHTS")
+#logFile  = system.file("KcViabSmall", "Screenlog.txt", #package="cellHTS")
+#descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", #package="cellHTS")
+#x = configure(x, confFile, logFile, descripFile)
 }
 \keyword{manip}
