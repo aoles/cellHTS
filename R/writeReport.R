@@ -112,14 +112,15 @@ writeReport = function(x, outdir=x$name, force=FALSE,
   ####  if (x$state["normalized"]) isChRatio = dim(x$xnorm)[4] < dim(x$xraw)[4] # check if xnorm content corresponds to ratios between channels else isChRatio=FALSE
 
 
-  ## Define the bins for the histograms
+  ## Define the bins for the histograms (channel-dependent)
   if(x$state["configured"]) {
     if(x$state["normalized"]) {
-      brks = range(x$xnorm, na.rm=TRUE)
+      brks = apply(x$xnorm, 4, range, na.rm=TRUE)
     } else {
-      brks = range(x$xraw, na.rm=TRUE)
+      brks = apply(x$xraw, 4, range, na.rm=TRUE)
     }
-    brks = seq(brks[1], brks[2], length=ceiling(nrWell/10))
+
+    brks = apply(brks, 2, function(s)seq(s[1], s[2], length=ceiling(nrWell/10)))
   }
 
 

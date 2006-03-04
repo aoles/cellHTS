@@ -142,8 +142,8 @@ nrRep = nrRepCh[ch]
     makePlot(file.path(basePath, subPath), con=con,
              name=sprintf("scp_Channel%d", ch), w=plsiz, h=plsiz, fun = function() {
       par(mai=c(0.5,0.5,0.1,0.1))
-      ylim=c(min(x, na.rm=TRUE), max(x, na.rm=TRUE))
-      plot(x[,,whHasData[[ch]][1],], x[,,whHasData[[ch]][2],], pch=16, cex=0.5,
+      ylim=c(min(x[,,,ch], na.rm=TRUE), max(x[,,,ch], na.rm=TRUE))
+      plot(x[,,whHasData[[ch]][1],ch], x[,,whHasData[[ch]][2],ch], pch=16, cex=0.5,
            ylim=ylim, xlab="Replicate 1", ylab="Replicate 2", col=wellTypeColor[mtt[[ch]]])
       abline(a=0, b=1, col="lightblue")
     }, print=FALSE)
@@ -162,9 +162,9 @@ count = count + 1
     makePlot(file.path(basePath, subPath), con=con,
               name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz/2*maxRep, fun = function() {
                par(mai=c(0.5,0.25,0.01,0.01))
-               hist(x[,,r,], xlab ="", breaks=brks,
+               hist(x[,,r,ch], xlab ="", breaks=brks[,ch],
                     col = gray(0.95), yaxt = "n", main="")
-               rug(x[,,r,])
+               rug(x[,,r,ch])
              }, print=FALSE)
 plotTable[count+1,ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("hist_Channel%d_%02d.pdf",ch,r), sprintf("hist_Channel%d_%02d.png",ch,r)) 
 } else { plotTable[count + 1, ch] = sprintf("<CENTER>Replicate %d is missing</CENTER>\n", r)}
@@ -221,6 +221,33 @@ count = count+1
     }
     } # if plot plates
 } # for channel
+
+	
+	## include also a "channel 2 vs channel 1" plot if the number of channels is 2
+	
+	
+	## correct the color code for the 2-channel scatterplot
+if (nrChannel==2) {
+plotTable$Channel2vs1 = ""
+
+for (r in 1:maxRep) {
+if ( (r %in% whHasData[[1]]) & (r %in% whHasData[[2]]) ) {
+
+## scatterplot between channels
+    makePlot(file.path(basePath, subPath), con=con,
+             name=sprintf("scp_Rep%d", r), w=plsiz, h=plsiz, fun = function() {
+      par(mai=c(0.5,0.5,0.1,0.1))
+      ylim=c(min(x, na.rm=TRUE), max(x, na.rm=TRUE))
+      plot(x[,,r,1], x[,,r,2], pch=16, cex=0.5,
+           ylim=ylim, xlab="Channel 1", ylab="Channel 2", col=wellTypeColor[mtt[[ch]]])
+      abline(a=0, b=1, col="lightblue")
+    }, print=FALSE)
+plotTable[r, 3] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("scp_Rep%d.pdf", r), sprintf("scp_Rep%d.png", r)) 
+  } else {
+plotTable[r, 3] = sprintf("<CENTER>Replicate %d is missing in one of the channels: scatterplot omitted</CENTER>\n", r)
+  }
+} }
+
 
   writeHTMLtable4plots(plotTable, con=con)
   writetail(con)
