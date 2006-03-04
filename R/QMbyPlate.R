@@ -13,7 +13,7 @@ QMbyPlate = function(x, wellAnno, pdim, name, basePath, subPath, plotPlateArgs, 
 
   nrWells = prod(pdim)
   nrChannel = dim(x)[4]
-maxRep = dim(x)[3]
+  maxRep = dim(x)[3]
   ## which of the replicate plates has not just all NA values
 whHasData = list()
 for (ch in 1:nrChannel) whHasData[[ch]] = which(apply(x[,,,ch,drop=FALSE], 3, function(xx) !all(is.na(xx))))
@@ -41,9 +41,11 @@ count = 0
       ##   this assumes that the data are on multplicative scale.
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
         mean(log(v[negCtrls]), na.rm=TRUE) - mean(log(v[posCtrls]), na.rm=TRUE))
-      ## if therex[,,,ch] are relicates, consider also the dynamic range for each individual replicate
-      for (j in whHasData[[ch]]) {
-          qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",j)), value=round(exp(dr[j]), 2), comment=I("")))} 
+
+      ## consider also the dynamic range for each individual replicate
+      for (r in 1:maxRep) {
+       if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",r)), value=round(exp(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",r)), value=NA, comment=I(sprintf("Replicate %s is missing", r))))
+     }
 
       dr = round(exp(mean(dr, na.rm=TRUE)), 2)
       comm = ""
@@ -52,22 +54,16 @@ count = 0
       ## determine the difference between the aritmetic mean between pos and negative controls
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
         mean(v[posCtrls], na.rm=TRUE)- mean(v[negCtrls], na.rm=TRUE))
-      ## if there are replicates, consider also the dynamic range for each individual replicate
-      if (nrRep > 1) {
-        for (j in whHasData[[ch]]) {
-          qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",j)), value=round(abs(dr[j]), 2), comment=I("")))}
 
-}
-
+      ## Consider also the dynamic range for each replicate
+      for (r in 1:maxRep) {
+       if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=round(exp(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=NA, comment=I(sprintf("Replicate %d is missing", r))))
+     }
 
       dr = round(mean(dr, na.rm=TRUE), 2) 
       comm = "" }
-
-if (nrRep < maxRep) {
-misRep =which(!(1:maxRep %in% whHasData[[ch]])) 
-for (ii in misRep) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",ii)), value=NA, comment=I(sprintf("Replicate %s is missing", ii)))) } 
-
-  } else {
+ 
+ } else {
     dr = as.numeric(NA)
     comm = "No controls ('pos' and 'neg') were found."
   } 
@@ -137,8 +133,6 @@ plsiz = 4
 ## Create a dataframe for the plots of each channel
 plotTable = data.frame(matrix(data = NA, nrow = 0, ncol = nrChannel))
 names(plotTable) = paste("Channel", 1:nrChannel, sep=" ")
-#url = data.frame(matrix(data = NA, nrow = 0, ncol = nrChannel))
-
 
 for (ch in 1:nrChannel) {
 count = 0
@@ -156,24 +150,27 @@ nrRep = nrRepCh[ch]
 
 plotTable[count + 1, ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("scp_Channel%d.pdf", ch), sprintf("scp_Channel%d.png", ch)) 
   } else {
-plotTable[count + 1, ch] = sprintf("<CENTER>%d replicates: scatterplot omitted</CENTER>\n", nrRep)
+plotTable[count + 1, ch] = sprintf("<CENTER>%d replicate(s): scatterplot omitted</CENTER>\n", nrRep)
   }
 count = count + 1 
 
 
   ## histograms (replicates)
-  for(j in whHasData[[ch]]) {
-    plotTable[count+1, ch] = sprintf("<CENTER>Histogram of replicate %d</CENTER>\n", as.integer(j))
+  for (r in 1:maxRep) {
+       if (r %in% whHasData[[ch]]){
+    plotTable[count+1, ch] = sprintf("<CENTER>Histogram of replicate %d</CENTER>\n", as.integer(r))
     makePlot(file.path(basePath, subPath), con=con,
-              name=sprintf("hist_Channel%d_%02d",ch,j), w=plsiz, h=plsiz/2*nrRep, fun = function() {
+              name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz/2*maxRep, fun = function() {
                par(mai=c(0.5,0.25,0.01,0.01))
-               hist(x[,,j,], xlab ="", breaks=brks,
+               hist(x[,,r,], xlab ="", breaks=brks,
                     col = gray(0.95), yaxt = "n", main="")
-               rug(x[,,j,])
+               rug(x[,,r,])
              }, print=FALSE)
-plotTable[count+1,ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("hist_Channel%d_%02d.pdf",ch,j), sprintf("hist_Channel%d_%02d.png",ch,j))
+plotTable[count+1,ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("hist_Channel%d_%02d.pdf",ch,r), sprintf("hist_Channel%d_%02d.png",ch,r)) 
+} else { plotTable[count + 1, ch] = sprintf("<CENTER>Replicate %d is missing</CENTER>\n", r)}
 count = count+1
-  }
+}
+
 
   if(is.logical(plotPlateArgs)) {
     stopifnot(!plotPlateArgs)
@@ -185,7 +182,7 @@ count = count+1
 
     plsiz = 4
     ## platePlot of sd
-    psd = apply(x, 1, sd, na.rm=TRUE)
+    psd = apply(x[,,,ch,drop=FALSE], 1, sd, na.rm=TRUE)
 
     if(is.null(plotPlateArgs$sdcol))
       plotPlateArgs$sdcol = brewer.pal(9, "YlOrRd")
@@ -196,7 +193,7 @@ count = count+1
     if(is.null(plotPlateArgs$xrange))
       plotPlateArgs$xrange=quantile(x, c(0.025, 0.975), na.rm=TRUE)
 
-    if(!all(is.na(psd)))
+    if(!all(is.na(psd))) {
       makePlot(file.path(basePath, subPath), con=con,
                name=sprintf("ppsd_Channel%d",ch), w=plsiz, h=plsiz*0.66, fun = function() {
                  plotPlate(psd, nrow=pdim["nrow"], ncol=pdim["ncol"], na.action="xout",
@@ -204,21 +201,25 @@ count = count+1
                            col=plotPlateArgs$sdcol,
                            xrange=plotPlateArgs$sdrange)
                }, print=FALSE)
-    plotTable[count+1, ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("ppsd_Channel%d.pdf", ch), sprintf("ppsd_Channel%d.png", ch))
+    plotTable[count+1, ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("ppsd_Channel%d.pdf", ch), sprintf("ppsd_Channel%d.png", ch))} else {plotTable[count+1,ch] = sprintf("<CENTER>%d replicate(s): plate plot of 'between replicates standard deviations' omitted</CENTER>\n", nrRep)}
     count = count + 1
+
     ## platePlot of intensities
     ## we assume that a value of 1 corresponds 
-    for(j in whHasData[[ch]]) {
-      makePlot(file.path(basePath, subPath), con=con,
-               name=sprintf("pp_Channel%d_%d",ch,j), w=plsiz, h=plsiz*0.66, fun = function() {
-                 plotPlate(x[,,j,], nrow=pdim["nrow"], ncol=pdim["ncol"], na.action="xout",
-                           main=sprintf("intensities for replicate %d", j),
+      for (r in 1:maxRep) {
+       if (r %in% whHasData[[ch]]){
+         makePlot(file.path(basePath, subPath), con=con,
+               name=sprintf("pp_Channel%d_%d",ch,r), w=plsiz, h=plsiz*0.66, fun = function() {
+                 plotPlate(x[,,r,ch], nrow=pdim["nrow"], ncol=pdim["ncol"], na.action="xout",
+                           main=sprintf("intensities for replicate %d", r),
                            col=plotPlateArgs$xcol,
                            xrange=plotPlateArgs$xrange)
                }, print=FALSE)
-      plotTable[count+1,ch] =  sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("pp_Channel%d_%d.pdf",ch,j), sprintf("pp_Channel%d_%d.png",ch,j))
+          plotTable[count+1,ch] =  sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("pp_Channel%d_%d.pdf",ch,r), sprintf("pp_Channel%d_%d.png",ch,r))
+          } else {plotTable[count + 1, ch] = sprintf("<CENTER>Replicate %d is missing</CENTER>\n", r)}
       count = count+1
-    }     }     
+    }
+    } # if plot plates
 } # for channel
 
   writeHTMLtable4plots(plotTable, con=con)
