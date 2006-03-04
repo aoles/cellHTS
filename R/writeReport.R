@@ -157,9 +157,12 @@ writeReport = function(x, outdir=x$name, force=FALSE,
           for (j in names(resChan)) exptab[, j] = rep(as.numeric(NA), nrow(exptab))
           qmHaveBeenAdded = TRUE
         }
+       whh = split(wh, exptab$Channel[wh])
        for(ch in 1:length(res$qmsummary)) { # Channels
         resCh = res$qmsummary[[ch]]
-        for(j in names(resCh)) exptab[wh[nrReplicate*(ch-1)+(1:nrReplicate)], j] =resCh[j]
+        whCh = whh[[ch]]
+
+        for(j in names(resCh)) exptab[whCh, j] =resCh[j]
 } # channel
  } ## if
     }
