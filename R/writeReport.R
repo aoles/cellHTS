@@ -147,7 +147,7 @@ writeReport = function(x, outdir=x$name, force=FALSE,
         }
         res = QMbyPlate(datPlat, x$wellAnno[nrWell*(p-1)+(1:nrWell)], x$pdim, 
           name=sprintf("Plate %d (%s)", p, whatDat),
-          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,])
+          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE])
 
 
         url[wh, "status"] = res$url
