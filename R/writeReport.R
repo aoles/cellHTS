@@ -75,7 +75,7 @@ writeReport = function(x, outdir=x$name, force=FALSE,
   if(!inherits(x, "cellHTS"))
     stop("'x' must be a 'cellHTS' object")
 
-  ## See if output directory exists. If no, create. If yes, check if it is empty,
+  ## See if output directory exists. If not, create. If yes, check if it is empty,
   ## and if not, depending on parameter 'force', throw an error or clean it up.
   if(file.exists(outdir)){
     if(!file.info(outdir)$isdir)
@@ -109,7 +109,6 @@ writeReport = function(x, outdir=x$name, force=FALSE,
   nrPlate   = dim(x$xraw)[2]
   nrReplicate = dim(x$xraw)[3]
   nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
-  ####  if (x$state["normalized"]) isChRatio = dim(x$xnorm)[4] < dim(x$xraw)[4] # check if xnorm content corresponds to ratios between channels else isChRatio=FALSE
 
 
   ## Define the bins for the histograms (channel-dependent)
@@ -155,7 +154,7 @@ writeReport = function(x, outdir=x$name, force=FALSE,
         if(!qmHaveBeenAdded) {
          resChan = res$qmsummary[[1]]
          url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(resChan)))
-          for (j in names(resChan)) exptab[, j] = rep(as.numeric(NA), nrow(exptab))
+          for (j in names(resChan)) exptab[, j] = rep("", nrow(exptab))
           qmHaveBeenAdded = TRUE
         }
        whh = split(wh, exptab$Channel[wh])

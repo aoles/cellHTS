@@ -15,10 +15,14 @@ QMbyPlate = function(x, wellAnno, pdim, name, basePath, subPath, plotPlateArgs, 
   nrChannel = dim(x)[4]
   maxRep = dim(x)[3]
   ## which of the replicate plates has not just all NA values
-whHasData = list()
-for (ch in 1:nrChannel) whHasData[[ch]] = which(apply(x[,,,ch,drop=FALSE], 3, function(xx) !all(is.na(xx))))
+  whHasData = list()
+  for (ch in 1:nrChannel) whHasData[[ch]] = which(apply(x[,,,ch,drop=FALSE], 3, function(xx) !all(is.na(xx))))
 
-nrRepCh = sapply(whHasData, length)
+  nrRepCh = sapply(whHasData, length)
+
+  # Checks whether the number of channels has changed (e.g. normalized data)
+  hasLessCh = any(dim(finalWellAnno)!=dim(x))
+
 
   ## define colors and comment on them
   wellTypeColor=c(pos="#E41A1C", neg="#2040FF", empty="pink", other="#BEBADA", sample="#000000", flagged="black")
@@ -103,6 +107,21 @@ names(wellCount) = sprintf("Channel %d", 1:nrChannel)
 mtt = list()
 length(mtt) = nrChannel
 
+
+if (hasLessCh & nrChannel==1) {
+# The color code must have into account the common entries between channels and replicates 
+  mtt[[1]] = mt
+  fwa = matrix(finalWellAnno, ncol = sum(dim(finalWellAnno)[3:4]))
+  mtrep = apply(fwa, 2, function(u) match(u, names(wellTypeColor)))
+  aa = apply(fwa, 2, function(u) sum(u=="flagged"))
+  aa = order(aa, decreasing=TRUE)
+  nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
+  
+  wellCount[1,1] = paste(sprintf("%s: %d", names(wellTypeColor)[c(3,6)], nrWellTypes[c(3,6)]), collapse=", ")
+  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[c(-3,-6)], names(wellTypeColor)[c(-3,-6)], nrWellTypes[c(-3,-6)]), collapse=", ")
+  mtt[[1]][is.na(mtt[[1]])]=4 
+  } else { 
+  
   for (ch in 1:nrChannel) {
   mtt[[ch]] = mt
   mtrep = apply(finalWellAnno[,,,ch, drop=FALSE], 3, function(u) match(u, names(wellTypeColor)))
@@ -111,13 +130,8 @@ length(mtt) = nrChannel
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
 
   wellCount[1,ch] = paste(sprintf("%s: %d", names(wellTypeColor)[c(3,6)], nrWellTypes[c(3,6)]), collapse=", ")
-
-
-  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[c(-3,-6)], names(wellTypeColor)[c(-3,-6)],                  nrWellTypes[c(-3,-6)]), collapse=", ")
-
-  mtt[[ch]][is.na(mtt[[ch]])]=4 }
-
-
+  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[c(-3,-6)], names(wellTypeColor)[c(-3,-6)], nrWellTypes[c(-3,-6)]), collapse=", ")
+  mtt[[ch]][is.na(mtt[[ch]])]=4 } }
 
 
 cat("<CENTER>\n", file=con)
