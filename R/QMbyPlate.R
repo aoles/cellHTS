@@ -97,7 +97,6 @@ names(qmsummary[[sprintf("Channel %d", ch)]]) = qm$metric
 writeHTMLtable(qmplate, con=con, center=TRUE, extra=sprintf("Channel %d", 1:nrChannel))
 
   ## color legend 
-
   ## For the original configuration plate corrected by the screen log information:
 wellCount = data.frame(matrix(NA, ncol = nrChannel, nrow = 2))
 names(wellCount) = sprintf("Channel %d", 1:nrChannel)
@@ -224,10 +223,33 @@ count = count+1
 
 	
 	## include also a "channel 2 vs channel 1" plot if the number of channels is 2
-	
-	
+if (nrChannel==2) {	
 	## correct the color code for the 2-channel scatterplot
-if (nrChannel==2) {
+	## For the original configuration plate corrected by the screen log information:
+wellCount = data.frame(matrix(NA, ncol = maxRep, nrow = 2))
+names(wellCount) = sprintf("Replicate %d", 1:maxRep)
+mtt = list()
+length(mtt) = maxRep
+
+  for (r in 1:maxRep) {
+  mtt[[r]] = mt
+  mtrep = apply(finalWellAnno[,,r,, drop=FALSE], 4, function(u) match(u, names(wellTypeColor)))
+  aa = apply(finalWellAnno[,,r,, drop=FALSE], 4, function(u) sum(u=="flagged"))
+  aa = order(aa, decreasing=TRUE)
+  nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
+
+  wellCount[1,r] = paste(sprintf("%s: %d", names(wellTypeColor)[c(3,6)], nrWellTypes[c(3,6)]), collapse=", ")
+  wellCount[2, r] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[c(-3,-6)], names(wellTypeColor)[c(-3,-6)],                  nrWellTypes[c(-3,-6)]), collapse=", ")
+
+  mtt[[r]][is.na(mtt[[r]])]=4 }
+
+# cat("<CENTER>\n", file=con)
+# cat("<TABLE><TR>", paste(sprintf("<TH>%s</TH>", names(wellCount)), collapse=""),"</TR>\n", sep="", file=con)
+# for(i in 1:2) cat("<TR>", paste(sprintf("<TD align=center>%s</TD>", wellCount[i,]), collapse=""), "</TR>\n", sep="", file=con)
+#   cat("</TABLE>\n", file=con)
+#   cat("</CENTER>\n", file=con)
+
+
 plotTable$Channel2vs1 = ""
 
 for (r in 1:maxRep) {
@@ -239,7 +261,7 @@ if ( (r %in% whHasData[[1]]) & (r %in% whHasData[[2]]) ) {
       par(mai=c(0.5,0.5,0.1,0.1))
       ylim=c(min(x, na.rm=TRUE), max(x, na.rm=TRUE))
       plot(x[,,r,1], x[,,r,2], pch=16, cex=0.5,
-           ylim=ylim, xlab="Channel 1", ylab="Channel 2", col=wellTypeColor[mtt[[ch]]])
+           ylim=ylim, xlab="Channel 1", ylab="Channel 2", col=wellTypeColor[mtt[[r]]])
       abline(a=0, b=1, col="lightblue")
     }, print=FALSE)
 plotTable[r, 3] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("scp_Rep%d.pdf", r), sprintf("scp_Rep%d.png", r)) 
