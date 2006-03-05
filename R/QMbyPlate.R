@@ -57,12 +57,12 @@ count = 0
 
       ## Consider also the dynamic range for each replicate
       for (r in 1:maxRep) {
-       if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=round(exp(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=NA, comment=I(sprintf("Replicate %d is missing", r))))
+       if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=round(abs(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=NA, comment=I(sprintf("Replicate %d is missing", r))))
      }
-
+     
       dr = round(mean(dr, na.rm=TRUE), 2) 
       comm = "" }
- 
+
  } else {
     dr = as.numeric(NA)
     comm = "No controls ('pos' and 'neg') were found."
