@@ -100,8 +100,11 @@ points(pneg, xneg, pch=16, cex=0.5, col="red")
 legend("top",legend =c("'pos' controls", "'neg' controls"), col=c("blue","red"),
        horiz=TRUE, pch=16, pt.cex=0.5, bg="white", cex=0.9)
 xall = split(append(xpos, xneg), append(ppos, pneg))
+xall = xall[!sapply(xall, function(f) all(is.na(f)))]
 xalls = data.frame(lapply(xall, function (k) range(k, na.rm=TRUE)))
 segments(as.numeric(names(xall)), as.matrix(xalls)[1,], as.numeric(names(xall)), as.matrix(xalls)[2,], lty=3)
-axis(1, at = seq(1,max(ppos,pneg),by=10), labels = TRUE)
+mp = max(ppos,pneg)
+if ((mp-1)%/%20) by=10 else by=ifelse((mp-1)%/%10, 5, 1) 
+axis(1, at = seq(1,mp,by=by), labels = TRUE)
 }
 
