@@ -189,34 +189,42 @@ writeReport = function(x, outdir=x$name, force=FALSE,
 
   ## Score table and screen-wide QC
   if(x$state["scored"]) {
+    # Checks whether the number of channels has changed after normalization
+    trueNrCh = dim(x$xraw)[4]
     w=1:length(x$score)
     out=data.frame(
-      plate=1 + (w-1)%/% nrWell,
-      pos=1+(w-1) %% nrWell,
-      score=x$score, wellAnno = x$wellAnno)	
+      plate=1 + (w-1)%/%nrWell,
+      pos=1+(w-1)%%nrWell,
+      score=x$score, wellAnno = x$wellAnno)
 
-	for (ch in 1:nrChannel) {
+## Include the normalized values
+for (ch in 1:nrChannel) out[sprintf("normalized_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$xnorm[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+
+
          ## include also the final well annotation (after the screen log file)
-         out[paste("finalWellAnno", 1:nrReplicate, ch, sep="_")] = matrix(x$finalWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+for (ch in 1:trueNrCh) out[sprintf("finalWellAnno_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$finalWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+
          ## include also the raw values for each replicate and channel	 
-         out[paste("raw", 1:nrReplicate, ch, sep="_")] = matrix(x$xraw[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+for (ch in 1:trueNrCh) out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$xraw[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+
          # median between replicates  
-         if (nrReplicate > 1) {
-            out[sprintf("median_%d", ch)] = apply(out[paste("raw", 1:nrReplicate, ch, sep="_")], 1, median)
+for (ch in 1:trueNrCh) {
+ if (nrReplicate > 1) {
+            out[sprintf("median_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)],1,median)
             if (nrReplicate ==2) { 
            # Difference between replicates
-	   out[sprintf("diff_%d", ch)] = apply(out[paste("raw", 1:nrReplicate, ch, sep="_")], 1, diff)} else {
+	   out[sprintf("diff_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, diff)} else {
          # average between replicates
-	 out[sprintf("average_%d", ch)] = apply(out[paste("raw", 1:nrReplicate, ch, sep="_")], 1, mean)}}
+	 out[sprintf("average_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, mean)}} }
   	 # raw/plateMedian
 	 xn = array(as.numeric(NA), dim=dim(x$xraw))
          for(p in 1:nrPlate) {
             samples = (x$wellAnno[(1:nrWell)+nrWell*(p-1)]=="sample")
             for(r in 1:nrReplicate)
-            xn[, p, r, ch] = x$xraw[, p, r, ch] / median(x$xraw[samples, p, r, ch], na.rm=TRUE)
+              for (ch in 1:trueNrCh) 
+                xn[, p, r, ch] = x$xraw[, p, r, ch] / median(x$xraw[samples, p, r, ch], na.rm=TRUE)
          }
-	 out[paste("raw/PlateMedian", 1:nrReplicate, ch, sep="_")] = signif(matrix(xn[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate), 3)
-	}
+for (ch in 1:trueNrCh) out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch)] = signif(matrix(xn[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate), 3)
 
 
     if(x$state["annotated"]) {
