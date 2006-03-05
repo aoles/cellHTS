@@ -58,7 +58,7 @@ plotTable[count + 1, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></
 
       } else {
 plotTable[count + 1, 1] = "<CENTER></CENTER>"
-plotTable[count + 1, ch+1] = "<CENTER><i>No controls ('pos' and 'neg') were found.</i></CENTER>\n"
+plotTable[count + 1, ch+1] = "<CENTER><i>No controls ('pos' and 'neg') were found and/or 'x' is not normalized yet.</i></CENTER>\n"
 }
 
 count = count + 1
