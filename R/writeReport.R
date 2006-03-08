@@ -152,17 +152,24 @@ writeReport = function(x, outdir=x$name, force=FALSE,
 
         url[wh, "status"] = res$url
         if(!qmHaveBeenAdded) {
-         resChan = res$qmsummary[[1]]
-         url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(resChan)))
-          for (j in names(resChan)) exptab[, j] = rep("", nrow(exptab))
+         #resChan = res$qmsummary[[1]]
+         #url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(resChan)))
+         #for (j in names(resChan)) exptab[, j] = rep("", nrow(exptab))
+         #qmHaveBeenAdded = TRUE
+         
+         url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=3))
+         TableNames = c("Replicate dynamic range", "Average dynamic range", "Spearman rank correlation")
+         for (j in TableNames) exptab[, j] = rep("", nrow(exptab))
           qmHaveBeenAdded = TRUE
         }
        whh = split(wh, exptab$Channel[wh])
        for(ch in 1:length(res$qmsummary)) { # Channels
         resCh = res$qmsummary[[ch]]
         whCh = whh[[ch]]
-
-        for(j in names(resCh)) exptab[whCh, j] =resCh[j]
+        exptab[whCh, "Replicate dynamic range"] = resCh[exptab$Replicate[whCh]]
+        exptab[whCh, "Average dynamic range"] = resCh[nrReplicate + 1]
+        exptab[whCh, "Spearman rank correlation"] = resCh[nrReplicate + 2]
+        #for(j in names(resCh)[(nrReplicate+1):) exptab[whCh, j] =resCh[j]
 } # channel
  } ## if
     }

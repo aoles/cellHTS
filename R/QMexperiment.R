@@ -5,20 +5,22 @@ QMexperiment = function(x, path, con) {
   nrbxp = 1+x$state["normalized"]
   nrCh = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4]) 
 
+# Checks whether the number of channels has changed (e.g. normalized data)
+  if (x$state["normalized"]) hasLessCh = dim(x$xraw)[4] > dim(x$xnorm)[4] else hasLessCh=FALSE
 
 ## Create a dataframe for the plots of each channel
 plotTable = data.frame(matrix(data = NA, nrow = 0, ncol = nrCh + 1))
 names(plotTable) = c("", paste("Channel", 1:nrCh, sep=" "))
 
   for (ch in 1:nrCh) {
-count = 0
+    count = 0
     for (r in 1:(dim(x$xraw)[3])) {
-
       makePlot(path, con=con,
-           name=sprintf("boxplot_%d_%d", r, ch), w=5*nrbxp, h=5, fun = function() {
-             par(mfrow=c(1, nrbxp), mai=c(par("mai")[1:2], 0.01, 0.01))
+           name=sprintf("boxplot_%d_%d", r, ch), w=5*(nrbxp-hasLessCh), h=5, fun = function() {
+             par(mfrow=c(1, (nrbxp-hasLessCh)), mai=c(par("mai")[1:2], 0.01, 0.01))
+             if (!hasLessCh) {
              xbp = x$xraw[,,r,ch]
-             boxplotwithNA(xbp, col(xbp), col="pink", outline=FALSE, main="")
+             boxplotwithNA(xbp, col(xbp), col="pink", outline=FALSE, main="")}
              if(x$state["normalized"]) {
                xbp = x$xnorm[,,r,ch]
                boxplotwithNA(xbp, col(xbp), col="lightblue", outline=FALSE, main="")
@@ -26,7 +28,7 @@ count = 0
            }, print=FALSE)
 
 if (ch ==1) {
- if(x$state["normalized"]) 
+ if(x$state["normalized"] & !hasLessCh) 
 	plotTable[count + 1, 1] = sprintf("<H3 align=left>Replicate %d </H3><em>%s</em><br>\n", r,"Left: raw, right: normalized") else plotTable[count + 1, 1] = sprintf("<H3 align=left>Replicate %d</H3>", r)}
 
 plotTable[count + 1, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("boxplot_%d_%d.pdf", r, ch), sprintf("boxplot_%d_%d.png", r, ch)) 
@@ -105,6 +107,6 @@ xalls = data.frame(lapply(xall, function (k) range(k, na.rm=TRUE)))
 segments(as.numeric(names(xall)), as.matrix(xalls)[1,], as.numeric(names(xall)), as.matrix(xalls)[2,], lty=3)
 mp = max(ppos,pneg)
 if ((mp-1)%/%20) by=10 else by=ifelse((mp-1)%/%10, 5, 1) 
-axis(1, at = seq(1,mp,by=by), labels = TRUE)
+axis(1, at = c(1, seq(0,mp,by=by)[-1]), labels = TRUE)
 }
 

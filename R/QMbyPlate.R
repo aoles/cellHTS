@@ -64,7 +64,7 @@ count = 0
        if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=round(abs(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=NA, comment=I(sprintf("Replicate %d is missing", r))))
      }
      
-      dr = round(mean(dr, na.rm=TRUE), 2) 
+      dr = round(abs(mean(dr, na.rm=TRUE)), 2) 
       comm = "" }
 
  } else {
