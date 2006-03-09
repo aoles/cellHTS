@@ -111,7 +111,7 @@ length(mtt) = nrChannel
 if (hasLessCh & nrChannel==1) {
 # The color code must have into account the common entries between channels and replicates 
   mtt[[1]] = mt
-  fwa = matrix(finalWellAnno, ncol = sum(dim(finalWellAnno)[3:4]))
+  fwa = matrix(finalWellAnno, ncol = prod(dim(finalWellAnno)[3:4]))
   mtrep = apply(fwa, 2, function(u) match(u, names(wellTypeColor)))
   aa = apply(fwa, 2, function(u) sum(u=="flagged"))
   aa = order(aa, decreasing=TRUE)
