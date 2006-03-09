@@ -100,7 +100,7 @@ names(qmsummary[[sprintf("Channel %d", ch)]]) = qm$metric
 
 writeHTMLtable(qmplate, con=con, center=TRUE, extra=sprintf("Channel %d", 1:nrChannel))
 
-  ## color legend 
+  ## color legend for each channel 
   ## For the original configuration plate corrected by the screen log information:
 wellCount = data.frame(matrix(NA, ncol = nrChannel, nrow = 2))
 names(wellCount) = sprintf("Channel %d", 1:nrChannel)
@@ -134,23 +134,23 @@ if (hasLessCh & nrChannel==1) {
   mtt[[ch]][is.na(mtt[[ch]])]=4 } }
 
 
-cat("<CENTER>\n", file=con)
-cat("<TABLE><TR>", paste(sprintf("<TH>%s</TH>", names(wellCount)), collapse=""),"</TR>\n", sep="", file=con)
-for(i in 1:2) cat("<TR>", paste(sprintf("<TD align=center>%s</TD>", wellCount[i,]), collapse=""), "</TR>\n", sep="", file=con)
-  cat("</TABLE>\n", file=con)
-  cat("</CENTER>\n", file=con)
 
-
-plsiz = 4
+cat("<BR>\n", file=con)
+cat("<BR>\n", file=con)
 
 ## Create a dataframe for the plots of each channel
-plotTable = data.frame(matrix(data = NA, nrow = 0, ncol = nrChannel))
-names(plotTable) = paste("Channel", 1:nrChannel, sep=" ")
+plotTable = data.frame(matrix(data = NA, nrow = 0, ncol = nrChannel + 1))
+names(plotTable) = c("", paste("Channel", 1:nrChannel, sep=" "))
 
+plsiz = 4
 for (ch in 1:nrChannel) {
-count = 0
+
 nrRep = nrRepCh[ch]
 ## scatterplot
+## plot title
+plotTable[1, ch+1] = "<H5 align=center><FONT color=#494F8A>SCATTERPLOT BETWEEN REPLICATES</FONT></H5>\n"
+count = 1
+
   if(nrRep==2) {
     makePlot(file.path(basePath, subPath), con=con,
              name=sprintf("scp_Channel%d", ch), w=plsiz, h=plsiz, fun = function() {
@@ -161,17 +161,26 @@ nrRep = nrRepCh[ch]
       abline(a=0, b=1, col="lightblue")
     }, print=FALSE)
 
-plotTable[count + 1, ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("scp_Channel%d.pdf", ch), sprintf("scp_Channel%d.png", ch)) 
+# color legend:
+wellLeg = paste(sprintf("<CENTER>%s</CENTER><BR>\n", wellCount[1,ch]), sprintf("<CENTER><em>Color legend: </em> %s</CENTER><BR>\n", wellCount[2,ch]), collapse="")
+
+plotTable[count + 1, ch+1] = sprintf("%s<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER>\n",
+wellLeg, sprintf("scp_Channel%d.pdf", ch), sprintf("scp_Channel%d.png", ch))
+ 
   } else {
-plotTable[count + 1, ch] = sprintf("<CENTER>%d replicate(s): scatterplot omitted</CENTER>\n", nrRep)
+#plotTable[count + 1, ch+1] = ""
+plotTable[count + 1, ch+1] = sprintf("<CENTER>%d replicate(s): scatterplot omitted</CENTER>\n", nrRep)
   }
 count = count + 1 
 
-
   ## histograms (replicates)
+## plot title
+plotTable[count + 1, ch+1] = "<H5 align=center><FONT color=#494F8A>HISTOGRAM(S)</FONT></H5>\n"
+count= count + 1
+
   for (r in 1:maxRep) {
+    plotTable[count+1, 1] = sprintf("<H4 align=left>Replicate %d</H4>\n", as.integer(r))
        if (r %in% whHasData[[ch]]){
-    plotTable[count+1, ch] = sprintf("<CENTER>Histogram of replicate %d</CENTER>\n", as.integer(r))
     makePlot(file.path(basePath, subPath), con=con,
               name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz/2*maxRep, fun = function() {
                par(mai=c(0.5,0.25,0.01,0.01))
@@ -179,10 +188,11 @@ count = count + 1
                     col = gray(0.95), yaxt = "n", main="")
                rug(x[,,r,ch])
              }, print=FALSE)
-plotTable[count+1,ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("hist_Channel%d_%02d.pdf",ch,r), sprintf("hist_Channel%d_%02d.png",ch,r)) 
-} else { plotTable[count + 1, ch] = sprintf("<CENTER>Replicate %d is missing</CENTER>\n", r)}
+plotTable[count+1,ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER>\n", sprintf("hist_Channel%d_%02d.pdf",ch,r), sprintf("hist_Channel%d_%02d.png",ch,r)) 
+} else { plotTable[count + 1, ch+1] = sprintf("<CENTER>Replicate %d is missing</CENTER>\n", r)}
 count = count+1
 }
+} # for channel
 
 
   if(is.logical(plotPlateArgs)) {
@@ -194,46 +204,84 @@ count = count+1
       stop("Only elements 'sdcol', 'sdrange', 'xcolx', and 'xrange' are allowed for 'plotPlateArgs'")
 
     plsiz = 4
-    ## platePlot of sd
-    psd = apply(x[,,,ch,drop=FALSE], 1, sd, na.rm=TRUE)
 
+## Currently, it does not allows to use different colors for different channels
     if(is.null(plotPlateArgs$sdcol))
       plotPlateArgs$sdcol = brewer.pal(9, "YlOrRd")
-    if(is.null(plotPlateArgs$sdrange))
-      plotPlateArgs$sdrange=c(0, quantile(psd, 0.95, na.rm=TRUE))
     if(is.null(plotPlateArgs$xcol))
       plotPlateArgs$xcol=rev(brewer.pal(9, "RdBu"))
-    if(is.null(plotPlateArgs$xrange))
-      plotPlateArgs$xrange=quantile(x, c(0.025, 0.975), na.rm=TRUE)
 
-    if(!all(is.na(psd))) {
-      makePlot(file.path(basePath, subPath), con=con,
+## set this argument as a list with the same length as the number of channels
+    if(is.null(plotPlateArgs$xrange)) { 
+	plotPlateArgs$xrange = list()
+        length(plotPlateArgs$xrange)=nrChannel} else {
+        if  (!is.list(plotPlateArgs$xrange)) {
+          plotPlateArgs$xrange=list(plotPlateArgs$xrange)
+	  length(plotPlateArgs$xrange)=nrChannel} }
+ 
+## set this argument as a list with the same length as the number of channels
+     if(is.null(plotPlateArgs$sdrange)) {
+        plotPlateArgs$sdrange = list()
+        length(plotPlateArgs$sdrange) = nrChannel } else {
+     if (!is.list(plotPlateArgs$sdrange)) {     plotPlateArgs$sdrange=list(plotPlateArgs$sdrange)
+     length(plotPlateArgs$sdrange)=nrChannel } }
+
+
+    oldcount = count
+
+
+    for (ch in 1:nrChannel) {
+    count = oldcount
+# plot global title
+    plotTable[count+1, ch+1] = "<H5 align=center><FONT color=#494F8A>PLATE PLOT(S)</FONT></H5>\n"
+
+# plot title
+    plotTable[count+2, 1] = "<H5 align=left>Standard deviation across replicates</H5>\n"
+
+## platePlot of sd
+
+    psd = apply(x[,,,ch,drop=FALSE], 1, sd, na.rm=TRUE)
+
+     if(!all(is.na(psd))){
+
+    if(is.null(plotPlateArgs$sdrange[[ch]])) plotPlateArgs$sdrange[[ch]]=c(0, quantile(psd, 0.95, na.rm=TRUE))
+
+    makePlot(file.path(basePath, subPath), con=con,
                name=sprintf("ppsd_Channel%d",ch), w=plsiz, h=plsiz*0.66, fun = function() {
                  plotPlate(psd, nrow=pdim["nrow"], ncol=pdim["ncol"], na.action="xout",
                            main="between replicate standard deviations",
                            col=plotPlateArgs$sdcol,
-                           xrange=plotPlateArgs$sdrange)
+                           xrange=plotPlateArgs$sdrange[[ch]])
                }, print=FALSE)
-    plotTable[count+1, ch] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("ppsd_Channel%d.pdf", ch), sprintf("ppsd_Channel%d.png", ch))} else {plotTable[count+1,ch] = sprintf("<CENTER>%d replicate(s): plate plot of 'between replicates standard deviations' omitted</CENTER>\n", nrRep)}
-    count = count + 1
+    plotTable[count+2, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("ppsd_Channel%d.pdf", ch), sprintf("ppsd_Channel%d.png", ch))
+        } else { plotTable[count+2, ch+1] = sprintf("<CENTER>%d replicate(s): plate plot omitted</CENTER>\n", nrRep)}
 
+    count = count + 2
     ## platePlot of intensities
     ## we assume that a value of 1 corresponds 
+
       for (r in 1:maxRep) {
+       plotTable[count+1, 1] = sprintf("<H4 align=left>Replicate %d</H4>\n", as.integer(r))
        if (r %in% whHasData[[ch]]){
-         makePlot(file.path(basePath, subPath), con=con,
+
+         if(is.null(plotPlateArgs$xrange[[ch]])) plotPlateArgs$xrange[[ch]]=quantile(x[,,,ch], c(0.025, 0.975), na.rm=TRUE)
+
+
+      makePlot(file.path(basePath, subPath), con=con,
                name=sprintf("pp_Channel%d_%d",ch,r), w=plsiz, h=plsiz*0.66, fun = function() {
                  plotPlate(x[,,r,ch], nrow=pdim["nrow"], ncol=pdim["ncol"], na.action="xout",
                            main=sprintf("intensities for replicate %d", r),
                            col=plotPlateArgs$xcol,
-                           xrange=plotPlateArgs$xrange)
+                           xrange=plotPlateArgs$xrange[[ch]])
                }, print=FALSE)
-          plotTable[count+1,ch] =  sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("pp_Channel%d_%d.pdf",ch,r), sprintf("pp_Channel%d_%d.png",ch,r))
-          } else {plotTable[count + 1, ch] = sprintf("<CENTER>Replicate %d is missing</CENTER>\n", r)}
+          plotTable[count+1,ch+1] =  sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER>\n", sprintf("pp_Channel%d_%d.pdf",ch,r), sprintf("pp_Channel%d_%d.png",ch,r))
+          } else {
+          plotTable[count + 1, ch+1] = sprintf("<CENTER>Replicate %d is missing</CENTER>\n", r)}
       count = count+1
-    }
-    } # if plot plates
-} # for channel
+    } # maxRep
+ } # channel
+ } # plot plates
+
 
 	
 	## include also a "channel 2 vs channel 1" plot if the number of channels is 2
@@ -257,17 +305,17 @@ length(mtt) = maxRep
 
   mtt[[r]][is.na(mtt[[r]])]=4 }
 
-# cat("<CENTER>\n", file=con)
-# cat("<TABLE><TR>", paste(sprintf("<TH>%s</TH>", names(wellCount)), collapse=""),"</TR>\n", sep="", file=con)
-# for(i in 1:2) cat("<TR>", paste(sprintf("<TD align=center>%s</TD>", wellCount[i,]), collapse=""), "</TR>\n", sep="", file=con)
-#   cat("</TABLE>\n", file=con)
-#   cat("</CENTER>\n", file=con)
-
 
 plotTable$Channel2vs1 = ""
 
+## plot title
+plotTable[3, 4] = "<H5 align=center><FONT color=#494F8A>SCATTERPLOT BETWEEN CHANNELS</FONT></H5>\n"
+
 for (r in 1:maxRep) {
+
 if ( (r %in% whHasData[[1]]) & (r %in% whHasData[[2]]) ) {
+# color legend:
+wellLeg = paste(sprintf("<CENTER>%s</CENTER><BR>\n", wellCount[1,r]), sprintf("<CENTER><em>Color legend: </em> %s</CENTER><BR>\n", wellCount[2,r]), collapse="")
 
 ## scatterplot between channels
     makePlot(file.path(basePath, subPath), con=con,
@@ -278,12 +326,13 @@ if ( (r %in% whHasData[[1]]) & (r %in% whHasData[[2]]) ) {
            ylim=ylim, xlab="Channel 1", ylab="Channel 2", col=wellTypeColor[mtt[[r]]])
       abline(a=0, b=1, col="lightblue")
     }, print=FALSE)
-plotTable[r, 3] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("scp_Rep%d.pdf", r), sprintf("scp_Rep%d.png", r)) 
+plotTable[r+3, 4] = sprintf("<CENTER>%s</CENTER><CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER>\n", wellLeg, sprintf("scp_Rep%d.pdf", r), sprintf("scp_Rep%d.png", r)) 
   } else {
-plotTable[r, 3] = sprintf("<CENTER>Replicate %d is missing in one of the channels: scatterplot omitted</CENTER>\n", r)
+plotTable[r+3, 4] = sprintf("<CENTER>Replicate %d is missing in one of the channels: scatterplot omitted</CENTER>\n", r)
   }
 } }
 
+plotTable[is.na(plotTable)] = ""
 
   writeHTMLtable4plots(plotTable, con=con)
   writetail(con)
