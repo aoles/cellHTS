@@ -96,7 +96,7 @@ legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("blue
 
 controlsplot = function(xpos, xneg, ppos, pneg,...) {
 ylim = range(c(xpos,xneg), na.rm=TRUE)
-ylim = sign(ylim)*1.15*abs(ylim)
+if (prod(ylim)<0) ylim = sign(ylim)*1.15*abs(ylim) else ylim = c(0.85*ylim[1], 1.15*ylim[2])
 plot(ppos, xpos, pch=16, cex=0.5, ylim=ylim, xlab="Plate", ylab="", col="blue", xaxt="n", ...)
 points(pneg, xneg, pch=16, cex=0.5, col="red")
 legend("top",legend =c("'pos' controls", "'neg' controls"), col=c("blue","red"),
