@@ -249,4 +249,5 @@ for (ch in 1:trueNrCh) out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch
              fun = function() do.call("imageScreen", args=append(list(x=x), imageScreenArgs)))
   }
   writetail(con)
+  return(outdir)
 }

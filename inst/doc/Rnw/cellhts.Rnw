@@ -4,6 +4,15 @@
 
 \documentclass[11pt]{article}
 \usepackage{amsmath}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.75}
+\usepackage[%
+baseurl={http://www.bioconductor.org},%
+pdftitle={End-to-end analysis of cell-based screens},%
+pdfauthor={Wolfgang Huber},%
+pdfsubject={cellHTS},%
+pdfkeywords={Bioconductor},%
+pagebackref,bookmarks,colorlinks,linkcolor=darkblue,citecolor=darkblue,%
+pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 
 \newcommand{\Robject}[1]{\texttt{#1}}
 \newcommand{\Rpackage}[1]{\textit{#1}}
@@ -29,12 +38,13 @@
 \maketitle
 \tableofcontents
 
-
-\section{Introduction}
+\section{Introduction and Scope}
 This is a technical report that demonstrates the use of the
-\Rpackage{cellHTS} package. Its scope is a complete basic analysis of
-a cell-based high-throughput screen (HTS), from raw intensity readings
-to an annotated hit list.
+\Rpackage{cellHTS} package. It accompanies the paper \textit{Analysis
+of cell-based RNAi screens} by Michael Boutros, Ligia Bras and
+Wolfgang Huber.  This report explains all the steps necessary to run a
+complete analysis of a cell-based high-throughput screen (HTS), from
+raw intensity readings to an annotated hit list.
 
 This text has been produced as a reproducible
 document~\cite{Gentleman2004RepRes}. It contains the actual computer
@@ -44,25 +54,17 @@ computer instructions are given in the language R, thus, in order to
 reproduce the computations shown here, you will need an installation
 of R (version 2.2 or greater) together with the package
 \Rpackage{cellHTS} and a number of other add-on packages.
-First, we load the required libraries.
+First, we load the package.
 %
 <<setup1, results=hide>>=
 library("cellHTS")
-library("xtable")
-library("vsn")
-library("biomaRt")
-library("Category")
-library("GO")
-library("annotate")
 @ 
 %
 <<setup2, echo=FALSE, results=hide>>=
-## package versions
-## this for debugging:
+## for debugging:
 options(error=recover)
-
-## this for software development, when we do not want to install 
-##    the package after each minor change:
+## for software development, when we do not want to install 
+## the package after each minor change:
 ##   for(f in dir("~/huber/projects/Rpacks/cellHTS/R", full.names=TRUE, pattern=".R$"))source(f)
 @ 
 %
@@ -72,12 +74,12 @@ options(error=recover)
 %------------------------------------------------------------
 We consider a cell-based screen that was conducted in microtiter plate
 format, where a library of double-stranded RNAs was used to target the
-corresponding genes in cultured \textit{Drosophila} $K_{c167}$ 
+corresponding genes in cultured \textit{Drosophila} $Kc_{167}$ 
 cells~\cite{Boutros2004}. Each of the wells in the plates contains either a
 gene-specific probe, a control, or it can be empty. 
 The experiments were done in duplicate, and the viability of the cells after
 treatment was recorded by a plate reader measuring luciferase activity, which
-is indicative of ATP levels. Although this example data corresponds to a
+is indicative of ATP levels. Although this set of example data corresponds to a
 single-channel screening assay, the \Rpackage{cellHTS} package can also 
 deal with cases where there are readings from more color channels, corresponding 
 to different reporters.
@@ -90,10 +92,12 @@ plate list file are shown in Table~\ref{tab:platelist}.
 \input{cellhts-platelist}
 
 The first step of the analysis is to read the plate list file, to read
-all the intensity files, and to assemble the data into one
-comprehensive table that is suitable for subsequent analyses.  We now
-demonstrate the R instructions for this step. We define the path where
-the input files can be found.
+all the intensity files, and to assemble the data into a single R
+object that is suitable for subsequent analyses.  The main component
+of that object is one big table with the intensity readings of all
+plates, channels, and replicates. We demonstrate the R instructions
+for this step. First we define the path where the input files can be
+found.
 %
 <<dataPath>>=
 experimentName = "KcViab"
@@ -102,10 +106,12 @@ dataPath=system.file(experimentName, package="cellHTS")
 %
 In this example, the input files are in the
 \Robject{\Sexpr{experimentName}} directory of the \Rpackage{cellHTS}
-package. Modify this accordingly to read your own data. We show the
-names of 12 files from this directory
+package. To read your own data, modify \Robject{dataPath} to point to
+the directory where they reside. We show the names of 12 files from
+our example directory:
 %
 <<dirDataPath>>=
+dataPath
 rev(dir(dataPath))[1:12]
 @ 
 %
@@ -152,15 +158,16 @@ specified to direct the output to another directory.
 writeReport(x)
 @ 
 <<writeReport1Do, echo=FALSE, results=hide>>=
-writeReport(x, force=TRUE)
+out = writeReport(x, force=TRUE)
 @ 
 %
-After this function has finished, the index page of the report will be
-in the file \Robject{\Sexpr{file.path(x$name, "index.html")}}, and you
-can view it by directing a web browser to it.
+It can take a while to run this function, since it writes a large number
+of graphics files. After this function has finished, the index page of
+the report will be in the file \Sexpr{file.path(out,"index.html")}, 
+and you can view it by directing a web browser to it.
 %
 <<browseReport1, eval=FALSE>>=
-browseURL(file.path(x$name, "index.html"))
+browseURL(file.path(out, "index.html"))
 @ 
 
 %------------------------------------------------------------
@@ -288,6 +295,8 @@ after which the normalized intensities are stored in the slot
 
 It is easy to define alternative normalization methods, for example,
 to adjust for additional experimental biases besides the plate effect.
+You might want to start by taking the source code of
+\Rfunction{normalizePlateMedian} as a template.
 
 %------------------------------------------------------------
 \section{Scoring}
@@ -372,7 +381,40 @@ will be in the release 1.8.
 library("biomaRt")
 stopifnot(package.version("biomaRt") >= package_version("1.5.3"))
 @ 
-%
+%--------------------------- 
+\subsubsection{Installation}
+%--------------------------- 
+The installation of the biomaRt can be a little bit tricky, since it
+relies on the two packages \Rpackage{RCurl} and \Rpackage{XML}, which
+in turn rely on the system libraries \textit{libcurl} and
+\textit{libxml2}. If you are installing the precompiled R packages
+(for example, this is what most people do on Windows), then you need
+to make sure that the system libraries on your computer are compatible
+with those where the R packages were compiled, and that they are
+found. If you are installing the R packages from source, then you need
+to make sure that the library header files are available and that the
+headers as well as the actual library is found by the compiler and
+linker. Please refer to the \textit{Writing R Extensions} manual and
+to the FAQ lists on www.r-project.org.
+
+Naturally, you will want to explore the \Rpackage{cellHTS} package and
+see whether it is worthwhile before facing an extensive installation
+struggle, hence we have made available the result of the annotation
+with \Rpackage{biomaRt}, described below, as a precomputed R object:
+<<>>=
+data("bdgp42biomart")
+x$geneAnno = bdgp42biomart
+@ 
+
+%------------------------------------------------------------------
+\subsubsection{Using biomaRt to annotate the target genes online}
+%------------------------------------------------------------------
+The commands in this section are optional, you do not need them to
+complete this example analysis. They demonstrate how to obtain the
+dataframe \Robject{bdgp42biomart} that we have loaded above by
+querying the online webservice \textit{BioMart} and through it the
+Ensembl genome annotation database~\cite{Ensembl2006}.
+
 Let's check which BioMart databases it currently covers:
 %
 <<listMarts>>=
@@ -461,7 +503,7 @@ x$geneAnno = cbind(x$geneAnno,
 %
 
 %------------------------------------------------------------
-\subsection{Report}
+\section{Report}
 %------------------------------------------------------------
 We have now completed the analysis tasks: the dataset has been read, 
 configured, normalized, scored, and annotated:

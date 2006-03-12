@@ -45,9 +45,10 @@ writeReport(x, outdir=x$name, force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=
 
 \value{
   The function is called for its side-effect.
+  It returns the character \code{outdir} with the path to the output directory.
 }
 
-\author{Wolfgang Huber \email{huber@ebi.ac.uk}, Ligia Bras \email{ligia@ebi.ac.uk}}
+\author{Ligia Bras \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 
 \examples{
  datadir = system.file("KcViabSmall", package = "cellHTS")
