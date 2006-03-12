@@ -4,6 +4,7 @@ export("readPlateData",
        "normalizePlateMedian",
        "normalizeRatio",
        "calcZscore",
+       "oneRowPerId",
        "summarizeZscore",
        "writeReport",
        "ROC")

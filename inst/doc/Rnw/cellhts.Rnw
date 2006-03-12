@@ -4,6 +4,7 @@
 
 \documentclass[11pt]{article}
 \usepackage{amsmath}
+\usepackage{color}
 \definecolor{darkblue}{rgb}{0.0,0.0,0.75}
 \usepackage[%
 baseurl={http://www.bioconductor.org},%
@@ -38,7 +39,7 @@ pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 \maketitle
 \tableofcontents
 
-\section{Introduction and Scope}
+\section{Introduction}
 This is a technical report that demonstrates the use of the
 \Rpackage{cellHTS} package. It accompanies the paper \textit{Analysis
 of cell-based RNAi screens} by Michael Boutros, Ligia Bras and
@@ -53,7 +54,14 @@ all results, including the figures and tables that are shown here. The
 computer instructions are given in the language R, thus, in order to
 reproduce the computations shown here, you will need an installation
 of R (version 2.2 or greater) together with the package
-\Rpackage{cellHTS} and a number of other add-on packages.
+\Rpackage{cellHTS} and some other add-on packages.
+
+To reproduce the computations shown here, you do not need to type them
+or copy-paste them from the PDF file; rather, you can take the file
+\textit{cellhts.Rnw} in the \textit{doc/Rnw} directory of the package,
+open it in a text editor, run it using the R command
+\Rfunction{Sweave}, and modify it to your needs.
+
 First, we load the package.
 %
 <<setup1, results=hide>>=
@@ -379,6 +387,8 @@ will be in the release 1.8.
 %
 <<biomaRt, results=hide>>=
 library("biomaRt")
+@ 
+<<biomaRtversioncheck,echo=FALSE,results=hide>>=
 stopifnot(package.version("biomaRt") >= package_version("1.5.3"))
 @ 
 %--------------------------- 
@@ -390,45 +400,48 @@ in turn rely on the system libraries \textit{libcurl} and
 \textit{libxml2}. If you are installing the precompiled R packages
 (for example, this is what most people do on Windows), then you need
 to make sure that the system libraries on your computer are compatible
-with those where the R packages were compiled, and that they are
-found. If you are installing the R packages from source, then you need
-to make sure that the library header files are available and that the
-headers as well as the actual library is found by the compiler and
-linker. Please refer to the \textit{Writing R Extensions} manual and
-to the FAQ lists on www.r-project.org.
+with those on the computer where the R packages were compiled, and
+that they are found. If you are installing the R packages from source,
+then you need to make sure that the library header files are available
+and that the headers as well as the actual library is found by the
+compiler and linker. Please refer to the \textit{Writing R Extensions}
+manual and to the FAQ lists on www.r-project.org.
 
-Naturally, you will want to explore the \Rpackage{cellHTS} package and
-see whether it is worthwhile before facing an extensive installation
-struggle, hence we have made available the result of the annotation
-with \Rpackage{biomaRt}, described below, as a precomputed R object:
+Naturally, before facing an extensive installation struggle, you will
+want to explore the \Rpackage{cellHTS} package and see whether it is
+worthwhile. We have made available the result of the annotation with
+\Rpackage{biomaRt}, described below, as a precomputed R object:
 <<>>=
-data("bdgp42biomart")
-x$geneAnno = bdgp42biomart
+data("bdgpbiomart")
+x$geneAnno = bdgpbiomart
 @ 
 
 %------------------------------------------------------------------
 \subsubsection{Using biomaRt to annotate the target genes online}
 %------------------------------------------------------------------
-The commands in this section are optional, you do not need them to
-complete this example analysis. They demonstrate how to obtain the
-dataframe \Robject{bdgp42biomart} that we have loaded above by
+The commands in this section are optional, you can move on to
+Section~\ref{sec:report} if you do not have the \Rpackage{biomaRt} package or do
+not want to use it. In the remainder of this section, we will
+demonstrate how to obtain the dataframe \Robject{bdgpbiomart} by
 querying the online webservice \textit{BioMart} and through it the
 Ensembl genome annotation database~\cite{Ensembl2006}.
 
-Let's check which BioMart databases it currently covers:
+By default, the \Rpackage{biomaRt} package will query the webservice
+at http://www.ebi.ac.uk/biomart/martservice.  Let's check
+which BioMart databases it covers:
 %
 <<listMarts>>=
 listMarts()
 @
 %
-In this example, we will use the Ensembl database~\cite{Ensembl2006}, from which we select the
-\textit{D. melanogaster} dataset.
+In this example, we use the Ensembl database~\cite{Ensembl2006}, from
+which we select the \textit{D. melanogaster} dataset.
 %
 <<useMart, results=hide>>=
 mart = useMart("ensembl")
 @
 % 
-<<listDatasets, results=hide>>=
+<<listDatasets>>=
 listDatasets(mart = mart)
 @ 
 <<checkDatasets, results=hide, echo=FALSE>>=
@@ -439,71 +452,76 @@ stopifnot("dmelanogaster_gene_ensembl" %in% listDatasets(mart = mart)[,1])
 mart = useDataset("dmelanogaster_gene_ensembl", mart)
 @ 
 %
-We can query the available gene attributes and filters for the selected dataset using the following functions.
+We can query the available gene attributes and filters for the
+selected dataset using the following functions.
 <<>>=
 attrs = listAttributes(mart)
 filts = listFilters(mart)
 @
 %
 In the BioMart system~\cite{Kasprzyk2004}, a \emph{filter} is a
-property that can be used to select a gene or a set of genes (the
+property that can be used to select a gene or a set of genes (like the
 ``where'' clause in an SQL query), and an \emph{attribute} is a
-property that can be queried (the ``select'' clause in an SQL
+property that can be queried (like the ``select'' clause in an SQL
 query). We use the \Rfunction{getBM} function of the package
-\Rpackage{biomaRt} to obtain the gene annotation from Ensembl:
+\Rpackage{biomaRt} to obtain the gene annotation from Ensembl.
+%
+<<myGetBM>>=
+myGetBM = function(att)
+  getBM(attributes=c("gene_stable_id", att), 
+        filter="gene_stable_id", 
+        values=unique(x$geneAnno$GeneID), mart=mart)
+@ 
+% 
+For performance reasons, we split up our query in three subqueries,
+which corresponds to different areas in the BioMart schema, and then
+assemble the results together in R.  Alternatively, it would also be
+possible to submit a single query for all of the attributes, but then
+the result table will be blown up enormously due to the 1:many mapping
+especially from gene ID to GO categories~\cite{GO}.
 %
 <<getBM>>=
-myGetBM = function(att)
-  getBM(attributes=att, filter="gene_stable_id", 
-        values=unique(x$geneAnno$GeneID), mart=mart)
-bm1 = myGetBM(c("gene_stable_id", "chr_name", "chrom_start", "chrom_end", "description"))
-bm2 = myGetBM(c("gene_stable_id", "flybase_name"))
-bm3 = myGetBM(c("gene_stable_id", "go_id", "go_description"))
-##
-unique(setdiff(x$geneAnno$GeneID, bm1$gene_stable_id)) 
-table(table(bm1$gene_stable_id))
-table(table(bm2$gene_stable_id))
-table(table(bm2$gene_stable_id))
+bm1 = myGetBM(c("chr_name", "chrom_start", "chrom_end", "description"))
+bm2 = myGetBM(c("flybase_name"))
+bm3 = myGetBM(c("go_id", "go_description"))
 @ 
 %
-In the code above, although it would be possible to run a single query
-for all of the attributes, we run three separate queries, in order to
-avoid enormous blow-up of the result table due to the 1:many mapping
-especially from gene ID to GO categories~\cite{GO}.  Below, we add the results
+There are only a few CG-identifiers for which we were not able to
+obtain chromosomal locations: 
+%
+<<setDiff>>=
+unique(setdiff(x$geneAnno$GeneID,bm1$gene_stable_id)) 
+## table(table(bm1$gene_stable_id))
+## table(table(bm2$gene_stable_id)) 
+## table(table(bm2$gene_stable_id))
+@ 
+%
+Below, we add the results
 to the dataframe \Robject{x\$geneAnno}. Since the tables \Robject{bm1},
 \Robject{bm2}, and \Robject{bm3} contain zero, one or several rows for
 each gene ID, but in \Robject{x\$geneAnno} we want exactly one row per
-gene ID, the function \Rfunction{format} does the somewhat tedious
+gene ID, the function \Rfunction{oneRowPerId} does the somewhat tedious
 task of reformatting the tables: multiple entries are collapsed
 into a single comma-separated string, and empty rows are inserted
 where necessary.
 %
 <<addBMdata>>=
-format = function(ids, x) {
-  stopifnot(all(x[,1] %in% ids))
-  d = lapply(2:ncol(x), function(i) {
-    r  = character(length(ids))
-    v  = sapply(split(x[,i], x[,1]), unique)
-    v  = sapply(v, paste, collapse=", ")
-   # mt = match(names(v), ids)
-   # r[mt] = v
-    mt = match(ids, names(v))
-    r[!is.na(mt)] = v[mt[!is.na(mt)]]
-    r[r==""] = NA
-    return(I(r))
-  })
-  names(d) = colnames(x)[2:ncol(x)]
-  res = do.call("data.frame", d)
-}
-x$geneAnno = cbind(x$geneAnno,
-   format(x$geneAnno$GeneID, bm1),
-   format(x$geneAnno$GeneID, bm2),
-   format(x$geneAnno$GeneID, bm3))
+id = x$geneAnno$GeneID
+bmAll = cbind(
+   oneRowPerId(bm1, id),
+   oneRowPerId(bm2, id),
+   oneRowPerId(bm3, id)) 
+identical(bdgpbiomart[, 5:11],  bmAll)
+@ 
+%
+<<check,echo=FALSE,results=hide>>=
+stopifnot(identical(bdgpbiomart[, 5:11], bmAll))
 @ 
 %
 
 %------------------------------------------------------------
 \section{Report}
+\label{sec:report}
 %------------------------------------------------------------
 We have now completed the analysis tasks: the dataset has been read, 
 configured, normalized, scored, and annotated:
@@ -683,6 +701,7 @@ original scale and logarithmic scale is one of taste, rather
 than necessity.
 %
 <<transfplots, fig=TRUE, include=FALSE, width=6.5, height=9>>=
+library("vsn")
 par(mfcol=c(3,2))
 myPlots=function(z,...) {
   hist(z[,1], 100, col="lightblue", xlab="",...)
