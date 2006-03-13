@@ -311,7 +311,7 @@ You might want to start by taking the source code of
 \label{sec:scoring}
 %------------------------------------------------------------
 We can now score the genes. For this, we calculate the $z$-score for 
-each gene in each replicate $j$:
+each probe in each replicate $j$:
 \begin{eqnarray}
 z_{kj} &=& -\frac{x'_{kj}-\hat{\mu_j}}{\hat{\sigma_j}} \label{eq:defz}
 \end{eqnarray}
@@ -329,7 +329,7 @@ For an activator assay, the minus sign is omitted. Thus, in both type of assays,
 large positive values of $z_{kj}$ will correspond to a strong effect.
 
 To obtain a single $z$-score value per probe, we take
-the minimum of the two $z$-scores from the two replicates:
+the minimum of the $z$-scores from the two replicates:
 \begin{eqnarray}
 z_{k} &=&  \min_{j}z_{kj}. \label{eq:scoresSummary}\\
 \end{eqnarray}
@@ -341,32 +341,27 @@ to be high. Depending on the intended stringency of the analysis,
 other plausible choices of summary
 function are the mean and the maximum. 
 %
-Since we wnat to produce the HTML quality reports using the scores values for
-each replicate, we will call again the \Rfunction{normalizePlateMedian}, and
-choose the option to score the replicates:
+Since we want to produce the HTML quality reports (see
+Section~\ref{sec:report}) using the normalized and
+scored replicate values ($z_{kj}$), we will call again the
+\Rfunction{normalizePlateMedian}, and choose the option to score 
+the replicates after scaling by the plate median\footnote{The
+  \Rpackage{cellHTS} also provides a function called \Rfunction{calcZscore} that
+first summarizes the normalized replicate values, and then calculates the 
+$z$-scores. However, in the present example, we prefer to have the normalized and scored
+replicates in \Robject{x\$xnorm}, and use them for constructing the quality report.}:
 %
 <<normalizePlateMedianandScore>>=
 x = normalizePlateMedian(x, zscore="-") 
 @ 
 %
-Note that this will replace the content in \Robject{x\$xnorm} by these scored
-normalized values z_{kj}. 
-
-% 
-
-% Mention that the final vector with ``one-score per probe'' is saved into \Robject{x\$score}.
-
-
-In the package, we also have a function called \Rfunction{calcZscore} that
-calculates the $z$-scores by first summarizing the normalized replicate
-values. However, we find more useful to have the normalized and scored
-replicates in \Robject{x\$xnorm}, in order to construct the quality report
-using these values.
-
-
+Note that this will replace the content in \Robject{x\$xnorm} by the scored
+replicate values $z_{kj}$.
+Using the above function, we summarize the scored replicates, obtaining a single $z$-score value per 
+probe that will be stored in the slot \Robject{x\$score}:
 %
-<<calcZscore>>=
-x = calcZscore(x, sign="-", summary="min")
+<<summarizeZscore>>=
+x = summarizeZscore(x, summary="min")
 @ 
 % 
 Boxplots of the $z$-scores for the different types of probes are shown
@@ -588,13 +583,17 @@ positive and negative controls~\cite{Oldenburg1999}, the boxplots with
 raw and normalized intensities for the different plates, and the
 screen-wide plot with the $z$-scores in every well position of each
 plate. 
-It should be noted that the per-plate and per-experiment quality reports are constructed based on the content of
-\Robject{x\$xnorm}, if it is present in the \Robject{x} object. Otherwise, it will use the content 
-given in the slot \Robject{xraw}. Although we have called the former slot, \Robject{xnorm}, it can
-contain already scored replicate data (as shown in Section~\ref{sec:scoring}),
-or, in the case of dual-channel experiments, the ratio between two channel
-intensities, etc. The main point that we want to give is that it should
-contain the data that you want to visualize in the HTML quality report.
+It should be noted that the per-plate and per-experiment 
+quality reports are constructed based on the content of
+\Robject{x\$xnorm}, if it is present in the \Robject{x} object. 
+Otherwise, it uses the content 
+given in the slot \Robject{x\$xraw}. 
+Although we have called the former slot, \Robject{xnorm}, it can
+contain already scored replicate data (as in the present case; see 
+Section~\ref{sec:scoring}), or, in the case of dual-channel experiments, 
+the ratio between the intensities in two different channels, etc. 
+The main point that we want to highlight is that \Robject{x\$xnorm} should
+contain the data that we want to visualize in the HTML quality reports.
 
 At this point we are finished with the basic analysis of the
 screen. As one example for how one could continue to further mine the
