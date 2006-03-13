@@ -59,7 +59,7 @@ writeReport(x, outdir=x$name, force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=
  x = configure(x, confFile, logFile, descripFile)
  writeReport(x)
  x = normalizePlateMedian(x)
- x = calcZscore(x, summary="max", sign="-")
+ x = calcZscore(x, sign="-", summary="min")
  writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs=list(zrange=c(-4,4)))
 }
 

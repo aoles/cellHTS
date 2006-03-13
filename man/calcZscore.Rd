@@ -8,30 +8,25 @@ Currently this function is implemented only for single-color data.
  
 }
 \usage{
-calcZscore(x, summary="mean", sign="+")
+calcZscore(x, sign="+", summary="mean")
 }
 \arguments{
   \item{x}{a cellHTS object that has already been normalized (see details).}
-  \item{summary}{a character string indicating how to summarize between replicated measurements. One of "mean" (default), "max", or "min" can be used (see details).}
   \item{sign}{a character string, either "+" for activator assays or "-"
     for inhibitor assays.}
+  \item{summary}{a character string indicating how to summarize between replicated measurements. One of "mean" (default), "max", or "min" can be used (see details).}
 }
 \details{
+ The argument \code{sign} allows to take into consideration the type of the assay. In an activation type assay, an effect originates a strong signal, whereas in an inhibition type assay, an effect will result in a signal decrease. Therefore, if \code{sign} is set to  "-" (inhibitor assays), the symmetric of the intensity values is taken, so that in both type of assays, large positive values will correspond to a strong effect. 
  If \code{summary} is \code{mean}, the average of replicate intensities
  is considered; if it is set to \code{max}, then the maximum of replicate
- intensities is taken (conservative), while if its value is set to
- \code{min}, the minimum is considered, instead.
+ intensities is taken, while if its value is set to
+ \code{min}, the minimum is considered, instead (conservative).
 
- After summarizing between replicate normalized measurements, a robust
- z-score is determined for each plate and each well by subtracting the
+ After summarizing between replicate normalized measurements (corrected by the \code{sign} argument), a robust z-score is determined for each plate and each well by subtracting the
  overall median and dividing by the overall mad. The overall median and
  mad are taken by considering the distribution of intensities (over all plates) 
 	in the wells whose content is annotated as \code{sample}. 
-
- The argument \code{sign} allows to take into consideration the type of the assay when determining the z-scores.
- In an activation type assay, an effect originates a strong signal, whereas in an inhibition type assay, an effect will result in a signal decrease. 
- Therefore, if \code{sign} is set to  "-" (inhibitor assays), the symmetric of the score values is taken as the final z-scores, so that in both type of assays, 
- large positive z-scores will correspond to a strong effect.
 }
 
 \value{
@@ -55,6 +50,6 @@ calcZscore(x, summary="mean", sign="+")
  descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
  x = normalizePlateMedian(x)
- x = calcZscore(x, summary="max", sign="-")
+ x = calcZscore(x, sign="-", summary="min")
 }
 \keyword{manip}

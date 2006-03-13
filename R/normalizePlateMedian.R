@@ -1,4 +1,4 @@
-normalizePlateMedian = function(x, transform, zscore=NULL){
+normalizePlateMedian = function(x, transform, zscore){
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
   
@@ -15,7 +15,7 @@ normalizePlateMedian = function(x, transform, zscore=NULL){
     xn = transform(xn)
 
 # calculates the z-score for each replicate separately
-  if(!is.null(zscore)) {
+  if(!missing(zscore)) {
   samps = (x$wellAnno=="sample")
   sg = switch(zscore,
     "+" = 1,

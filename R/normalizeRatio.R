@@ -1,4 +1,4 @@
-normalizeRatio = function(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore=NULL){
+normalizeRatio = function(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore){
 
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
@@ -27,7 +27,7 @@ normalizeRatio = function(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore=N
 
 
 ## calculates the z-score for each replicate separately
-  if(!is.null(zscore)) {
+  if(!missing(zscore)) {
   samps = (x$wellAnno=="sample")
   sg = switch(zscore,
     "+" = 1,

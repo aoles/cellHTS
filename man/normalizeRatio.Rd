@@ -6,7 +6,7 @@
   Plate median scaling may also be performed.
 }
 \usage{
-normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore=NULL)
+normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been configured (see details).}
@@ -18,7 +18,7 @@ normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore=NULL)
     scaling should be performed after applying \code{fun} (see details).
     The default is \code{scmedian = FALSE}.}
   \item{zscore}{indicates if the z-scores should be determined after
-    normalization and transformation. If set to \code{NULL} (default),
+    normalization and transformation. If missing (default),
     the data will not be scored. Otherwise, it should be a character
     string, either "+" for activator assays or "-" for inhibitor assays.}
 }

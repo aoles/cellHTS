@@ -6,16 +6,14 @@
   Furthermore, a data transformation may also be performed.
 }
 \usage{
-normalizePlateMedian(x, transform, zscore=NULL)
+normalizePlateMedian(x, transform, zscore)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been configured (see details).}
   \item{transform}{a function that takes a numeric vector and returns a
     numeric vector of the same length; for example, the logarithm
     function \code{\link{log}}.}
-  \item{zscore}{indicates if the z-scores should be determined after normalization and transformation. If set to 
-    \code{NULL} (default), the data will not be scored. Otherwise, it should be a character string, either "+" for activator assays or "-"
-    for inhibitor assays.}
+  \item{zscore}{indicates if the z-scores should be determined after normalization and transformation. If missing (default), the data will not be scored. Otherwise, it should be a character string, either "+" for activator assays or "-" for inhibitor assays.}
 }
 
 \details{

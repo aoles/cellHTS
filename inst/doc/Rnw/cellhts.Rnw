@@ -313,30 +313,29 @@ You might want to start by taking the source code of
 We can now score the genes. For this, we summarize the replicate values 
 for each gene and calculate the $z$-score:
 \begin{eqnarray}
-y_k &=&  \max_{i} x'_{ki} \label{eq:replicatesSummary}\\
-z_k &=& -\frac{y_k-\hat{\mu}}{\hat{\sigma}}. \label{eq:defz}
+y_k &=&  \min_{i}\lbrace{-x'_{ki}}\rbrace \label{eq:replicatesSummary}\\
+z_k &=& \frac{y_k-\hat{\mu}}{\hat{\sigma}}. \label{eq:defz}
 \end{eqnarray}
-Here, the summary is taken over all replicates $i$ for gene $k$. In
-the case of the example data, we are looking at an inhibitor assay,
-where an effect results in a decrease of the signal. By using
-the maximum as the summary function in Equation
+Here, the summary is taken over all replicates $i$ for gene $k$. The 
+minus sign on the right hand side of Equation~\eqref{eq:replicatesSummary}
+reflects that, in the case of the example data, we are looking at an 
+inhibitor assay, where an effect results in a decrease of the signal. 
+For an activator assay, the minus sign is omitted. Thus, in both type of assays, large positive values of $y_k$ will correspond 
+to a strong effect. By using the minimun as the summary function in Equation
 \eqref{eq:replicatesSummary}, the analysis is particularly
-conservative: all replicate values have to be small in order for $y_k$
-to be small. Depending on the type of assay and the intended
+conservative: all replicate values have to be high in order for $y_k$
+to be high. Depending on the intended
 stringency of the analysis, other plausible choices of summary
-function are the mean and the minimum. 
-$\hat{\mu}$ and $\hat{\sigma}$ are the estimated mean and standard deviation
+function are the mean and the maximum. 
+In Equation~\eqref{eq:defz}, $\hat{\mu}$ and $\hat{\sigma}$ are the 
+estimated mean and standard deviation
 of the summarized values, $y_k$, annotated as \textit{sample}. 
 We use robust estimates for the mean and the standard deviation, 
-namely, the median for
-$\hat{\mu}$ and the median absolute deviation (mad) for $\hat{\sigma}$.
-The minus sign on the right hand side of Equation~\eqref{eq:defz}
-reflects that we are looking at an inhibitor assay: large positive
-values of $z$ correspond to a strong effect. For an activator assay,
-the minus sign is omitted.
+namely, the median for $\hat{\mu}$ and the median absolute deviation 
+(mad) for $\hat{\sigma}$.
 %
 <<calcZscore>>=
-x = calcZscore(x, summary="max", sign="-")
+x = calcZscore(x, sign="-", summary="min")
 @ 
 % 
 Boxplots of the $z$-scores for the different types of probes are shown
@@ -623,8 +622,9 @@ isEnriched = (acTtest<=1e-3) & (acMean>0.5)
 %
 A volcano plot of the $-\log_{10}$ of the $p$-value \Robject{acTtest} versus
 the per category mean $z$-score \Robject{acMean} is shown in
-Figure~\ref{cellhts-volcano}. The $p$-value is calculated from the 
-$t$-test against the null hypothesis $H_0: z=0$. 
+Figure~\ref{cellhts-volcano}. For a given category, the $p$-value is calculated from the 
+$t$-test against the null hypothesis that there is no difference between the mean
+$z$-score of all probes and the mean $z$-score of the probes in that category. 
 To select the enriched categories (\Robject{isEnriched}), we considered a significance
 level of $0.1\%$ for the $t$-test, and a per category mean $z$-score greater
 than $0.5$. This led to the \Sexpr{sum(isEnriched)} categories marked in red in
