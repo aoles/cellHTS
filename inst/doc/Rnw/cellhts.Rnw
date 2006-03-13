@@ -286,11 +286,11 @@ effects by dividing each value in each plate by the median of values
 in the plate:
 \begin{eqnarray} 
 x'_{ki} &=& \frac{x_{ki}}{M_i}\quad\quad\forall k,i\\
-M_i&=&\mathop{\operatorname{median}}_{m\in\,\mbox{\scriptsize samples}} x_{mi} 
+M_{i}&=&\mathop{\operatorname{median}}_{m\in\,\mbox{\scriptsize samples}} x_{mi} 
 \end{eqnarray}
 where $x_{ki}$ is the raw intensity for the $k$-th well in the $i$-th
-result file and $x'_{ki}$ is the normalized intensity. The median is calculated 
-across the wells annotated as \textit{sample} in the $i$-th result file.
+result file, and $x'_{ki}$ is the corresponding normalized intensity. 
+The median is calculated across the wells annotated as \textit{sample} in the $ij$-th result file.
 This is achieved by calling:
 %
 <<normalizePlateMedian>>=
@@ -310,29 +310,60 @@ You might want to start by taking the source code of
 \section{Scoring}
 \label{sec:scoring}
 %------------------------------------------------------------
-We can now score the genes. For this, we summarize the replicate values 
-for each gene and calculate the $z$-score:
+We can now score the genes. For this, we calculate the $z$-score for 
+each gene in each replicate $j$:
 \begin{eqnarray}
-y_k &=&  \min_{i}\lbrace{-x'_{ki}}\rbrace \label{eq:replicatesSummary}\\
-z_k &=& \frac{y_k-\hat{\mu}}{\hat{\sigma}}. \label{eq:defz}
+z_{kj} &=& -\frac{x'_{kj}-\hat{\mu_j}}{\hat{\sigma_j}} \label{eq:defz}
 \end{eqnarray}
-Here, the summary is taken over all replicates $i$ for gene $k$. The 
-minus sign on the right hand side of Equation~\eqref{eq:replicatesSummary}
+where $x'_{kj}$ is the normalized intensity for the $k$-th well in the
+$j$-th replicate, $\hat{\mu_j}$ and $\hat{\sigma_j}$ are the 
+estimated mean and standard deviation for the normalized values 
+annotated as \textit{sample} within all the plates of the $j$-th replicate.
+We use robust estimates for the mean and the standard deviation, 
+namely, the median for $\hat{\mu_j}$ and the median absolute deviation 
+(mad) for $\hat{\sigma_j}$.
+The minus sign on the right hand side of Equation~\eqref{eq:defz} 
 reflects that, in the case of the example data, we are looking at an 
 inhibitor assay, where an effect results in a decrease of the signal. 
-For an activator assay, the minus sign is omitted. Thus, in both type of assays, large positive values of $y_k$ will correspond 
-to a strong effect. By using the minimun as the summary function in Equation
-\eqref{eq:replicatesSummary}, the analysis is particularly
-conservative: all replicate values have to be high in order for $y_k$
-to be high. Depending on the intended
-stringency of the analysis, other plausible choices of summary
+For an activator assay, the minus sign is omitted. Thus, in both type of assays,
+large positive values of $z_{kj}$ will correspond to a strong effect.
+
+To obtain a single $z$-score value per probe, we take
+the minimum of the two $z$-scores from the two replicates:
+\begin{eqnarray}
+z_{k} &=&  \min_{j}z_{kj}. \label{eq:scoresSummary}\\
+\end{eqnarray}
+The summary is taken over all replicates $j$ for probe $k$.  
+By using the minimun as the summary function in Equation~\eqref{eq:scoresSummary}, 
+the analysis is particularly
+conservative: all replicate values have to be high in order for $z_{k}$
+to be high. Depending on the intended stringency of the analysis, 
+other plausible choices of summary
 function are the mean and the maximum. 
-In Equation~\eqref{eq:defz}, $\hat{\mu}$ and $\hat{\sigma}$ are the 
-estimated mean and standard deviation
-of the summarized values, $y_k$, annotated as \textit{sample}. 
-We use robust estimates for the mean and the standard deviation, 
-namely, the median for $\hat{\mu}$ and the median absolute deviation 
-(mad) for $\hat{\sigma}$.
+%
+Since we wnat to produce the HTML quality reports using the scores values for
+each replicate, we will call again the \Rfunction{normalizePlateMedian}, and
+choose the option to score the replicates:
+%
+<<normalizePlateMedianandScore>>=
+x = normalizePlateMedian(x, zscore="-") 
+@ 
+%
+Note that this will replace the content in \Robject{x\$xnorm} by these scored
+normalized values z_{kj}. 
+
+% 
+
+% Mention that the final vector with ``one-score per probe'' is saved into \Robject{x\$score}.
+
+
+In the package, we also have a function called \Rfunction{calcZscore} that
+calculates the $z$-scores by first summarizing the normalized replicate
+values. However, we find more useful to have the normalized and scored
+replicates in \Robject{x\$xnorm}, in order to construct the quality report
+using these values.
+
+
 %
 <<calcZscore>>=
 x = calcZscore(x, sign="-", summary="min")
@@ -556,7 +587,14 @@ $Z'$-factor determined for each experiment (replicate) using the
 positive and negative controls~\cite{Oldenburg1999}, the boxplots with
 raw and normalized intensities for the different plates, and the
 screen-wide plot with the $z$-scores in every well position of each
-plate.
+plate. 
+It should be noted that the per-plate and per-experiment quality reports are constructed based on the content of
+\Robject{x\$xnorm}, if it is present in the \Robject{x} object. Otherwise, it will use the content 
+given in the slot \Robject{xraw}. Although we have called the former slot, \Robject{xnorm}, it can
+contain already scored replicate data (as shown in Section~\ref{sec:scoring}),
+or, in the case of dual-channel experiments, the ratio between two channel
+intensities, etc. The main point that we want to give is that it should
+contain the data that you want to visualize in the HTML quality report.
 
 At this point we are finished with the basic analysis of the
 screen. As one example for how one could continue to further mine the
@@ -711,7 +749,9 @@ myPlots=function(z,...) {
 }
 dv = matrix(x$xnorm, nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
 myPlots(dv, main="untransformed")
-myPlots(log2(dv), main="log2")
+xlog = normalizePlateMedian(x, transform=log2, zscore="-")
+dvlog = matrix(xlog$xnorm, nrow=prod(dim(xlog$xnorm)[1:2]), ncol=dim(xlog$xnorm)[3])
+myPlots(dvlog, main="log2")
 @ 
 
 
