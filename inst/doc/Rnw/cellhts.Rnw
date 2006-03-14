@@ -290,7 +290,8 @@ M_{i}&=&\mathop{\operatorname{median}}_{m\in\,\mbox{\scriptsize samples}} x_{mi}
 \end{eqnarray}
 where $x_{ki}$ is the raw intensity for the $k$-th well in the $i$-th
 result file, and $x'_{ki}$ is the corresponding normalized intensity. 
-The median is calculated across the wells annotated as \textit{sample} in the $ij$-th result file.
+The median is calculated across the wells annotated as \textit{sample} in 
+the $i$-th result file.
 This is achieved by calling:
 %
 <<normalizePlateMedian>>=
@@ -331,9 +332,9 @@ large positive values of $z_{kj}$ will correspond to a strong effect.
 To obtain a single $z$-score value per probe, we take
 the minimum of the $z$-scores from the two replicates:
 \begin{eqnarray}
-z_{k} &=&  \min_{j}z_{kj}. \label{eq:scoresSummary}\\
+z_{k} &=&  \min_{j}z_{kj}. \label{eq:scoresSummary}
 \end{eqnarray}
-The summary is taken over all replicates $j$ for probe $k$.  
+The summary is taken over all replicates for probe $k$.  
 By using the minimun as the summary function in Equation~\eqref{eq:scoresSummary}, 
 the analysis is particularly
 conservative: all replicate values have to be high in order for $z_{k}$
@@ -346,10 +347,12 @@ Section~\ref{sec:report}) using the normalized and
 scored replicate values ($z_{kj}$), we will call again the
 \Rfunction{normalizePlateMedian}, and choose the option to score 
 the replicates after scaling by the plate median\footnote{The
-  \Rpackage{cellHTS} also provides a function called \Rfunction{calcZscore} that
-first summarizes the normalized replicate values, and then calculates the 
-$z$-scores. However, in the present example, we prefer to have the normalized and scored
-replicates in \Robject{x\$xnorm}, and use them for constructing the quality report.}:
+\Rpackage{cellHTS} package also provides a function called 
+\Rfunction{calcZscore} that
+first summarizes the normalized values across replicates, and then calculates
+a $z$-score value for each probe. However, in the present example, we prefer 
+to have the normalized and scored replicates in \Robject{x\$xnorm}, and use them for 
+constructing the quality report.}:
 %
 <<normalizePlateMedianandScore>>=
 x = normalizePlateMedian(x, zscore="-") 
@@ -357,14 +360,16 @@ x = normalizePlateMedian(x, zscore="-")
 %
 Note that this will replace the content in \Robject{x\$xnorm} by the scored
 replicate values $z_{kj}$.
-Using the above function, we summarize the scored replicates, obtaining a single $z$-score value per 
+Then, using the function below, we summarize the scored replicates, 
+obtaining a single $z$-score value per 
 probe that will be stored in the slot \Robject{x\$score}:
 %
 <<summarizeZscore>>=
 x = summarizeZscore(x, summary="min")
 @ 
 % 
-Boxplots of the $z$-scores for the different types of probes are shown
+The content of \Robject{x\$score} should always correspond to the final list of
+scored probes. Boxplots of the $z$-scores for the different types of probes are shown
 in Figure~\ref{cellhts-boxplotzscore}.
 %
 <<boxplotzscore, fig=TRUE, include=FALSE, width=4.5, height=5.5>>=
@@ -567,7 +572,7 @@ function \Rfunction{writeReport} again,
 %
 <<writeReport2, results=hide>>=
 writeReport(x, force=TRUE, 
-  plotPlateArgs = list(xrange=c(0.6, 1.4)),
+  plotPlateArgs = list(xrange=c(-6, 5)),
   imageScreenArgs = list(zrange=c(-2, 6.5), ar=1)) 
 @ 
 %
@@ -594,6 +599,8 @@ Section~\ref{sec:scoring}), or, in the case of dual-channel experiments,
 the ratio between the intensities in two different channels, etc. 
 The main point that we want to highlight is that \Robject{x\$xnorm} should
 contain the data that we want to visualize in the HTML quality reports.
+On the other hand, \Robject{x\$score} should always contain the final list of 
+scored probes (one value per probe).
 
 At this point we are finished with the basic analysis of the
 screen. As one example for how one could continue to further mine the
