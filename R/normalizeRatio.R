@@ -1,4 +1,4 @@
-normalizeRatio = function(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore){
+normalizeRatio = function(x, fun=function(r1,r2) r2/r1, log=FALSE, scmedian=FALSE, zscore){
 
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
@@ -9,22 +9,24 @@ normalizeRatio = function(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore){
   xn = array(as.numeric(NA), dim=c(dim(x$xraw)[-4], 1))
   nrWpP = dim(x$xraw)[1]
 
-## The argument 'fun' allows using different normalizations (e.g. log2 of the ratio), and also to define the numerator/denominator for the ratio (i.e. R1/R2 or R2/R1)
+## The argument 'fun' allows using different normalizations, and also to define the numerator/denominator for the ratio (i.e. R1/R2 or R2/R1)
   for(p in 1:(dim(x$xraw)[2])) {
     for(r in 1:(dim(x$xraw)[3])) 
           xn[, p, r, 1] = fun(x$xraw[, p, r, 1], x$xraw[, p, r, 2])  
   }
 
+## log2 transformes the result of 'fun'
+  if (log) xn = log2(xn)
+
 
   if(scmedian) {
 ## Apply plate median scaling
-
     for(p in 1:(dim(x$xraw)[2])) {
         samples = (x$wellAnno[(1:nrWpP)+nrWpP*(p-1)]=="sample")
         for(r in 1:(dim(x$xraw)[3]))
-           xn[, p, r, 1] = xn[, p, r, ch] / median(xn[samples, p, r, 1], na.rm=TRUE)
+	 if (log) {xn[, p, r, 1] = xn[, p, r, 1] - median(xn[samples, p, r, 1], na.rm=TRUE)} 
+		else {xn[, p, r, 1] = xn[, p, r, 1] / median(xn[samples, p, r, 1], na.rm=TRUE)}
   } }
-
 
 ## calculates the z-score for each replicate separately
   if(!missing(zscore)) {

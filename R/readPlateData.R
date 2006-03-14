@@ -68,29 +68,24 @@ readPlateData = function(x, name, path=".", plateType="384", verbose=TRUE)
   names(intensityFiles) = pd[, "Filename"]
     
   status = character(nrow(pd))
-  
+  dfiles = dir(path)
+
   if(verbose)
     cat("Reading ")
   
   for(i in 1:nrow(pd)) {
     if(verbose)
       cat(pd[i, "Filename"], "")
-    ## try the 2 versions (FNAME.TXT and FNAME.txt)
-    ff = unlist(strsplit(pd[i,"Filename"], "\\."))
-    fup = file.path(path, paste(ff[1], toupper(ff[2]), sep="."))
-    fdo = file.path(path, paste(ff[1], tolower(ff[2]), sep="."))
-    #f = file.path(path, pd[i, "Filename"])
-    ## try the 2 versions (FNAME.TXT and FNAME.txt)
+   
+    ff = grep(pd[i, "Filename"], dfiles, ignore.case=TRUE)
 
-   if (!(file.exists(fup) | file.exists(fdo))) {
+    if (length(ff)!=1) {
       f = file.path(path, pd[i, "Filename"])
       status[i] = sprintf("File not found: %s", f)
 
     } else {
-      f = ifelse(file.exists(fup), fup, fdo)
-      names(intensityFiles)[i] = ifelse(file.exists(fup), 
-		paste(ff[1], toupper(ff[2]), sep="."), 
-		paste(ff[1], tolower(ff[2]), sep="."))
+      f = file.path(path, dfiles[ff])
+      names(intensityFiles)[i] = dfiles[ff]
       status[i] = tryCatch({
         txt = readLines(f)
         sp  = strsplit(txt, "\t")
@@ -113,7 +108,7 @@ readPlateData = function(x, name, path=".", plateType="384", verbose=TRUE)
               }) ## tryCatch
     } ## else
   } ## for
-  
+
   if(verbose)
     cat("\nDone.\n\n")
 

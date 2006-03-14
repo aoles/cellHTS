@@ -6,7 +6,7 @@
   Plate median scaling may also be performed.
 }
 \usage{
-normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore)
+normalizeRatio(x, fun=function(r1,r2) r2/r1, log=FALSE, scmedian=FALSE, zscore)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been configured (see details).}
@@ -14,6 +14,9 @@ normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore)
     two color channels \code{r1} and \code{r2}. \code{fun} takes two
     numeric vectors and returns a numeric vector of the same length. The
     default is to take the ration between the two channel.}
+  \item{log}{a logical value indicating whether the result obtained after applying 
+    \code{fun} should be log2 transformed. The default is \code{log = FALSE}, 
+    and the data is not log transformed.}
   \item{scmedian}{a logical value indicating whether plate median
     scaling should be performed after applying \code{fun} (see details).
     The default is \code{scmedian = FALSE}.}
@@ -27,13 +30,16 @@ normalizeRatio(x, fun=function(r1,r2) r2/r1, scmedian=FALSE, zscore)
 For each plate and replicate of a two-color experiment, the function
 defined in \code{fun} is applied to relate the intensity values in the
 two channels of the \code{cellHTS} object. The default is to calculate
-the ration between the second and the first channels. Another procedure
-could be, for example, to take the log of this ratio.
+the ration between the second and the first channels, but other options can be defined.
 
+If \code{log = TRUE}, the data obtained after applying \code{fun} is 
+log2 transformed. The default is \code{log = FALSE}.
+  
 If \code{scmedian = TRUE}, plate median scaling will be further
 performed, by dividing each measurement by the median value across the
 wells annotated as \code{sample} in the respective plate and
-replicate. The default is \code{scmedian} is \code{FALSE}.
+replicate. Note that if the data have been log transformed (\code{log = TRUE}), 
+the median is subtracted instead. The default is \code{scmedian = FALSE}.
    
 If \code{zscore} is not \code{NULL}, a robust z-score for each
 individual measurement will be determined for each plate and each well
