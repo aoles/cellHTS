@@ -129,12 +129,12 @@ writeReport = function(x, outdir=x$name, force=FALSE,
   url = matrix(as.character(NA), nrow=nrow(exptab), ncol=ncol(exptab))
   colnames(url) = colnames(exptab)
   qmHaveBeenAdded = FALSE
-
+if (x$state["configured"]) {
   for(p in 1:nrPlate){
 #    for(ch in 1:nrChannel){
       nm = p
       wh = with(x$plateList, which(Plate==p & status=="OK"))
-      if(x$state["configured"] && (length(wh)>0)) {
+      if(length(wh)>0) {
         dir.create(file.path(outdir, nm))
          if(x$state["normalized"]) {
           datPlat = x$xnorm[, p,,, drop=FALSE]
@@ -173,6 +173,7 @@ writeReport = function(x, outdir=x$name, force=FALSE,
 } # channel
  } ## if
     }
+} # if configured
 
   ## Report pages per plate result file 
   #dir.create(file.path(outdir, "in"))
