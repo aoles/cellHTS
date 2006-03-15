@@ -53,7 +53,7 @@ whereas in an inhibition type assay, an effect will result in a signal
 decrease.  Therefore, if \code{zscore} is set to "-" (inhibitor assays),
 the symmetric of the score values is taken as the final z-scores, so
 that in both type of assays, large positive z-scores will correspond to
-a strong effect.  }
+a strong effect.}
 
 \value{An object of class \code{cellHTS}, which is a copy of the
 argument \code{x}, plus an additional slot \code{xnorm} containing the
@@ -69,11 +69,14 @@ in the slot \code{state} to \code{state["normalized"]=TRUE}.  }
 \references{..}
 
 \examples{
-#datadir = system.file("KcViabSmall", package = "cellHTS")
-#x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-#confFile = system.file("KcViabSmall", "Plateconf.txt", #package="cellHTS")
-#logFile  = system.file("KcViabSmall", "Screenlog.txt", #package="cellHTS")
-#descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", #package="cellHTS")
-#x = configure(x, confFile, logFile, descripFile)
+datadir = system.file("TwoColorScreen", package = "cellHTS")
+x = readPlateData("Platelist.txt", "TwoColorData", path=datadir)
+confFile = system.file("TwoColorScreen", "Plateconf.txt", package="cellHTS")
+logFile  = system.file("TwoColorScreen", "Screenlog.txt", package="cellHTS")
+descripFile  = system.file("TwoColorScreen", "Description.txt", package="cellHTS")
+x = configure(x, confFile, logFile, descripFile)
+#writeReport(x)
+x = normalizeRatio(x, fun=function(x,y) x/y, log=TRUE, scmedian=TRUE)
+#writeReport(x, force=TRUE, plotPlateArgs=list(xrange=c(-3,3)))
 }
 \keyword{manip}

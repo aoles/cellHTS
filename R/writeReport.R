@@ -206,7 +206,7 @@ if (x$state["configured"]) {
       score=x$score, wellAnno = x$wellAnno)
 
 ## Include the normalized values
-for (ch in 1:nrChannel) out[sprintf("normalized_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$xnorm[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+for (ch in 1:nrChannel) out[sprintf("normalized_r%d_ch%d", 1:nrReplicate, ch)] = round(matrix(x$xnorm[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate), 3)
 
 
          ## include also the final well annotation (after the screen log file)
