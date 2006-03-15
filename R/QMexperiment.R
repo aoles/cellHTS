@@ -85,10 +85,10 @@ dpos=density(xpos, na.rm=TRUE, adjust=3)
 ymax = max(dpos$y, dneg$y)*1.1
 xmax = max(dpos$x, dneg$x)
 xmin = min(dpos$x, dneg$x)
-plot(dpos, xlim = c(xmin, xmax) ,ylim=c(0, ymax), col="blue", yaxt="n",ylab="", xlab="", ...)
-lines(dneg, col="red")
+plot(dpos, xlim = c(xmin, xmax) ,ylim=c(0, ymax), col="red", yaxt="n",ylab="", xlab="", ...)
+lines(dneg, col="blue")
 #axis(1, labels =TRUE)
-legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("blue","red"), 
+legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("red","blue"), 
 	bg="white", cex=0.9, title = sprintf("Z'-factor = %g", round(zfac,2))) 
 }
 
@@ -97,9 +97,9 @@ legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("blue
 controlsplot = function(xpos, xneg, ppos, pneg,...) {
 ylim = range(c(xpos,xneg), na.rm=TRUE)
 if (prod(ylim)<0) ylim = sign(ylim)*1.15*abs(ylim) else ylim = c(0.85*ylim[1], 1.15*ylim[2])
-plot(ppos, xpos, pch=16, cex=0.5, ylim=ylim, xlab="Plate", ylab="", col="blue", xaxt="n", ...)
-points(pneg, xneg, pch=16, cex=0.5, col="red")
-legend("top",legend =c("'pos' controls", "'neg' controls"), col=c("blue","red"),
+plot(ppos, xpos, pch=16, cex=0.5, ylim=ylim, xlab="Plate", ylab="", col="red", xaxt="n", ...)
+points(pneg, xneg, pch=16, cex=0.5, col="blue")
+legend("top",legend =c("'pos' controls", "'neg' controls"), col=c("red","blue"),
        horiz=TRUE, pch=16, pt.cex=0.5, bg="white", cex=0.9)
 xall = split(append(xpos, xneg), append(ppos, pneg))
 xall = xall[!sapply(xall, function(f) all(is.na(f)))]
