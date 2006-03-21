@@ -6,7 +6,7 @@
 ## zrange is the range of values to be mapped into the color scale.
 ##   If the argument "zrange" is missing, it will be set to zrange=range(x$score, na.rm=TRUE)
 
-imageScreen = function (x, ar=3/5, zrange, ...) {
+imageScreen = function (x, ar=3/5, zrange) {
 
   ## Determine the number of columns and rows for the image plot,
   ## given the aspect ratio 'ar' provided by the user

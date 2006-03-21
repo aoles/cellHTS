@@ -587,7 +587,16 @@ $Z'$-factor determined for each experiment (replicate) using the
 positive and negative controls~\cite{Oldenburg1999}, the boxplots with
 raw and normalized intensities for the different plates, and the
 screen-wide plot with the $z$-scores in every well position of each
-plate. 
+plate. The latter image plot can also be produced separately 
+using the function \Rfunction{imageScreen} given in the \Rpackage{cellHTS}
+package. This might be useful if we want to select the best display for our
+data, namely, the aspect ratio for the plot and/or the range of $z$-score 
+values to be mapped into the color scale. These can be passed to the function's arguments \Robject{ar} and \Robject{zrange}, respectively. For example,
+
+<<imageScreen>>=
+imageScreen(x, ar=1, zrange=c(-3,4))
+@ 
+
 It should be noted that the per-plate and per-experiment 
 quality reports are constructed based on the content of
 \Robject{x\$xnorm}, if it is present in the \Robject{x} object. 
