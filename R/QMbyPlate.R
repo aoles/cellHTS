@@ -70,6 +70,7 @@ count = 0
  } else {
     dr = as.numeric(NA)
     comm = "No controls ('pos' and 'neg') were found."
+	for (u in 1:maxRep) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",u)), value=dr, comment=I(comm)))
   } 
 
   qm = rbind(qm, data.frame(metric=I("Dynamic range"), value=dr, comment=I(comm)))

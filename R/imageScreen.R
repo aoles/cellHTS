@@ -18,7 +18,7 @@ imageScreen = function (x, ar=3/5, zrange) {
   pRow=x$pdim[1] 
   pCol=x$pdim[2]
 
-  ## Get the y coordinate for the image plot (the center is in the uper-left corner of the plate)
+  ## Get the y coordinate for the image plot (the center is in the upper-left corner of the plate)
   ypos =(pRow+1) - (1+(1:nrWells-1)%/% pCol)
 
   ## Create the big matrix for the image plot (plates will be added horizontally)
