@@ -25,15 +25,17 @@ imageScreen = function (x, ar=3/5, zrange) {
   Nrow = nrRow*(pRow+1)-1
   Ncol = nrCol*(pCol+1)-1
 
-  ## replace NA by zero (because it will be neutral for the current analysis)
   sc = x$score
-  sc[is.na(x$score)]=0
 
   ## Check if zrange was given as an argument
   if (missing(zrange)) {
     ## set default values
     zrange = range(x$score, na.rm=TRUE)
   }
+
+  ## replace NA by zero (because it will be neutral for the current analysis)
+  sc = x$score
+  sc[is.na(sc)]=0
 
   ## Cap the values outside the dynamic range defined by the user (zrange):
   sc[sc<zrange[1]] = zrange[1]
