@@ -1,4 +1,4 @@
-Batch	Pos	Well	Content
+Batch	Position	Well	Content
 1	1	A01	neg
 1	2	A02	neg
 1	3	A03	sample

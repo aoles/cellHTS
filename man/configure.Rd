@@ -27,9 +27,15 @@ configure(x, \dots)
 }
 
 \details{
-  \item{confFile}{This file is expected to be a tab-delimited file with at least four columns, and column names \code{Batch}, \code{Pos}, \code{Well} and \code{Content}. The contents of \code{Pos} are expected to be integer.}
-  \item{logFile}{This file is expected to be a tab-delimited file with at least three columns, and column names \code{Filename}, \code{Well}, and \code{Flag}. Further columns are allowed.}
-  \item{descripFile}{This file is the screen description file with general information about the screen.}
+  \item{confFile}{This file is expected to be a tab-delimited file with
+at least four columns, and column names \code{Batch}, \code{Position},
+\code{Well} and \code{Content}. The contents of \code{Position} are expected
+to be integer.}
+  \item{logFile}{This file is expected to be a tab-delimited file with
+at least three columns, and column names \code{Filename}, \code{Well},
+and \code{Flag}. Further columns are allowed.}
+  \item{descripFile}{This file is the screen description file with
+general information about the screen.}
   
 Data from wells that are annotated as \emph{empty} are ignored and are set to NA in \code{x} in slot \code{xraw}.  
 }

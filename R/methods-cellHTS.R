@@ -51,8 +51,10 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
   slog = read.table(logFile,  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
   descript = readLines(descripFile)
 
-  checkColumns(conf, confFile, mandatory=c("Batch", "Pos", "Well", "Content"),
-               numeric=c("Pos"))
+  ## backward compatibility...
+  colnames(conf) = sub("^Pos$", "Position", colnames(conf))
+  checkColumns(conf, confFile, mandatory=c("Batch", "Position", "Well", "Content"),
+               numeric=c("Position"))
 
   ## Check if the screen log file is empty
   if (!dim(slog)[1])
@@ -61,13 +63,13 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
     checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
                  numeric=character(0))
 
-  ## check consistency between 'Pos' and 'Well' columns
-  badRows = which(conf$Pos!=pos2i(conf$Well, x$pdim))
+  ## check consistency between 'Position' and 'Well' columns
+  badRows = which(conf$Position!=pos2i(conf$Well, x$pdim))
   if(length(badRows)>0) {
     if(length(badRows)>5)
       badRows = badRows[1:5]
-    msg = paste("The columns 'Pos' and 'Well' in ", confFile, " are inconsistent:\n",
-                 paste("Row ", badRows, ": ", conf$Pos[badRows], " != ", conf$Well[badRows],
+    msg = paste("The columns 'Position' and 'Well' in ", confFile, " are inconsistent:\n",
+                 paste("Row ", badRows, ": ", conf$Position[badRows], " != ", conf$Well[badRows],
                        sep="", collapse="\n"),
                  sep="")
     stop(msg)
@@ -79,7 +81,7 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
   nrPlate = dim(x$xraw)[2]
   stopifnot(nrWpP==dim(x$xraw)[1])
   
-  if(!((nrow(conf)==nrWpP*nrBatch) && all(conf$Pos==rep(1:nrWpP, nrBatch)) &&
+  if(!((nrow(conf)==nrWpP*nrBatch) && all(conf$Position==rep(1:nrWpP, nrBatch)) &&
        all(conf$Batch==rep(1:nrBatch, each=nrWpP))))
     stop(paste("Invalid input file '", confFile, "': expecting ", nrWpP*nrBatch,
                " rows, one for each well and for each batch. Please see the vignette for",
