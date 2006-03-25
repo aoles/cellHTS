@@ -226,7 +226,7 @@ this function.
 %% Create the example table for plateConf and screenLog
 <<plateConfscreenLogTable, results=hide, echo=FALSE>>=
 cellHTS:::tableOutput(confFile, "plate configuration", selRows=25:28)
-cellHTS:::tableOutput(logFile, "screen log", selRows=1:4)
+cellHTS:::tableOutput(logFile, "screen log", selRows=1:3)
 @ 
 
 %%--------------------------------------------------
