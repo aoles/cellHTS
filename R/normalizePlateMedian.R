@@ -11,9 +11,12 @@ normalizePlateMedian = function(x, transform, zscore){
         xn[, p, r, ch] = x$xraw[, p, r, ch] / median(x$xraw[samples, p, r, ch], na.rm=TRUE)
   }
 
-  if(!missing(transform))
+  one = 1
+  if(!missing(transform)) {
     xn = transform(xn)
-
+    one = transform(one)
+  }
+  
   ## calculates the z-score for each replicate separately
   if(!missing(zscore)) {
     samps = (x$wellAnno=="sample")
@@ -25,8 +28,8 @@ normalizePlateMedian = function(x, transform, zscore){
     for(r in 1:(dim(xn)[3]))
       for(ch in 1:(dim(xn)[4])) {
         ## this should be true after plate median normalization (above) 
-        stopifnot(median(xn[,, r, ch][samps], na.rm=TRUE) == 1)
-        xn[,,r,ch] = sg * (xn[,,r,ch] - 1) / mad(xn[,,r,ch][samps], na.rm=TRUE)
+        stopifnot(abs(median(xn[,, r, ch][samps], na.rm=TRUE) - one) < 1e-10)
+        xn[,,r,ch] = sg * (xn[,,r,ch] - one) / mad(xn[,,r,ch][samps], na.rm=TRUE)
       }
   } 
 

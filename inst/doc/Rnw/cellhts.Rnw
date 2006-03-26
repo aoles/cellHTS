@@ -425,7 +425,8 @@ Naturally, before facing an extensive installation struggle, you will
 want to explore the \Rpackage{cellHTS} package and see whether it is
 worthwhile. We have made available the result of the annotation with
 \Rpackage{biomaRt}, described below, as a precomputed R object:
-<<>>=
+%
+<<bdgpbiomart>>=
 data("bdgpbiomart")
 x$geneAnno = bdgpbiomart
 @ 
@@ -440,11 +441,18 @@ will demonstrate how to obtain the dataframe \Robject{bdgpbiomart} by
 querying the online webservice \textit{BioMart} and through it the
 Ensembl genome annotation database~\cite{Ensembl2006}.
 %
-<<biomaRt, eval=TRUE, echo=FALSE>>=
+<<biomaRt, eval=TRUE, echo=FALSE, results=hide>>=
 Sweave("biomart.Rnw")
-stop()
 @ 
 \input{biomart.tex}
+
+% This is how 'bdgpbiomart' it is created from 'x$geneAnno' 
+% (before the assignment in the chunk <<bdgpbiomart>> above) from the 
+% table 'bmAll' (which is produced by the call to Sweave("biomart.Rnw")
+% below):
+%
+% bdgpbiomart = cbind(x$geneAnno, bmAll)
+% save(bdgpbiomart, file="../../../data/bdgpbiomart.rda", compress=TRUE)
 
 %------------------------------------------------------------
 \section{Report}
@@ -469,7 +477,7 @@ function \Rfunction{writeReport} again,
 %
 <<writeReport2, results=hide>>=
 writeReport(x, force=TRUE, 
-  plotPlateArgs = list(xrange=c(-6, 5)),
+  plotPlateArgs   = list(xrange=c(-2, 6.5)),
   imageScreenArgs = list(zrange=c(-2, 6.5), ar=1)) 
 @ 
 %
