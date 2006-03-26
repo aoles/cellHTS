@@ -280,13 +280,14 @@ should be discarded and regarded as missing.
 
 %------------------------------------------------------------
 \section{Normalization and summarization of replicates}
+\label{sec:norm}
 %------------------------------------------------------------ 
 The function \Rfunction{normalizePlateMedian} adjusts for plate
 effects by dividing each value in each plate by the median of values
 in the plate:
 \begin{eqnarray} 
 x'_{ki} &=& \frac{x_{ki}}{M_i}\quad\quad\forall k,i \label{eq:normalizePlateMedian}\\
-M_{i}&=&\mathop{\operatorname{median}}_{m\in\,\mbox{\scriptsize samples}} x_{mi} \nolabel
+M_{i}&=&\mathop{\operatorname{median}}_{m\in\,\mbox{\scriptsize samples}} x_{mi}
 \end{eqnarray}
 where $x_{ki}$ is the raw intensity for the $k$-th well in the $i$-th
 replicate file, and $x'_{ki}$ is the corresponding normalized intensity. 
@@ -304,7 +305,7 @@ We can now summarize the replicates, calculating a single score for
 each gene. One option is to take the minimum of the $z$-scores from the two
 replicates:
 \begin{eqnarray}
-z_{ki} &=& \pm \frac{x'_{ki}-\hat{\mu}}{\hat{\sigma}} \label{eq:defz}
+z_{ki} &=& \pm \frac{x'_{ki}-\hat{\mu}}{\hat{\sigma}} \label{eq:defz} \\
 z_{k}  &=& \min_{i} z_{ki} \label{eq:scoresSummary}.
 \end{eqnarray}
 Here $\hat{\mu}$ and $\hat{\sigma}$ are estimators of location and
@@ -343,7 +344,9 @@ boxplot(x$score ~ x$wellAnno, col="lightblue", outline=FALSE, ylim=ylim)
 for the different types of probes.}
 %
 
+%------------------------------------------------------------
 \subsection{Alternative processing strategies}
+%------------------------------------------------------------
 The HTML quality report will consider the values in the slot
 \Robject{x\$xnorm} for the calculation of its quality metrics.  In the
 example above, \Robject{x\$xnorm} contains the data after plate median
@@ -364,10 +367,6 @@ to adjust for additional experimental biases besides the plate effect.
 You might want to start by taking the source code of
 \Rfunction{normalizePlateMedian} as a template.
 
-%------------------------------------------------------------
-\section{Summarization of replicates}
-\label{sec:summarization}
-%------------------------------------------------------------
 %------------------------------------------------------------
 \section{Annotation}
 %------------------------------------------------------------
@@ -441,7 +440,7 @@ will demonstrate how to obtain the dataframe \Robject{bdgpbiomart} by
 querying the online webservice \textit{BioMart} and through it the
 Ensembl genome annotation database~\cite{Ensembl2006}.
 %
-<<biomaRt, eval=TRUE, echo=FALSE, results=hide>>=
+<<biomaRt, eval=FALSE, echo=FALSE, results=hide>>=
 Sweave("biomart.Rnw")
 @ 
 \input{biomart.tex}
@@ -477,8 +476,8 @@ function \Rfunction{writeReport} again,
 %
 <<writeReport2, results=hide>>=
 writeReport(x, force=TRUE, 
-  plotPlateArgs   = list(xrange=c(-2, 6.5)),
-  imageScreenArgs = list(zrange=c(-2, 6.5), ar=1)) 
+  plotPlateArgs   = list(xrange=c(0.5, 1.5)),
+  imageScreenArgs = list(zrange=c( -2, 6.5), ar=1)) 
 @ 
 %
 and use a web browser to view the resulting report
@@ -492,25 +491,24 @@ $Z'$-factor determined for each experiment (replicate) using the
 positive and negative controls~\cite{Oldenburg1999}, the boxplots with
 raw and normalized intensities for the different plates, and the
 screen-wide plot with the $z$-scores in every well position of each
-plate. The latter image plot can also be produced separately 
-using the function \Rfunction{imageScreen} given in the \Rpackage{cellHTS}
-package. This might be useful if we want to select the best display for our
-data, namely, the aspect ratio for the plot and/or the range of $z$-score 
-values to be mapped into the color scale. These can be passed to the function's arguments \Robject{ar} and \Robject{zrange}, respectively. For example,
+plate. The latter image plot can also be produced separately using the
+function \Rfunction{imageScreen} given in the \Rpackage{cellHTS}
+package. This might be useful if we want to select the best display
+for our data, namely, the aspect ratio for the plot and/or the range
+of $z$-score values to be mapped into the color scale. These can be
+passed to the function's arguments \Robject{ar} and \Robject{zrange},
+respectively. For example,
 
-<<imageScreen>>=
+<<imageScreen, eval=FALSE, results=hide>>=
 imageScreen(x, ar=1, zrange=c(-3,4))
 @ 
 
-It should be noted that the per-plate and per-experiment 
-quality reports are constructed based on the content of
-\Robject{x\$xnorm}, if it is present in the \Robject{x} object. 
-Otherwise, it uses the content 
-given in the slot \Robject{x\$xraw}. 
-Although we have called the former slot, \Robject{xnorm}, it can
-contain already scored replicate data (as in the present case; see 
-Section~\ref{sec:scoring}), or, in the case of dual-channel experiments, 
-the ratio between the intensities in two different channels, etc. 
+It should be noted that the per-plate and per-experiment quality
+reports are constructed based on the content of \Robject{x\$xnorm}, if
+it is present in the \Robject{x} object.  Otherwise, it uses the
+content given in the slot \Robject{x\$xraw}.
+In the case of dual-channel experiments,  the \Robject{x\$xnorm} slot
+could also contain the ratio between the intensities in two different channels, etc. 
 The main point that we want to highlight is that \Robject{x\$xnorm} should
 contain the data that we want to visualize in the HTML quality reports.
 On the other hand, \Robject{x\$score} should always contain the final list of 
@@ -566,7 +564,7 @@ As the statistic for the category analysis we use the $z$-score. After
 selecting the subset of genes that actually have GO annotation,
 %
 <<cat3>>=
-stats = x$score[ selsc & (names(x$score) %in% nodes(categs)) ]
+stats = x$score[ sel & (names(x$score) %in% nodes(categs)) ]
 @
 %
 we are ready to call the category summary functions:

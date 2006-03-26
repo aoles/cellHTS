@@ -107,3 +107,57 @@ especially from gene ID to GO categories~\cite{GO}.
 \begin{Sinput}
 > bm1 = myGetBM(c("chr_name", "chrom_start", "chrom_end", "description"))
 > bm2 = myGetBM(c("flybase_name"))
+> bm3 = myGetBM(c("go_id", "go_description"))
+\end{Sinput}
+\end{Schunk}
+%
+There are only a few CG-identifiers for which we were not able to
+obtain chromosomal locations: 
+%
+\begin{Schunk}
+\begin{Sinput}
+> unique(setdiff(x$geneAnno$GeneID, bm1$gene_stable_id))
+\end{Sinput}
+\begin{Soutput}
+ [1] NA        "CG33715" "CG33949" "CG32904" "CG33926" "CG33696" "CG33768"
+ [8] "CG33769" "CG33770" "CG33936" "CG33937" "CG33630" "CG33950" "CG33653"
+[15] "CG33635" "CG33922" "CG33673" "CG33640" "CG33642" "CG33697" "CG33681"
+[22] "CG33911" "CG33648" "CG33679" "CG33704" "CR33655" "CG33914" "CG33758"
+[29] "CG33757" "CG33800" "CG33919" "CG33627" "CG33752" "CG33775" "CG33792"
+[36] "CG33777" "CG33702" "CG33725" "CG33924" "CG33796" "CG33689" "CG33631"
+[43] "CG33784" "CG33779" "CG33698" "CG33773" "CR33945" "CG33651" "CR33939"
+[50] "CG33639"
+\end{Soutput}
+\end{Schunk}
+%
+Below, we add the results
+to the dataframe \Robject{x\$geneAnno}. Since the tables \Robject{bm1},
+\Robject{bm2}, and \Robject{bm3} contain zero, one or several rows for
+each gene ID, but in \Robject{x\$geneAnno} we want exactly one row per
+gene ID, the function \Rfunction{oneRowPerId} does the somewhat tedious
+task of reformatting the tables: multiple entries are collapsed
+into a single comma-separated string, and empty rows are inserted
+where necessary.
+%
+\begin{Schunk}
+\begin{Sinput}
+> id = x$geneAnno$GeneID
+> bmAll = cbind(oneRowPerId(bm1, id), oneRowPerId(bm2, id), oneRowPerId(bm3, 
++     id))
+\end{Sinput}
+\end{Schunk}
+%
+This is indeed the same as we loaded previously in
+Section~\ref{sec:install}:
+%
+\begin{Schunk}
+\begin{Sinput}
+> identical(bdgpbiomart[, 5:11], bmAll)
+\end{Sinput}
+\begin{Soutput}
+[1] TRUE
+\end{Soutput}
+\end{Schunk}
+%
+
+
