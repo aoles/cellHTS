@@ -402,13 +402,7 @@ annotation from public databases~\cite{biomaRt2005}.  You will need
 version 1.5.3 or later of the \Rpackage{biomaRt} package. This is
 currently (March 2006) in the development branch of Bioconductor and
 will be in the release 1.8.
-%
-<<biomaRt, results=hide>>=
-library("biomaRt")
-@ 
-<<biomaRtversioncheck,echo=FALSE,results=hide>>=
-stopifnot(package.version("biomaRt") >= package_version("1.5.3"))
-@ 
+
 %--------------------------- 
 \subsubsection{Installation}
 \label{sec:install}
@@ -445,105 +439,12 @@ package or do not want to use it. In the remainder of this section, we
 will demonstrate how to obtain the dataframe \Robject{bdgpbiomart} by
 querying the online webservice \textit{BioMart} and through it the
 Ensembl genome annotation database~\cite{Ensembl2006}.
-
-By default, the \Rpackage{biomaRt} package will query the webservice at\newline 
-http://www.ebi.ac.uk/biomart/martservice.  Let's check
-which BioMart databases it covers:
 %
-<<listMarts>>=
-listMarts()
-@
-%
-In this example, we use the Ensembl database~\cite{Ensembl2006}, from
-which we select the \textit{D. melanogaster} dataset.
-%
-<<useMart, results=hide>>=
-mart = useMart("ensembl")
-@
-% 
-<<listDatasets>>=
-listDatasets(mart = mart)
+<<biomaRt, eval=TRUE, echo=FALSE>>=
+Sweave("biomart.Rnw")
+stop()
 @ 
-<<checkDatasets, results=hide, echo=FALSE>>=
-stopifnot("dmelanogaster_gene_ensembl" %in% listDatasets(mart = mart)[,1])
-@ 
-%
-<<selectDataset, results=hide>>=
-mart = useDataset("dmelanogaster_gene_ensembl", mart)
-@ 
-%
-We can query the available gene attributes and filters for the
-selected dataset using the following functions.
-<<>>=
-attrs = listAttributes(mart)
-filts = listFilters(mart)
-@
-%
-In the BioMart system~\cite{Kasprzyk2004}, a \emph{filter} is a
-property that can be used to select a gene or a set of genes (like the
-``where'' clause in an SQL query), and an \emph{attribute} is a
-property that can be queried (like the ``select'' clause in an SQL
-query). We use the \Rfunction{getBM} function of the package
-\Rpackage{biomaRt} to obtain the gene annotation from Ensembl.
-%
-<<myGetBM>>=
-myGetBM = function(att)
-  getBM(attributes=c("gene_stable_id", att), 
-        filter="gene_stable_id", 
-        values=unique(x$geneAnno$GeneID), mart=mart)
-@ 
-% 
-For performance reasons, we split up our query in three subqueries,
-which corresponds to different areas in the BioMart schema, and then
-assemble the results together in R.  Alternatively, it would also be
-possible to submit a single query for all of the attributes, but then
-the result table will be enormous due to the 1:many mapping
-especially from gene ID to GO categories~\cite{GO}.
-%
-<<getBM>>=
-bm1 = myGetBM(c("chr_name", "chrom_start", "chrom_end", "description"))
-bm2 = myGetBM(c("flybase_name"))
-bm3 = myGetBM(c("go_id", "go_description"))
-@ 
-%
-There are only a few CG-identifiers for which we were not able to
-obtain chromosomal locations: 
-%
-<<setDiff>>=
-unique(setdiff(x$geneAnno$GeneID,bm1$gene_stable_id)) 
-## table(table(bm1$gene_stable_id))
-## table(table(bm2$gene_stable_id)) 
-## table(table(bm2$gene_stable_id))
-@ 
-%
-Below, we add the results
-to the dataframe \Robject{x\$geneAnno}. Since the tables \Robject{bm1},
-\Robject{bm2}, and \Robject{bm3} contain zero, one or several rows for
-each gene ID, but in \Robject{x\$geneAnno} we want exactly one row per
-gene ID, the function \Rfunction{oneRowPerId} does the somewhat tedious
-task of reformatting the tables: multiple entries are collapsed
-into a single comma-separated string, and empty rows are inserted
-where necessary.
-%
-<<addBMdata>>=
-id = x$geneAnno$GeneID
-bmAll = cbind(
-   oneRowPerId(bm1, id),
-   oneRowPerId(bm2, id),
-   oneRowPerId(bm3, id)) 
-@ 
-%
-This is indeed the same as we loaded previously in
-Section~\ref{sec:install}:
-%
-<<checkBmAll>>=
-identical(bdgpbiomart[, 5:11],  bmAll)
-@ 
-%
-<<check,echo=FALSE,results=hide>>=
-stopifnot(identical(bdgpbiomart[, 5:11], bmAll))
-@ 
-%
+\input{biomart.tex}
 
 %------------------------------------------------------------
 \section{Report}
@@ -639,10 +540,10 @@ each probe and one row for each category. The matrix element
 %
 <<cat1>>=
 names(x$score) = x$geneAnno$GeneID
-selsc = !is.na(x$score)
-selbm = (bm3$gene_stable_id %in% names(which(selsc))) & (bm3$go_id != "")
-categs = cache("categs",
-   cateGOry(bm3$"gene_stable_id"[selbm], bm3$"go_id"[selbm]))
+sel = !is.na(x$score) & (!is.na(x$geneAnno$go_id))
+goids = strsplit(x$geneAnno$go_id[sel], ", ")
+genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
+categs = cache("categs", cateGOry(genes, unlist(goids, use.names=FALSE)))
 @ 
 % 
 We will selected only those categories that contain at least 3 and no more than 1000 genes.

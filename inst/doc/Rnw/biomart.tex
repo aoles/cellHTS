@@ -1,0 +1,146 @@
+\begin{Schunk}
+\begin{Sinput}
+> library("biomaRt")
+\end{Sinput}
+\end{Schunk}
+%
+By default, the \Rpackage{biomaRt} package will query the webservice at\newline 
+http://www.ebi.ac.uk/biomart/martservice.  Let's check
+which BioMart databases it covers:
+%
+\begin{Schunk}
+\begin{Sinput}
+> listMarts()
+\end{Sinput}
+\begin{Soutput}
+$biomart
+[1] "dicty"    "ensembl"  "snp"      "vega"     "uniprot"  "msd"      "wormbase"
+
+$version
+[1] "DICTYBASE (NORTHWESTERN)" "ENSEMBL 37 (SANGER)"     
+[3] "SNP 37 (SANGER)"          "VEGA 37 (SANGER)"        
+[5] "UNIPROT 4-5 (EBI)"        "MSD 4 (EBI)"             
+[7] "WORMBASE CURRENT (CSHL)" 
+
+$host
+[1] "www.dictybase.org" "www.biomart.org"   "www.biomart.org"  
+[4] "www.biomart.org"   "www.biomart.org"   "www.biomart.org"  
+[7] "www.biomart.org"  
+\end{Soutput}
+\end{Schunk}
+%
+In this example, we use the Ensembl database~\cite{Ensembl2006}, from
+which we select the \textit{D. melanogaster} dataset.
+%
+\begin{Schunk}
+\begin{Sinput}
+> mart = useMart("ensembl")
+\end{Sinput}
+\end{Schunk}
+% 
+\begin{Schunk}
+\begin{Sinput}
+> listDatasets(mart = mart)
+\end{Sinput}
+\begin{Soutput}
+                      dataset    version
+1    rnorvegicus_gene_ensembl    RGSC3.4
+2    scerevisiae_gene_ensembl       SGD1
+3       celegans_gene_ensembl     CEL150
+4  cintestinalis_gene_ensembl       JGI2
+5   ptroglodytes_gene_ensembl    CHIMP1A
+6      frubripes_gene_ensembl      FUGU4
+7       agambiae_gene_ensembl     AgamP3
+8       hsapiens_gene_ensembl     NCBI35
+9        ggallus_gene_ensembl    WASHUC1
+10   xtropicalis_gene_ensembl       JGI4
+11        drerio_gene_ensembl     ZFISH5
+12 tnigroviridis_gene_ensembl TETRAODON7
+13      mmulatta_gene_ensembl   MMUL_0_1
+14    mdomestica_gene_ensembl    BROADO2
+15    amellifera_gene_ensembl    AMEL2.0
+16 dmelanogaster_gene_ensembl      BDGP4
+17     mmusculus_gene_ensembl    NCBIM34
+18       btaurus_gene_ensembl   Btau_2.0
+19   cfamiliaris_gene_ensembl    BROADD1
+\end{Soutput}
+\end{Schunk}
+%
+\begin{Schunk}
+\begin{Sinput}
+> mart = useDataset("dmelanogaster_gene_ensembl", mart)
+\end{Sinput}
+\end{Schunk}
+%
+We can query the available gene attributes and filters for the
+selected dataset using the following functions.
+\begin{Schunk}
+\begin{Sinput}
+> attrs = listAttributes(mart)
+> filts = listFilters(mart)
+\end{Sinput}
+\end{Schunk}
+%
+In the BioMart system~\cite{Kasprzyk2004}, a \emph{filter} is a
+property that can be used to select a gene or a set of genes (like the
+``where'' clause in an SQL query), and an \emph{attribute} is a
+property that can be queried (like the ``select'' clause in an SQL
+query). We use the \Rfunction{getBM} function of the package
+\Rpackage{biomaRt} to obtain the gene annotation from Ensembl.
+%
+\begin{Schunk}
+\begin{Sinput}
+> myGetBM = function(att) getBM(attributes = c("gene_stable_id", 
++     att), filter = "gene_stable_id", values = unique(x$geneAnno$GeneID), 
++     mart = mart)
+\end{Sinput}
+\end{Schunk}
+% 
+For performance reasons, we split up our query in three subqueries,
+which corresponds to different areas in the BioMart schema, and then
+assemble the results together in R.  Alternatively, it would also be
+possible to submit a single query for all of the attributes, but then
+the result table will be enormous due to the 1:many mapping
+especially from gene ID to GO categories~\cite{GO}.
+%
+\begin{Schunk}
+\begin{Sinput}
+> bm1 = myGetBM(c("chr_name", "chrom_start", "chrom_end", "description"))
+> bm2 = myGetBM(c("flybase_name"))
+> bm3 = myGetBM(c("go_id", "go_description"))
+\end{Sinput}
+\end{Schunk}
+%
+There are only a few CG-identifiers for which we were not able to
+obtain chromosomal locations: 
+%
+\begin{Schunk}
+\begin{Sinput}
+> unique(setdiff(x$geneAnno$GeneID, bm1$gene_stable_id))
+\end{Sinput}
+\begin{Soutput}
+ [1] NA        "CG33715" "CG33949" "CG32904" "CG33926" "CG33696" "CG33768"
+ [8] "CG33769" "CG33770" "CG33936" "CG33937" "CG33630" "CG33950" "CG33653"
+[15] "CG33635" "CG33922" "CG33673" "CG33640" "CG33642" "CG33697" "CG33681"
+[22] "CG33911" "CG33648" "CG33679" "CG33704" "CR33655" "CG33914" "CG33758"
+[29] "CG33757" "CG33800" "CG33919" "CG33627" "CG33752" "CG33775" "CG33792"
+[36] "CG33777" "CG33702" "CG33725" "CG33924" "CG33796" "CG33689" "CG33631"
+[43] "CG33784" "CG33779" "CG33698" "CG33773" "CR33945" "CG33651" "CR33939"
+[50] "CG33639"
+\end{Soutput}
+\end{Schunk}
+%
+Below, we add the results
+to the dataframe \Robject{x\$geneAnno}. Since the tables \Robject{bm1},
+\Robject{bm2}, and \Robject{bm3} contain zero, one or several rows for
+each gene ID, but in \Robject{x\$geneAnno} we want exactly one row per
+gene ID, the function \Rfunction{oneRowPerId} does the somewhat tedious
+task of reformatting the tables: multiple entries are collapsed
+into a single comma-separated string, and empty rows are inserted
+where necessary.
+%
+\begin{Schunk}
+\begin{Sinput}
+> id = x$geneAnno$GeneID
+> bmAll = cbind(oneRowPerId(bm1, id), oneRowPerId(bm2, id), oneRowPerId(bm3, 
++     id))
