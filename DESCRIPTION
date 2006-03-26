@@ -4,10 +4,10 @@ Date: 25 Mar 2006
 Title: Analysis of cell-based screens
 Author: Wolfgang Huber <huber@ebi.ac.uk>, Ligia Bras <ligia@ebi.ac.uk>, Michael Boutros <m.boutros@dkfz.de>
 Maintainer: Wolfgang Huber <huber@ebi.ac.uk>
-Depends: R (>= 2.1.0), prada (>= 1.7.14), RColorBrewer
+Depends: R (>= 2.2.0), prada (>= 1.7.14), RColorBrewer
 Suggests: 
 Description: Analysis of cell-based high-throughput screens
 Reference: M. Boutros, L. Bras and W. Huber, TBA
 License: LGPL
-URL: http://www.r-project.org, http://www.dkfz.de/signaling, http://www.ebi.ac.uk/huber
+URL: http://www.dkfz.de/signaling, http://www.ebi.ac.uk/huber
 biocViews: CellBasedAssays, Preprocessing, Visualization
