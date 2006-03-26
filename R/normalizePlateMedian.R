@@ -14,19 +14,21 @@ normalizePlateMedian = function(x, transform, zscore){
   if(!missing(transform))
     xn = transform(xn)
 
-# calculates the z-score for each replicate separately
+  ## calculates the z-score for each replicate separately
   if(!missing(zscore)) {
-  samps = (x$wellAnno=="sample")
-  sg = switch(zscore,
-    "+" = 1,
-    "-" = -1,
-    stop(sprintf("Invalid value '%s' for argument 'zscore'", zscore)))
-
+    samps = (x$wellAnno=="sample")
+    sg = switch(zscore,
+      "+" = 1,
+      "-" = -1,
+      stop(sprintf("Invalid value '%s' for argument 'zscore'", zscore)))
+    
     for(r in 1:(dim(xn)[3]))
-      for(ch in 1:(dim(xn)[4]))
-         xn[, , r, ch] = sg * (xn[, , r, ch] - median(xn[,, r, ch][samps], na.rm=TRUE)) / mad(xn[,, r, ch][samps], na.rm=TRUE)
-  }
-
+      for(ch in 1:(dim(xn)[4])) {
+        ## this should be true after plate median normalization (above) 
+        stopifnot(median(xn[,, r, ch][samps], na.rm=TRUE) == 1)
+        xn[,,r,ch] = sg * (xn[,,r,ch] - 1) / mad(xn[,,r,ch][samps], na.rm=TRUE)
+      }
+  } 
 
   x$xnorm = xn
   x$state["normalized"] = TRUE

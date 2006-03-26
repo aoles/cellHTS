@@ -2,18 +2,23 @@
 \alias{normalizePlateMedian}
 \title{Median normalization of the data and data transformation}
 \description{
-  Normalizes the data \code{xraw} of a given cellHTS object by dividing by the plate median.
-  Furthermore, a data transformation may also be performed.
+  Plate median normalization of the data \code{xraw} of a cellHTS object.
+  Optionally, a data transformation such \code{log}, and a
+  transformation to z-scores can be performed.
 }
 \usage{
 normalizePlateMedian(x, transform, zscore)
 }
 \arguments{
-  \item{x}{a cellHTS object that has already been configured (see details).}
+  \item{x}{a \code{cellHTS} object that has already been configured (see details).}
   \item{transform}{a function that takes a numeric vector and returns a
     numeric vector of the same length; for example, the logarithm
     function \code{\link{log}}.}
-  \item{zscore}{indicates if the z-scores should be determined after normalization and transformation. If missing (default), the data will not be scored. Otherwise, it should be a character string, either "+" for activator assays or "-" for inhibitor assays.}
+  \item{zscore}{indicates if the data should be centered and scaled after
+    normalization and transformation. If missing (default), the data will
+    not be centered and scaled. Otherwise, the value of this argument
+    should be a character string, either "+"
+    for an activator assay or "-" for an inhibitor assay.}
 }
 
 \details{
@@ -24,13 +29,19 @@ calculated. Then, every measurement is divided by this value.
 If \code{transform} is not missing, the chosen data transformation is applied. 
 Most commonly, this option can be used to apply a log transformation.
 
-If \code{zscore} is not \code{NULL}, a robust z-score for each individual measurement will be determined for each plate 
-and each well by subtracting the overall median and dividing by the overall mad. The overall median and mad are taken 
-by considering the distribution of intensities (over all plates) in the wells whose content is annotated as \code{sample}. 
-The allowed values for \code{zscore} ("+" or "-") take into consideration the type of the assay when determining the z-scores. 
-In an activation type assay, an effect originates a strong signal, whereas in an inhibition type assay, an effect will result in a signal decrease. 
-Therefore, if \code{zscore} is set to  "-" (inhibitor assays), the symmetric of the score values is taken as the final z-scores, so that in both type of assays, 
-large positive z-scores will correspond to a strong effect.
+If \code{zscore} is not missing, a robust z-score for each individual
+measurement will be determined for each plate and each well by
+subtracting the overall \code{\link{median}} and dividing by the overall
+\code{\link{mad}}. These are taken by considering
+the distribution of intensities (over all plates) in the wells whose
+content is annotated as \code{sample}.  The allowed values for
+\code{zscore} ("+" or "-") take into consideration the type of the assay
+when determining the z-scores.  In an activation type assay, an effect
+originates a strong signal, whereas in an inhibition type assay, an
+effect will result in a signal decrease.  Therefore, if \code{zscore} is
+set to "-" (inhibitor assays), the value will be multiplied by -1,
+so that in both type of assays, large positive z-scores will correspond
+to a strong effect.
 }
 
 \value{
@@ -42,7 +53,7 @@ Moreover, the processing status of the \code{cellHTS} object is updated
 in the slot \code{state} to \code{state["normalized"]=TRUE}.
 }
 
-\author{Wolfgang Huber \email{huber@ebi.ac.uk}, Ligia Braz \email{ligia@ebi.ac.uk}}
+\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 
 \references{..}
 

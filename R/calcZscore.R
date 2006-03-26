@@ -24,7 +24,8 @@ calcZscore=function(x, sign="+", summary="mean") {
     ifelse(length(x)>=1, min(x), as.numeric(NA))
   }
 
-  ## 1) First applies the "sign" argument, so that the selected summary has the same meaning independently of the type of the assay:
+  ## 1) First applies the "sign" argument, so that the selected summary has
+  ## the same meaning independently of the type of the assay:
   mx = sg*mx
 
  ## 2) Summarize between replicates:
