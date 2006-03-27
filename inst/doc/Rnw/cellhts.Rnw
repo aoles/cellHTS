@@ -326,8 +326,8 @@ order for $z_{k}$ to be high. Depending on the intended stringency of
 the analysis, other plausible choices of summary function are the mean
 and the maximum.
 %
-<<calcZscore>>=
-x = calcZscore(x, sign="-", summary="min") 
+<<summariReplicates>>=
+x = summarizeReplicates(x, sign="-", summary="min") 
 @ 
 %
 The resulting single $z$-score value per probe will be stored in the
@@ -355,11 +355,12 @@ multiplication by $-1$. The package \Rpackage{cellHTS} allows some
 flexibility with respect to these steps. We can already calculate the
 $z$-scores and multiply by $-1$ in the function
 \Rfunction{normalizePlateMedian}, and then do the summarization
-between replicates in the function \Rfunction{summarizeZscore}.
+between replicates, by calling the function \Rfunction{summarizeReplicates}
+without the argument \Robject{zscore}.
 %
 <<normalizePlateMedianWithZscore>>=
 xalt = normalizePlateMedian(x, zscore="-") 
-xalt = summarizeZscore(xalt, summary="max")
+xalt = summarizeReplicates(xalt, summary="min")
 @ 
 %
 It is easy to define alternative normalization methods, for example,
@@ -667,7 +668,7 @@ myPlots=function(z,...) {
 }
 dv = matrix(x$xnorm, nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
 myPlots(dv, main="untransformed")
-xlog = normalizePlateMedian(x, transform=log2, zscore="-")
+xlog = normalizePlateMedian(x, transform=log2)
 dvlog = matrix(xlog$xnorm, nrow=prod(dim(xlog$xnorm)[1:2]), ncol=dim(xlog$xnorm)[3])
 myPlots(dvlog, main="log2")
 @ 

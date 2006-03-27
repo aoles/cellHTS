@@ -41,7 +41,7 @@ wells annotated as \code{sample} in the respective plate and
 replicate. Note that if the data have been log transformed (\code{log = TRUE}), 
 the median is subtracted instead. The default is \code{scmedian = FALSE}.
    
-If \code{zscore} is not \code{NULL}, a robust z-score for each
+If \code{zscore} is not missing, a robust z-score for each
 individual measurement will be determined for each plate and each well
 by subtracting the overall median and dividing by the overall mad. The
 overall median and mad are taken by considering the distribution of

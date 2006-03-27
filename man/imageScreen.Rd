@@ -28,7 +28,7 @@ from the cellHTS object \code{x}.
  descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
  x = normalizePlateMedian(x, zscore="-")
- x = summarizeZscore(x) 
+ x = summarizeReplicates(x) 
  imageScreen(x, zrange=c(-5,5))
 }
 
