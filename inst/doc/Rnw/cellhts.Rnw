@@ -326,8 +326,8 @@ order for $z_{k}$ to be high. Depending on the intended stringency of
 the analysis, other plausible choices of summary function are the mean
 and the maximum.
 %
-<<summariReplicates>>=
-x = summarizeReplicates(x, sign="-", summary="min") 
+<<summarizeReplicates>>=
+x = summarizeReplicates(x, zscore="-", summary="min") 
 @ 
 %
 The resulting single $z$-score value per probe will be stored in the
