@@ -239,7 +239,7 @@ for (ch in 1:trueNrCh) out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch
     if(x$state["annotated"]) {
           out = cbind(out, x$geneAnno)
           out = out[,!duplicated(tolower(names(out)))] 
-	  ttInfo = "Table of scored and annotated probes"
+	  ttInfo = "Table of scored <BR> and annotated probes"
           } else ttInfo = "Table of scored probes"
     ## consider only the wells with sample and controls, at least for one of the replicates
     toconsider = which(!apply(out[,grep("finalWellAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
@@ -257,7 +257,7 @@ for (ch in 1:trueNrCh) out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch
 count = nrow(plotTable)
 plotTable = rbind(plotTable, rep("", length=prod(ncol(plotTable)* 2))) 
 plotTable[count + 1, 2] = "<H3 align=center>Screen-wide image plot of the scored values</H3>"
-plotTable[count + 2, 1] = sprintf("<CENTER><A HREF=\"topTable.txt\">%s</A></CENTER><BR>\n", ttInfo)
+plotTable[count + 2, 1] = sprintf("<CENTER><A HREF=\"topTable.txt\"><em>%s</em></A></CENTER><BR>\n", ttInfo)
 plotTable[count + 2, 2] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", "imageScreen.pdf", "imageScreen.png") 
 }
 
