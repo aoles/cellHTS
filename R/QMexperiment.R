@@ -76,8 +76,10 @@ return(plotTable)
 
 boxplotwithNA = function(x, fac, ...) {
 	sel = apply(x,2,function(x) all(is.na(x)))	
-        x[,sel] = min(x,na.rm=TRUE) 	
-        boxplot(x~fac,...)
+        x[,sel] = min(x,na.rm=TRUE)
+        xsp = split(x, fac)	
+        #boxplot(x~fac,...)
+        boxplot(xsp,...)
 }
 
 densityplot = function(xpos, xneg, zfac, ...) {
