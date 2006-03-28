@@ -193,7 +193,8 @@ if (x$state["configured"]) {
   cat("</CENTER><BR><BR>", file=con)
 
   ## Per experiment QC
-  QMexperiment(x, outdir, con)
+  plotTable = QMexperiment(x, outdir, con)
+
 
   ## Score table and screen-wide QC
   if(x$state["scored"]) {
@@ -237,7 +238,9 @@ for (ch in 1:trueNrCh) out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch
 
     if(x$state["annotated"]) {
           out = cbind(out, x$geneAnno)
-          out = out[,!duplicated(tolower(names(out)))] }
+          out = out[,!duplicated(tolower(names(out)))] 
+	  ttInfo = "Table of scored and annotated probes"
+          } else ttInfo = "Table of scored probes"
     ## consider only the wells with sample and controls, at least for one of the replicates
     toconsider = which(!apply(out[,grep("finalWellAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
     out = out[toconsider, ]
@@ -245,10 +248,20 @@ for (ch in 1:trueNrCh) out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch
     out$score = round(out$score, 2)
     write.table(out, file=file.path(outdir, "topTable.txt"), sep="\t", row.names=FALSE, col.names=TRUE, quote = FALSE)
 
+
     ## screen-wide QC (image plot with the z score values)
     makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
-             fun = function() do.call("imageScreen", args=append(list(x=x), imageScreenArgs)))
-  }
+             fun = function() do.call("imageScreen", args=append(list(x=x), imageScreenArgs)), print=FALSE)
+
+
+count = nrow(plotTable)
+plotTable = rbind(plotTable, rep("", length=prod(ncol(plotTable)* 2))) 
+plotTable[count + 1, 2] = "<H3 align=center>Screen-wide image plot of the scored values</H3>"
+plotTable[count + 2, 1] = sprintf("<CENTER><A HREF=\"topTable.txt\">%s</A></CENTER><BR>\n", ttInfo)
+plotTable[count + 2, 2] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", "imageScreen.pdf", "imageScreen.png") 
+}
+
+writeHTMLtable4plots(plotTable, con=con)
   writetail(con)
   return(outdir)
 }

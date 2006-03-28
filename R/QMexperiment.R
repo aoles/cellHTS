@@ -66,7 +66,8 @@ plotTable[count + 1, ch+1] = "<CENTER><i>No controls ('pos' and 'neg') were foun
 count = count + 1
     } ## for r
   } ## for ch
-writeHTMLtable4plots(plotTable, con=con)
+return(plotTable) 
+#writeHTMLtable4plots(plotTable, con=con)
 
 } ## QMexperiment
 
