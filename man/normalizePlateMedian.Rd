@@ -17,8 +17,8 @@ normalizePlateMedian(x, transform, zscore)
   \item{zscore}{indicates if the data should be centered and scaled after
     normalization and transformation. If missing (default), the data will
     not be centered and scaled. Otherwise, the value of this argument
-    should be a character string, either "+"
-    for an activator assay or "-" for an inhibitor assay.}
+    should be a character string, either "+" or "-", which will be used to set the sign 
+    for the calculated z-scores (see details).}
 }
 
 \details{
@@ -35,13 +35,11 @@ subtracting the overall \code{\link{median}} and dividing by the overall
 \code{\link{mad}}. These are taken by considering
 the distribution of intensities (over all plates) in the wells whose
 content is annotated as \code{sample}.  The allowed values for
-\code{zscore} ("+" or "-") take into consideration the type of the assay
-when determining the z-scores.  In an activation type assay, an effect
-originates a strong signal, whereas in an inhibition type assay, an
-effect will result in a signal decrease.  Therefore, if \code{zscore} is
-set to "-" (inhibitor assays), the value will be multiplied by -1,
-so that in both type of assays, large positive z-scores will correspond
-to a strong effect.
+\code{zscore} ("+" or "-") are used to set the sign of the calculated z-scores.
+For example, with a \code{zscore="-"} a strong decrease in the signal will be 
+represented by a positive z-score, whereas setting \code{zscore="+"}, 
+such a phenotype will be represented by a negative z-score.  
+This option can be set to calculate the results to the commonly used convention.
 }
 
 \value{

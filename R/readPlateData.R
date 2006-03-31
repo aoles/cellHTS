@@ -1,18 +1,21 @@
 ## (C) Michael Boutros and Wolfgang Huber, Nov 2005
-readPlateData = function(x, name, path=".", plateType="384", verbose=TRUE)
+readPlateData = function(filename, path=dirname(filename), name, plateType="384", verbose=TRUE)
 {
+
+  file = basename(filename)
+
   pdim = switch(plateType,
     "96"  = c(nrow=8, ncol=12),
     "384" = c(nrow=16, ncol=24),
     stop("'plateType' must be 96 or 384")
   )
-  
+
   if(!(is.character(path)&&length(path)==1))
     stop("'path' must be character of length 1")
-  
-  pd = read.table(file.path(path, x), sep="\t", header=TRUE, as.is=TRUE)
-  
-  checkColumns(pd, x, mandatory=c("Filename", "Plate", "Replicate"),
+
+  pd = read.table(file.path(path, file), sep="\t", header=TRUE, as.is=TRUE)
+
+  checkColumns(pd, file, mandatory=c("Filename", "Plate", "Replicate"),
                numeric=c("Plate", "Replicate", "Channel", "Batch"))
 
   nrRep   = max(pd$Replicate)
@@ -72,13 +75,14 @@ readPlateData = function(x, name, path=".", plateType="384", verbose=TRUE)
 
   if(verbose)
     cat("Reading ")
-  
+
+  isThereAnyHope=FALSE
   for(i in 1:nrow(pd)) {
     if(verbose)
       cat(pd[i, "Filename"], "")
    
     ff = grep(pd[i, "Filename"], dfiles, ignore.case=TRUE)
-
+   
     if (length(ff)!=1) {
       f = file.path(path, pd[i, "Filename"])
       status[i] = sprintf("File not found: %s", f)
@@ -92,12 +96,13 @@ readPlateData = function(x, name, path=".", plateType="384", verbose=TRUE)
         plateID = sapply(sp, "[", 1)
         pos     = sapply(sp, "[", 2)
         val     = sapply(sp, "[", 3)
-        
+
         pos     = pos2i(pos, pdim)
         val     = as.numeric(val)
-        
+
         intensityFiles[[i]] = txt
         xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = val
+  	isThereAnyHope=TRUE
         "OK"
       },
               warning = function(e) {
@@ -111,6 +116,9 @@ readPlateData = function(x, name, path=".", plateType="384", verbose=TRUE)
 
   if(verbose)
     cat("\nDone.\n\n")
+
+  if (!isThereAnyHope) stop(sprintf("None of the files were found in the given 'path': %s", path))
+
 
   res = list(name=name, 
     xraw=xraw, pdim=pdim, batch=batch,

@@ -8,23 +8,24 @@
   by the argument 'x'.  
 }
 \usage{
-readPlateData(x, name, path=".", plateType="384", verbose=TRUE)
+readPlateData(filename, name, path=dirname(filename), plateType="384", verbose=TRUE)
 }
 \arguments{
-  \item{x}{the name of the file table (see details).
+  \item{filename}{the name of the file table (see details).
     This argument is just passed on to the \code{\link{read.table}}
     function, so any of the valid argument
     types for \code{\link{read.table}} are valid here, too.}
   \item{name}{a character of length 1 with the experiment name.}
   \item{path}{a character of length 1 indicating the path in
-    which to find the plate reader files.}
+    which to find the plate reader files. By default, 
+    it can extract the path from \code{filename}.}
   \item{plateType}{a character of length 1, allowed values are "96" and "384".}
   \item{verbose}{a logical value, if TRUE, the function reports some of
     its intermediate progress.}
 }
 \details{The file table is expected to be a tab-delimited file with at
   least three columns, and column names \code{Filename}, \code{Plate},
-  and \code{Replicate}. The contents of the columns code{Plate} and
+  and \code{Replicate}. The contents of the columns \code{Plate} and
   \code{Replicate} are expected to be integers. Further columns are
   allowed.
 
@@ -32,7 +33,6 @@ readPlateData(x, name, path=".", plateType="384", verbose=TRUE)
   A plate result file contains the measurements results for all
   replicates and all channels of a plate, which is the physical carrier
   of the reagents. 
-
 }
 
 \value{

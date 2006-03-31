@@ -16,7 +16,8 @@ summarizeReplicates(x, zscore, summary="min")
     If missing (default), the data will
     not be centered and scaled. Otherwise, the value of this argument
     should be a character string, either "+"
-    for an activator assay or "-" for an inhibitor assay (see details).}
+    or "-", specifying the sign to use for the calculated 
+    z-scores (see details).}
   \item{summary}{a character string indicating how to summarize between replicated measurements. 
     One of "min" (default), "mean", or "min" can be used (see details).}
 }
@@ -25,15 +26,15 @@ summarizeReplicates(x, zscore, summary="min")
 
  The argument \code{zscore} indicates the state of the normalized replicate measurements: if \code{zscore} is missing, it
  is assumed that the replicates have been scored, by calling \code{\link{normalizePlateMedian}} 
- with the argument \code{zscore} equal to "-" or "+"; Otherwise, \code{zscore} should be given to correct for the type of the assay, before 
- scoring each replicate. In an activation type assay, an effect originates a strong signal, 
- whereas in an inhibition type assay, an effect will result in a signal decrease. Therefore, if \code{zscore} is set to "-" 
- (inhibitor assays), the symmetric of the intensity values is taken, so that in both type of assays, large positive values will correspond to a strong effect. 
- After correcting the replicate measurements using \code{zscore}, a robust z-score is calculated for each plate and each well by subtracting the
- overall median and dividing by the overall mad. The overall median and
- mad are taken by considering the distribution of intensities (over all plates) 
-	in the wells whose content is annotated as \code{sample}. 
-
+ with the argument \code{zscore} equal to "-" or "+"; Otherwise, \code{zscore} should be given, so that a robust z-score 
+ is calculated for each plate and each well by subtracting the overall median and dividing by the overall mad. The overall median and
+ mad are taken by considering the distribution of intensities (over all plates) in the wells whose content is annotated as \code{sample}. 
+ The allowed values for \code{zscore} ("+" or "-") are used to set the sign of 
+ the calculated z-scores. For example, with a \code{zscore="-"} a strong decrease in the signal will be represented 
+ by a positive z-score, whereas setting \code{zscore="+"}, 
+ such a phenotype will be represented by a negative z-score.  
+ This option can be set to calculate the results to the commonly used convention.
+ 
  Finally, a single z-score per probe is calculated by summarizing between scored replicates. If \code{summary} is \code{mean}, 
  the average of replicate values is considered; if it is set to \code{max}, then the maximum of replicate
  intensities is taken, while if its value is set to \code{min}, the minimum is considered, instead (conservative).
