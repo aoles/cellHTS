@@ -8,7 +8,7 @@
   by the argument 'x'.  
 }
 \usage{
-readPlateData(filename, name, path=dirname(filename), plateType="384", verbose=TRUE)
+readPlateData(filename, path=dirname(filename), name, plateType="384", verbose=TRUE)
 }
 \arguments{
   \item{filename}{the name of the file table (see details).
