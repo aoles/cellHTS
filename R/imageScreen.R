@@ -76,11 +76,11 @@ imageScreen = function (x, ar=3/5, zrange) {
   xbar  = seq(0, 1, length=7)
   xval  = signif(reverseMap(xbar), 2)
   
-  newmat[13:16, 1:(length(xbar)*4)] = matrix(data=rep(xbar, each = 4, times=4),
-                                             nrow = 4, ncol=length(xbar)*4, byrow=TRUE)
+  newmat[13:16, 1:(length(xbar)*3)] = matrix(data=rep(xbar, each = 3, times=4),
+                                             nrow = 4, ncol=length(xbar)*3, byrow=TRUE)
   newmat[22+(1:Nrow),] = mat
 
   image((1:Ncol), 1:(Nrow+22), z=t(newmat), zlim=c(0,1), axes=FALSE, col=colrs, add = FALSE, ylab="", xlab="")
-  text(seq(4*0.625, length(xbar)*4+1, by=4), y=6, offset=0, cex = 1, srt=90, 
+  text(seq(3*0.625, length(xbar)*3+1, by=3), y=6, offset=0, cex = 1, srt=90, 
        labels=c(paste(c("< ", rep("", length(xval)-2), ">"), xval, sep="")))
 }
