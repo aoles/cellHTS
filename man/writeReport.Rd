@@ -6,16 +6,20 @@
   Creates a directory with HTML pages of linked tables and plots
   documenting the contents of a  cellHTS object.}
 \usage{
-writeReport(x, outdir=x$name, force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=NULL)
+writeReport(x, outdir=file.path(getwd(), x$name),
+  force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=NULL)
 }
 
 \arguments{
   \item{x}{a cell HTS object.}
-  \item{outdir}{a character of length 1 with the output base directory.}
-  \item{force}{a logical value, determines the behavior of the function
-    if \code{outdir} contains anything.
-    If \code{force} is \code{TRUE}, the function forcefully recursively
-    removes the contents of \code{outdir} of it, otherwise it casts an error.}
+  \item{outdir}{a character of length 1 with the name of a directory where
+    to write the report HTML file and images. If the directory does not
+    exist, it is created. If it exists and is not empty, then the
+    behaviour depends on the value of \code{force}.}
+  \item{force}{a logical value, determines the behaviour of the function
+    if \code{outdir} exists and is not empty.
+    If \code{force} is \code{TRUE}, the function overwrites (removes and recreates)
+    \code{outdir}, otherwise it casts an error.}
   \item{plotPlateArgs}{either a list with parameters for the plate plots the
     per plate quality report pages, or a logical with value \code{FALSE}.
     If \code{FALSE}, the plate plots are omitted, this option is
@@ -45,7 +49,8 @@ writeReport(x, outdir=x$name, force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=
 
 \value{
   The function is called for its side-effect.
-  It returns the character \code{outdir} with the path to the output directory.
+  It returns a character with the full path and name of the report index
+  file, this is an HTML file which can be read by a web browser.
 }
 
 \author{Ligia Bras \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}

@@ -163,7 +163,7 @@ working directory. Alternatively, the argument \Robject{outdir} can be
 specified to direct the output to another directory. 
 %
 <<writeReport1Show, eval=FALSE>>=
-writeReport(x)
+out = writeReport(x)
 @ 
 <<writeReport1Do, echo=FALSE, results=hide>>=
 out = writeReport(x, force=TRUE)
@@ -175,7 +175,7 @@ the report will be in the file \Sexpr{file.path(out,"index.html")},
 and you can view it by directing a web browser to it.
 %
 <<browseReport1, eval=FALSE>>=
-browseURL(file.path(out, "index.html"))
+browseURL(out)
 @ 
 
 %------------------------------------------------------------
@@ -476,14 +476,15 @@ on to others. To produce a comprehensive report, we can call the
 function \Rfunction{writeReport} again,
 %
 <<writeReport2, results=hide>>=
-writeReport(x, force=TRUE, 
+out = writeReport(x, force=TRUE, 
   plotPlateArgs   = list(xrange=c(0.5, 1.5)),
   imageScreenArgs = list(zrange=c( -2, 6.5), ar=1)) 
 @ 
 %
 and use a web browser to view the resulting report
+%
 <<browseReport2, eval=FALSE>>=
-browseURL(file.path(x$name, "index.html"))
+browseURL(out)
 @ 
 % 
 Now, the report contains a quality report for each plate, and also for
