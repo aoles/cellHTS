@@ -53,8 +53,8 @@ instructions for the method it describes, and these in turn produce
 all results, including the figures and tables that are shown here. The
 computer instructions are given in the language R, thus, in order to
 reproduce the computations shown here, you will need an installation
-of R (version 2.2 or greater) together with the package
-\Rpackage{cellHTS} and some other add-on packages.
+of R (version 2.3 or greater) together with a recent version of the package
+\Rpackage{cellHTS} and of some other add-on packages.
 
 To reproduce the computations shown here, you do not need to type them
 or copy-paste them from the PDF file; rather, you can take the file
@@ -171,8 +171,13 @@ out = writeReport(x, force=TRUE)
 %
 It can take a while to run this function, since it writes a large number
 of graphics files. After this function has finished, the index page of
-the report will be in the file \Sexpr{file.path(out,"index.html")}, 
-and you can view it by directing a web browser to it.
+the report will be in the file indicated by the variable \Robject{out}, 
+%
+<<printout>>=
+out
+@ 
+%
+and you can view it by directing a web browser to that file.
 %
 <<browseReport1, eval=FALSE>>=
 browseURL(out)
@@ -397,11 +402,25 @@ cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6)
 %---------------------------------------------------------------
 \subsection{Adding additional annotation from public databases}
 %---------------------------------------------------------------
-The package \Rpackage{biomaRt} can be used to obtain additional
-annotation from public databases~\cite{biomaRt2005}.  You will need
-version 1.5.3 or later of the \Rpackage{biomaRt} package. This is
-currently (March 2006) in the development branch of Bioconductor and
-will be in the release 1.8.
+For the analysis of the RNAi screening results, we usually want to
+consider gene annotation information such as Gene Ontology,
+chromosomal location, gene function summaries, homology.  The package
+\Rpackage{biomaRt} can be used to obtain such annotation from public
+databases~\cite{biomaRt2005}. However, there are also numerous
+alternative methods to annotate a list of gene identifiers with public
+annotation -- pick your favourite one.
+
+This section demonstrates how to do it with the package
+\Rpackage{biomaRt}.  It is optional, you can move on to the next
+section (\ref{sec:report}) if you do not have the \Rpackage{biomaRt}
+package or do not want to use it. For the purpose of this vignette, we
+load a cached version of the gene annotation:
+
+<<bdgpbiomart1, eval=FALSE>>=
+data("bdgpbiomart")
+x$geneAnno = bdgpbiomart
+@ 
+
 
 %--------------------------- 
 \subsubsection{Installation}
@@ -426,33 +445,26 @@ want to explore the \Rpackage{cellHTS} package and see whether it is
 worthwhile. We have made available the result of the annotation with
 \Rpackage{biomaRt}, described below, as a precomputed R object:
 %
-<<bdgpbiomart>>=
-data("bdgpbiomart")
-x$geneAnno = bdgpbiomart
-@ 
 
 %------------------------------------------------------------------
 \subsubsection{Using biomaRt to annotate the target genes online}
 %------------------------------------------------------------------
-The commands in this section are optional, you can move on to
-Section~\ref{sec:report} if you do not have the \Rpackage{biomaRt}
-package or do not want to use it. In the remainder of this section, we
+In the remainder of this section, we
 will demonstrate how to obtain the dataframe \Robject{bdgpbiomart} by
 querying the online webservice \textit{BioMart} and through it the
 Ensembl genome annotation database~\cite{Ensembl2006}.
-%
-<<biomaRt, eval=FALSE, echo=FALSE, results=hide>>=
-Sweave("biomart.Rnw")
-@ 
+
 \input{biomart.tex}
 
-% This is how 'bdgpbiomart' it is created from 'x$geneAnno' 
-% (before the assignment in the chunk <<bdgpbiomart>> above) from the 
-% table 'bmAll' (which is produced by the call to Sweave("biomart.Rnw")
-% below):
 %
-% bdgpbiomart = cbind(x$geneAnno, bmAll)
-% save(bdgpbiomart, file="../../../data/bdgpbiomart.rda", compress=TRUE)
+<<biomaRt, eval=TRUE, echo=FALSE, results=hide>>=
+Sweave("biomart.Rnw")
+@ 
+<<bdgpbiomart2, eval=TRUE>>=
+bdgpbiomart = cbind(x$geneAnno, bmAll)
+## save(bdgpbiomart, file="../../../data/bdgpbiomart.rda", compress=TRUE)
+x$geneAnno = bdgpbiomart
+@ 
 
 %------------------------------------------------------------
 \section{Report}
@@ -532,26 +544,32 @@ analyses could be done for other categorizations, for example
 chromosome location, pathway membership, or categorical phenotypes
 from other studies.
 
-You will need version 1.3.2 or later of the \Rpackage{Category}
-package. This is currently (March 2006) in the development branch of
-Bioconductor and will be in the release 1.8.
 %
 <<category, results=hide>>=
 library("Category")
-stopifnot(package.version("Category") >= package_version("1.3.2"))
 @ 
 %
-Now we can create the category matrix. This a matrix with one column for
-each probe and one row for each category. The matrix element
-\Robject{[i,j]} is \Robject{1} if probe \Robject{j} belongs to the
-\Robject{j}-th category, and \Robject{0} if not.
+Now we can create the category matrix. Conceptually, this a matrix 
+with one column for each probe and one row for each category. 
+The matrix element \Robject{[i,j]} is \Robject{1} if probe 
+\Robject{j} belongs to the \Robject{j}-th category, and \Robject{0} 
+if not. In practice, this matrix would be rather large (and perhaps 
+exhaust the memory of your computer), hence we use a type of sparse 
+matrix representation, implemented by the \Rclass{graph} object 
+\Robject{categs}. This bipartite graph's nodes correspond to the rows 
+and columns of the matrix and there is an edge if the matrix element 
+is non-zero.
+
+One distraction is the GO term GO:0000067, which is annotated to some
+of the genesprobes,
 %
 <<cat1>>=
 names(x$score) = x$geneAnno$GeneID
-sel = !is.na(x$score) & (!is.na(x$geneAnno$go_id))
-goids = strsplit(x$geneAnno$go_id[sel], ", ")
+sel = !is.na(x$score) & (!is.na(x$geneAnno$go))
+goids = strsplit(x$geneAnno$go[sel], ", ")
+goids = lapply(goids, function(x) x[x!="GO:0000067"])
 genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
-categs = cache("categs", cateGOry(genes, unlist(goids, use.names=FALSE)))
+cache(categs <- cateGOry(genes, unlist(goids, use.names=FALSE)))
 @ 
 % 
 We will selected only those categories that contain at least 3 and no more than 1000 genes.
