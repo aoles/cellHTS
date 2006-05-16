@@ -1,12 +1,9 @@
 <<biomaRt, results=hide>>=
 library("biomaRt")
 @ 
-<<biomaRtversioncheck,echo=FALSE,results=hide>>=
-stopifnot(package.version("biomaRt") >= package_version("1.5.3"))
-@ 
 %
 By default, the \Rpackage{biomaRt} package will query the webservice at\newline 
-http://www.ebi.ac.uk/biomart/martservice.  Let's check
+http://www.ebi.ac.uk/biomart/martservice.  Let us check
 which BioMart databases it covers:
 %
 <<listMarts>>=
@@ -47,7 +44,7 @@ query). We use the \Rfunction{getBM} function of the package
 %
 <<myGetBM>>=
 myGetBM = function(att)
-  getBM(attributes=c("gene_stable_id", att), 
+  getBM(attributes=c("ensembl_gene_id", att), 
         filter="gene_stable_id", 
         values=unique(x$geneAnno$GeneID), mart=mart)
 @ 
@@ -60,19 +57,16 @@ the result table will be enormous due to the 1:many mapping
 especially from gene ID to GO categories~\cite{GO}.
 %
 <<getBM>>=
-bm1 = myGetBM(c("chr_name", "chrom_start", "chrom_end", "description"))
+bm1 = myGetBM(c("chromosome_name", "start_position", "end_position", "description"))
 bm2 = myGetBM(c("flybase_name"))
-bm3 = myGetBM(c("go_id", "go_description"))
+bm3 = myGetBM(c("go", "go_description"))
 @ 
 %
 There are only a few CG-identifiers for which we were not able to
 obtain chromosomal locations: 
 %
 <<setDiff>>=
-unique(setdiff(x$geneAnno$GeneID, bm1$gene_stable_id)) 
-## table(table(bm1$gene_stable_id))
-## table(table(bm2$gene_stable_id)) 
-## table(table(bm2$gene_stable_id))
+unique(setdiff(x$geneAnno$GeneID, bm1$ensembl_gene_id)) 
 @ 
 %
 Below, we add the results
@@ -91,18 +85,6 @@ bmAll = cbind(
    oneRowPerId(bm1, id),
    oneRowPerId(bm2, id),
    oneRowPerId(bm3, id)) 
-@ 
-%
-This is indeed the same as we loaded previously in
-Section~\ref{sec:install}:
-%
-<<checkBmAll>>=
-identical(bdgpbiomart[, 5:11],  bmAll)
-@ 
-%
-<<check,echo=FALSE,results=hide>>=
-for(j in 1:ncol(bmAll))
-  stopifnot(identical(bdgpbiomart[, j+4], bmAll[,j]))
 @ 
 
 

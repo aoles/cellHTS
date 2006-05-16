@@ -413,8 +413,11 @@ annotation -- pick your favourite one.
 This section demonstrates how to do it with the package
 \Rpackage{biomaRt}.  It is optional, you can move on to the next
 section (\ref{sec:report}) if you do not have the \Rpackage{biomaRt}
-package or do not want to use it. For the purpose of this vignette, we
-load a cached version of the gene annotation:
+package or do not want to use it. If you do skip this section, then
+for the purpose of this vignette, please load a cached version of the
+gene annotation (you do not need to run the following two lines if
+you want to get the annotation online as described in the remainder 
+of this section).
 
 <<bdgpbiomart1, eval=FALSE>>=
 data("bdgpbiomart")
@@ -561,7 +564,7 @@ and columns of the matrix and there is an edge if the matrix element
 is non-zero.
 
 One distraction is the GO term GO:0000067, which is annotated to some
-of the genesprobes,
+of the genes, but is obsolete.
 %
 <<cat1>>=
 names(x$score) = x$geneAnno$GeneID
@@ -572,7 +575,7 @@ genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
 cache(categs <- cateGOry(genes, unlist(goids, use.names=FALSE)))
 @ 
 % 
-We will selected only those categories that contain at least 3 and no more than 1000 genes.
+We will select only those categories that contain at least 3 and no more than 1000 genes.
 <<cat2>>=
 remGO = which(regexpr("^GO:", nodes(categs)) > 0)
 nrMem = listLen(edges(categs)[remGO])
