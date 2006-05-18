@@ -1,17 +1,17 @@
-normalizePlates = function(x, fun="median", transform, zscore){
+normalizePlates = function(x, normalizationMethod="median", transform, zscore){
 
  ## Check the status of the 'cellHTS' object
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
 
  ## Apply the chosen plate-wise normalization function
- xn = switch(fun,
+ xn = switch(normalizationMethod,
     mean = scaleByPlateMean(x),
     median = scaleByPlateMedian(x),
     shorth = scaleByPlateShorth(x),
     POC = POC(x),
     NPI = NPI(x),
-    stop(sprintf("Invalid value '%s' for argument 'fun'", fun)))
+    stop(sprintf("Invalid value '%s' for argument 'normalizationMethod'", normalizationMethodfun)))
 
  ## See if the data should be further transformed
   if(!missing(transform)) {

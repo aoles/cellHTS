@@ -60,7 +60,7 @@ summarizeReplicates(x, zscore, summary="min")
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
  descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
- x = normalizePlateMedian(x)
+ x = normalizePlates(x, normalizationMethod="median")
  x = summarizeReplicates(x, zscore="-", summary="min")
 }
 \keyword{manip}

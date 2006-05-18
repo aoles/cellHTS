@@ -714,8 +714,12 @@ myPlots(dvlog, main="log2")
 \section{Appendix: Multiple channel experiments}
 %------------------------------------------------------------
 
-The \Rpackage{cellHTS} includes an example of a two-color screen performed with \textit{D. melanogaster} cells. Two reporters were used. The first reporter is specific for ...., while the second reporter is indicative of 
+Under construction!
 
+The \Rpackage{cellHTS} includes an example of a two-color screen performed 
+with \textit{D. melanogaster} cells. Two reporters were used. 
+The first reporter is specific for ...., while the second reporter is indicative of 
+...
 
 reporter $R1$ could monitor the total number of viable cells in a
 well, another reporter $R2$ the activity of a particular

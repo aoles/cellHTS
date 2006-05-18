@@ -27,7 +27,7 @@ from the cellHTS object \code{x}.
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
  descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
- x = normalizePlateMedian(x, zscore="-")
+ x = normalizePlates(x, normalizationMethod="median",zscore="-")
  x = summarizeReplicates(x) 
  imageScreen(x, zrange=c(-5,5))
 }

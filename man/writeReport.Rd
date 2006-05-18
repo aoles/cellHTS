@@ -63,7 +63,7 @@ writeReport(x, outdir=file.path(getwd(), x$name),
  descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
  writeReport(x)
- x = normalizePlateMedian(x, zscore="-")
+ x = normalizePlates(x, normalizationMethod="median",zscore="-")
  x = summarizeReplicates(x, summary="min")
  writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs=list(zrange=c(-4,4)))
 }
