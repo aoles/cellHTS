@@ -301,9 +301,12 @@ should be discarded and regarded as missing.
 \section{Normalization and summarization of replicates}
 \label{sec:norm}
 %------------------------------------------------------------ 
-The function \Rfunction{normalizePlates} can be called to adjust for plate effects. The \Robject{normalizationMethod}  allows to perform different normalizations. For example, if it is set to \Robject{"median"}, the function \Rfunction{normalizePlates} adjusts for plate
-effects by dividing each value in each plate by the median of values
-in the plate:
+The function \Rfunction{normalizePlates} can be called to adjust for
+plate effects. Its parameter \Robject{normalizationMethod} allows to choose 
+between different types of normalization. For example, if it is set to
+\Robject{"median"}, the function \Rfunction{normalizePlates} adjusts
+for plate effects by dividing each value in each plate by the median
+of values in the plate:
 \begin{eqnarray} 
 x'_{ki} &=& \frac{x_{ki}}{M_i}\quad\quad\forall k,i \label{eq:normalizePlateMedian}\\
 M_{i}&=&\mathop{\operatorname{median}}_{m\in\,\mbox{\scriptsize samples}} x_{mi}
@@ -321,11 +324,11 @@ after which the normalized intensities are stored in the slot
 \Robject{x\$xraw}. 
 
 We can now summarize the replicates, calculating a single score for
-each gene. One option is to take the average of the $z$-scores from the two
-replicates:
+each gene. One option would be to take the root mean square
+of the $z$-scores from the replicates:
 \begin{eqnarray}
 z_{ki} &=& \pm \frac{x'_{ki}-\hat{\mu}}{\hat{\sigma}} \label{eq:defz} \\
-z_{k}  &=& \mean_{i} z_{ki} \label{eq:scoresSummary}.
+z_{k}  &=& \sqr{\frac{1}{n_{\mbox{\scriptsize rep}}} \sum_{i} z_{ki}^2} \label{eq:scoresSummary}.
 \end{eqnarray}
 Here $\hat{\mu}$ and $\hat{\sigma}$ are estimators of location and
 scale of the distribution of $x'_{ki}$.  We use robust estimators,
@@ -338,12 +341,15 @@ useful in the application to an inhibitor assay, where an effect
 results in a decrease of the signal and we may want to see this
 represented by a large $z$-score.  Then, in
 Equation~\eqref{eq:scoresSummary}, the summary is taken over all
-replicates for probe $k$. Depending on the intended stringency of
-the analysis, other plausible choices of summary function between replicates 
-are the min, and the maximum. In the first case, the analysis would be particularly conservative: all replicate values have to be high in
-order for $z_{k}$ to be high. 
-In order to compare our results with those obtained in the paper of Boutros \textit{et al.}~\cite{Boutros2004}, we have chosen to consider the mean as a summary.
+replicates for probe $k$. 
 
+Depending on the intended stringency of the analysis, other plausible
+choices of summary function between replicates are the minimum and the
+maximum. In the first case, the analysis would be particularly
+conservative: all replicate values have to be high in order for
+$z_{k}$ to be high.  In order to compare our results with those
+obtained in the paper of Boutros \textit{et al.}~\cite{Boutros2004},
+we choose to consider the mean as a summary:
 %
 <<summarizeReplicates>>=
 x = summarizeReplicates(x, zscore="-", summary="mean") 
@@ -704,7 +710,7 @@ myPlots=function(z,...) {
 }
 dv = matrix(x$xnorm, nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
 myPlots(dv, main="untransformed")
-xlog = normalizePlates(x, normalizatioMethod="median", transform=log2)
+xlog = normalizePlates(x, normalizationMethod="median", transform=log2)
 dvlog = matrix(xlog$xnorm, nrow=prod(dim(xlog$xnorm)[1:2]), ncol=dim(xlog$xnorm)[3])
 myPlots(dvlog, main="log2")
 @ 
