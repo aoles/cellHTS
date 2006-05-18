@@ -25,7 +25,7 @@ summarizeReplicates(x, zscore, summary="min")
  Given the normalized values given in the slot \code{xnorm} of \code{x}, a single z-score is calculated for each probe.
 
  The argument \code{zscore} indicates the state of the normalized replicate measurements: if \code{zscore} is missing, it
- is assumed that the replicates have been scored, by calling \code{\link{normalizePlateMedian}} 
+ is assumed that the replicates have been scored, by calling \code{\link{normalizePlates}} 
  with the argument \code{zscore} equal to "-" or "+"; Otherwise, \code{zscore} should be given, so that a robust z-score 
  is calculated for each plate and each well by subtracting the overall median and dividing by the overall mad. The overall median and
  mad are taken by considering the distribution of intensities (over all plates) in the wells whose content is annotated as \code{sample}. 

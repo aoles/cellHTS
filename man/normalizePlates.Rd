@@ -27,7 +27,7 @@ normalizePlates(x, normalizationMethod="median", transform, zscore)
 \details{
 The normalization is performed in a per-plate fashion.
 If \code{normalizationMethod="median"}, plates effects are corrected by dividing each measurement 
-by the mean or median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate, replicate and batch.
+by the median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate, replicate and batch.
 If \code{normalizationMethod="mean"}, the average in the \code{sample} wells is consider instead.
 If \code{normalizationMethod="shorth"}, for each plate, replicate and batch, the midpoint of the shorth (see \code{\link[genefilter:shorth]{shorth}}) of the distribution of values in the wells annotated as \code{sample} is
 calculated. Then, every measurement is divided by this value.
