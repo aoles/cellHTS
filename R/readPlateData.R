@@ -1,14 +1,9 @@
 ## (C) Michael Boutros and Wolfgang Huber, Nov 2005
-readPlateData = function(filename, path=dirname(filename), name, plateType="384", verbose=TRUE)
+readPlateData = function(filename, path=dirname(filename), name, verbose=TRUE)
 {
 
   file = basename(filename)
-
-  pdim = switch(plateType,
-    "96"  = c(nrow=8, ncol=12),
-    "384" = c(nrow=16, ncol=24),
-    stop("'plateType' must be 96 or 384")
-  )
+  dfiles = dir(path)
 
   if(!(is.character(path)&&length(path)==1))
     stop("'path' must be character of length 1")
@@ -18,11 +13,50 @@ readPlateData = function(filename, path=dirname(filename), name, plateType="384"
   checkColumns(pd, file, mandatory=c("Filename", "Plate", "Replicate"),
                numeric=c("Plate", "Replicate", "Channel", "Batch"))
 
+
+## check if the data files are in the given directory
+   a = unlist(sapply(pd$Filename, function(z) grep(z, dfiles, ignore.case=TRUE)))
+   if (length(a)==0) stop(sprintf("None of the files were found in the given 'path': %s", path))
+
+## check the plate format
+f = file.path(path, names(a))
+Let = c()
+Num = c()
+
+for (fi in f) {
+      txt = readLines(fi) 
+      sp  = strsplit(txt, "\t")
+      pos     = sapply(sp, "[", 2)
+
+      ##  check if the plate format is correct
+        let = substr(pos, 1, 1)
+        num = substr(pos, 2, 3)
+        let = match(let, LETTERS)
+        num = as.integer(num)
+        Let=c(Let, max(let))
+	Num=c(Num, max(num))
+}
+
+## automatically determines the plate format
+pdim = c(nrow=max(Let), ncol=max(Num))
+if (!(prod(pdim) %in% c(96, 384)) ) 
+  stop(sprintf("Invalid plate format! Allowed formats are 96- or 384-well plates!"))
+
+
+# 
+#   pdim = switch(plateType,
+#     "96"  = c(nrow=8, ncol=12),
+#     "384" = c(nrow=16, ncol=24),
+#     stop("'plateType' must be 96 or 384")
+#   ) 
+
+
   nrRep   = max(pd$Replicate)
   nrPlate = max(pd$Plate)
 
   combo = paste(pd$Plate, pd$Replicate)
-  
+
+
   ## Channel: if not given, this implies that there is just one
   if("Channel" %in% colnames(pd)) {
     nrChannel = max(pd$Channel)
@@ -33,6 +67,7 @@ readPlateData = function(filename, path=dirname(filename), name, plateType="384"
     channel = rep(as.integer(1), nrow(pd))
     pd$Channel = channel	
   }
+
 
   ## Batch: if not given, this implies that there is just one.  Currently, we
   ## can only deal with situations where all replicates and channels from one
@@ -53,6 +88,9 @@ readPlateData = function(filename, path=dirname(filename), name, plateType="384"
     }
   } else {
     pd$Batch = rep(as.integer(1), nrow(pd))
+    sp = split(pd$Batch, pd$Plate)
+    plate = as.numeric(names(sp))
+    stopifnot(setequal(plate, 1:nrPlate))
   }
 
 
@@ -69,20 +107,18 @@ readPlateData = function(filename, path=dirname(filename), name, plateType="384"
   xraw = array(as.numeric(NA), dim=c(prod(pdim), nrPlate, nrRep, nrChannel))
   intensityFiles = vector(mode="list", length=nrow(pd))
   names(intensityFiles) = pd[, "Filename"]
-    
+
   status = character(nrow(pd))
-  dfiles = dir(path)
 
   if(verbose)
     cat("Reading ")
 
-  isThereAnyHope=FALSE
   for(i in 1:nrow(pd)) {
     if(verbose)
       cat(pd[i, "Filename"], "")
-   
+
     ff = grep(pd[i, "Filename"], dfiles, ignore.case=TRUE)
-   
+
     if (length(ff)!=1) {
       f = file.path(path, pd[i, "Filename"])
       status[i] = sprintf("File not found: %s", f)
@@ -90,20 +126,19 @@ readPlateData = function(filename, path=dirname(filename), name, plateType="384"
     } else {
       f = file.path(path, dfiles[ff])
       names(intensityFiles)[i] = dfiles[ff]
+
       status[i] = tryCatch({
         txt = readLines(f)
         sp  = strsplit(txt, "\t")
         plateID = sapply(sp, "[", 1)
         pos     = sapply(sp, "[", 2)
         val     = sapply(sp, "[", 3)
-
         pos     = pos2i(pos, pdim)
         val     = as.numeric(val)
 
         intensityFiles[[i]] = txt
         xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = val
-  	isThereAnyHope=TRUE
-        "OK"
+  	"OK"
       },
               warning = function(e) {
                 paste(class(e)[1], e$message, sep=": ")
@@ -117,16 +152,13 @@ readPlateData = function(filename, path=dirname(filename), name, plateType="384"
   if(verbose)
     cat("\nDone.\n\n")
 
-  if (!isThereAnyHope) stop(sprintf("None of the files were found in the given 'path': %s", path))
-
-
   res = list(name=name, 
     xraw=xraw, pdim=pdim, batch=batch,
     plateList=cbind(pd[,1,drop=FALSE], I(status), pd[,-1,drop=FALSE]),
     intensityFiles=intensityFiles,
     state=c("configured"=FALSE, "normalized"=FALSE, "scored"=FALSE, "annotated" = FALSE))
- 
+
   class(res) = "cellHTS"
 
-  return(res)  
+  return(res)
 }

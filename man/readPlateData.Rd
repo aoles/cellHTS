@@ -8,7 +8,7 @@
   by the argument 'x'.  
 }
 \usage{
-readPlateData(filename, path=dirname(filename), name, plateType="384", verbose=TRUE)
+readPlateData(filename, path=dirname(filename), name, verbose=TRUE)
 }
 \arguments{
   \item{filename}{the name of the file table (see details).
@@ -19,10 +19,9 @@ readPlateData(filename, path=dirname(filename), name, plateType="384", verbose=T
   \item{path}{a character of length 1 indicating the path in
     which to find the plate reader files. By default, 
     it can extract the path from \code{filename}.}
-  \item{plateType}{a character of length 1, allowed values are "96" and "384".}
-  \item{verbose}{a logical value, if TRUE, the function reports some of
-    its intermediate progress.}
+   \item{verbose}{a logical value, if TRUE, the function reports some of its intermediate progress.}
 }
+
 \details{The file table is expected to be a tab-delimited file with at
   least three columns, and column names \code{Filename}, \code{Plate},
   and \code{Replicate}. The contents of the columns \code{Plate} and
@@ -44,7 +43,8 @@ readPlateData(filename, path=dirname(filename), name, plateType="384", verbose=T
     measurement data.}
   \item{pdim}{a numeric vector of length 2 containg the number of rows
     and columns in a plate. The product of these two numbers is the
-    first dimension of \code{xraw}.}
+    first dimension of \code{xraw}. This corresponds to the plate    	format used in the screen, and it is automatically determined from the plate result files. The allowed formats are 96-well  or 384-well plates.
+}
   \item{batch}{an integer vector with the batch number (1, 2, ...)
     for each plate. Its length corresponds to the second dimension of 
     of \code{xraw}.}

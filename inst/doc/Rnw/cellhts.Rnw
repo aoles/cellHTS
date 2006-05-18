@@ -42,8 +42,8 @@ pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 \section{Introduction}
 This is a technical report that demonstrates the use of the
 \Rpackage{cellHTS} package. It accompanies the paper \textit{Analysis
-of cell-based RNAi screens} by Michael Boutros, Ligia Bras and
-Wolfgang Huber.  This report explains all the steps necessary to run a
+of cell-based RNAi screens} by Michael Boutros, L\'igia Br\'as and
+Wolfgang Huber. This report explains all the steps necessary to run a
 complete analysis of a cell-based high-throughput screen (HTS), from
 raw intensity readings to an annotated hit list.
 
@@ -95,7 +95,11 @@ Usually, the measurements from each replicate and each color channel
 come in individual result files. The set of available result files and 
 the information about them (which plate,
 which replicate, which channel) is contained in a spreadsheet, which
-we call the \emph{plate list file}. The first few lines of an example
+we call the \emph{plate list file}. This file should contain the following 
+columns: \emph{Filename},\emph{Plate}, and \emph{Replicate}. 
+The last two columns should be numeric, with values ranging from 1 to 
+the maximum number of plates or replicates, respectively. 
+The first few lines of an example
 plate list file are shown in Table~\ref{tab:platelist}.
 \input{cellhts-platelist}
 
@@ -132,6 +136,11 @@ x = readPlateData("Platelist.txt", name=experimentName, path=dataPath)
 <<showX>>=
 x
 @ 
+%
+The plate format used in the screen (96-well or 384-well plate design) is 
+automatically determined from the raw intensity files, when calling the
+\Rfunction{readPlateData} function.
+
 %% Create the example table:
 %% it would have been nice to use the "xtable" package but it insists on 
 %%   adding row numbers, which we don't like.
@@ -226,7 +235,9 @@ Note that the function \Rfunction{configure}\footnote{More precisely,
 \Rfunction{configure} is a method for the S3 class \Rclass{cellHTS}.}
 takes \Robject{x}, the result from Section~\ref{sec:read}, as an
 argument, and we then overwrite \Robject{x} with the result of
-this function.
+this function. If no screen log file is available for the experiment, 
+the argument \Robject{logFile} of the function \Rfunction{configure} 
+should be ommitted.
 %%
 %% Create the example table for plateConf and screenLog
 <<plateConfscreenLogTable, results=hide, echo=FALSE>>=
@@ -239,20 +250,21 @@ cellHTS:::tableOutput(logFile, "screen log", selRows=1:3)
 \label{sec:plateconf}
 %%--------------------------------------------------
 The software expects this to be a rectangular table in a tabulator
-delimited text file, with mandatory columns \emph{Batch}, \emph{Position},
-\emph{Well}, \emph{Content}. The \emph{Position} column runs from 1 to the
-number of wells in the plate (in the example,
-\Sexpr{max(x$plateConf$Position)}), and \emph{Well} is the name of the
-corresponding well in letter-number format (in this case, \Robject{A01} to \Robject{P24}). 
-The \emph{Content} column
-can contain one of the following: \textit{sample} (for wells that
+delimited text file, with mandatory columns \emph{Batch}, 
+\emph{Well}, \emph{Content}. The \emph{Batch} column 
+allows to have different plate configurations (see Section~\ref{sec:multPlateConfs}). 
+The \emph{Well} column 
+contains the name of each well of the plate, in letter-number format 
+(in this case, \Robject{A01} to \Robject{P24}). 
+The \emph{Content} column can contain one of the 
+following: \textit{sample} (for wells that
 contain genes of interest), \textit{pos} (for positive controls),
 \textit{neg} (for negative controls), \textit{empty} (for empty
 wells), and \textit{other} (for anything that does not fit into the
 four other categories). Note that these annotations are used by the
 software in the normalization, quality control, and gene selection
 calculations. Data from wells that are annotated as \textit{empty} are
-ignored, i.\,e.\ they are set to \Robject{NA}.  Here we look at the frequency of
+ignored, i.\,e.\ they are set to \Robject{NA}. Here we look at the frequency of
 each well annotation in the example data:
 %
 <<>>=
@@ -260,6 +272,7 @@ table(x$plateConf$Content)
 @ 
 %
 \subsubsection{Multiple plate configurations}
+\label{sec:multPlateConfs}
 Although it is good practice to use the same plate configuration for
 the whole experiment, sometimes this does not work out, and there are
 different parts of the experiment with different plate
@@ -283,11 +296,12 @@ type of flag is specified in the column \emph{Flag}. Most commonly,
 this will have the value ``NA'', indicating that the measurement
 should be discarded and regarded as missing.
 
+
 %------------------------------------------------------------
 \section{Normalization and summarization of replicates}
 \label{sec:norm}
 %------------------------------------------------------------ 
-The function \Rfunction{normalizePlateMedian} adjusts for plate
+The function \Rfunction{normalizePlates} can be called to adjust for plate effects. The \Robject{normalizationMethod}  allows to perform different normalizations. For example, if it is set to \Robject{"median"}, the function \Rfunction{normalizePlates} adjusts for plate
 effects by dividing each value in each plate by the median of values
 in the plate:
 \begin{eqnarray} 
@@ -300,18 +314,18 @@ The median is calculated across the wells annotated as \textit{sample} in
 the $i$-th result file. This is achieved by calling
 %
 <<normalizePlateMedian>>=
-x = normalizePlateMedian(x) 
+x = normalizePlates(x, normalizationMethod="median") 
 @ 
 after which the normalized intensities are stored in the slot
 \Robject{x\$xnorm}. This is an array of the same size as
 \Robject{x\$xraw}. 
 
 We can now summarize the replicates, calculating a single score for
-each gene. One option is to take the minimum of the $z$-scores from the two
+each gene. One option is to take the average of the $z$-scores from the two
 replicates:
 \begin{eqnarray}
 z_{ki} &=& \pm \frac{x'_{ki}-\hat{\mu}}{\hat{\sigma}} \label{eq:defz} \\
-z_{k}  &=& \min_{i} z_{ki} \label{eq:scoresSummary}.
+z_{k}  &=& \mean_{i} z_{ki} \label{eq:scoresSummary}.
 \end{eqnarray}
 Here $\hat{\mu}$ and $\hat{\sigma}$ are estimators of location and
 scale of the distribution of $x'_{ki}$.  We use robust estimators,
@@ -324,15 +338,15 @@ useful in the application to an inhibitor assay, where an effect
 results in a decrease of the signal and we may want to see this
 represented by a large $z$-score.  Then, in
 Equation~\eqref{eq:scoresSummary}, the summary is taken over all
-replicates for probe $k$.  By using the minimun as the summary
-function, the analysis is
-particularly conservative: all replicate values have to be high in
-order for $z_{k}$ to be high. Depending on the intended stringency of
-the analysis, other plausible choices of summary function are the mean
-and the maximum.
+replicates for probe $k$. Depending on the intended stringency of
+the analysis, other plausible choices of summary function between replicates 
+are the min, and the maximum. In the first case, the analysis would be particularly conservative: all replicate values have to be high in
+order for $z_{k}$ to be high. 
+In order to compare our results with those obtained in the paper of Boutros \textit{et al.}~\cite{Boutros2004}, we have chosen to consider the mean as a summary.
+
 %
 <<summarizeReplicates>>=
-x = summarizeReplicates(x, zscore="-", summary="min") 
+x = summarizeReplicates(x, zscore="-", summary="mean") 
 @ 
 %
 The resulting single $z$-score value per probe will be stored in the
@@ -359,19 +373,19 @@ normalization, but before calculation of the $z$-scores and the
 multiplication by $-1$. The package \Rpackage{cellHTS} allows some
 flexibility with respect to these steps. We can already calculate the
 $z$-scores and multiply by $-1$ in the function
-\Rfunction{normalizePlateMedian}, and then do the summarization
+\Rfunction{normalizePlates}, and then do the summarization
 between replicates, by calling the function \Rfunction{summarizeReplicates}
 without the argument \Robject{zscore}.
 %
 <<normalizePlateMedianWithZscore>>=
-xalt = normalizePlateMedian(x, zscore="-") 
-xalt = summarizeReplicates(xalt, summary="min")
+xalt = normalizePlates(x, normalizationMethod="median", zscore="-") 
+xalt = summarizeReplicates(xalt, summary="mean")
 @ 
 %
 It is easy to define alternative normalization methods, for example,
 to adjust for additional experimental biases besides the plate effect.
 You might want to start by taking the source code of
-\Rfunction{normalizePlateMedian} as a template.
+\Rfunction{normalizePlates} as a template.
 
 %------------------------------------------------------------
 \section{Annotation}
@@ -690,10 +704,39 @@ myPlots=function(z,...) {
 }
 dv = matrix(x$xnorm, nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
 myPlots(dv, main="untransformed")
-xlog = normalizePlateMedian(x, transform=log2)
+xlog = normalizePlates(x, normalizatioMethod="median", transform=log2)
 dvlog = matrix(xlog$xnorm, nrow=prod(dim(xlog$xnorm)[1:2]), ncol=dim(xlog$xnorm)[3])
 myPlots(dvlog, main="log2")
 @ 
+%
+
+%------------------------------------------------------------
+\section{Appendix: Multiple channel experiments}
+%------------------------------------------------------------
+
+The \Rpackage{cellHTS} includes an example of a two-color screen performed with \textit{D. melanogaster} cells. Two reporters were used. The first reporter is specific for ...., while the second reporter is indicative of 
+
+
+reporter $R1$ could monitor the total number of viable cells in a
+well, another reporter $R2$ the activity of a particular
+pathway. 
+Such experimental setups are typically used in screens for
+signaling pathway components, where a pathway-inducible readout is
+normalized against a constitutive reporter. 
+In this way, it becomes possible to
+distinguish between changes in the readout caused by depletion of
+specific pathway components versus changes in the overall cell number.
+The \textit{cellHTS} package provides a function to perform plate
+median normalization on the ratios $R2/R1$, which can be used as a
+measure of pathway activity per cell.
+
+This approach can be expanded to other types of reporters and to
+experiments with more than two reporters. Taking the in-built
+normalization functions of \textit{cellHTS} as a template, one can
+employ the extensive statistical modeling capabilities of the R
+programming language to consider more general analysis strategies that
+are adapted to the biological system and the question of
+interest.
 
 
 %------------------------------------------------------------

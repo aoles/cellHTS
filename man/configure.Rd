@@ -15,7 +15,7 @@ configure(x, \dots)
     This argument is just passed on to the \code{\link{read.table}}
     function, so any of the valid argument
     types for \code{\link{read.table}} are valid here, too. Must contain one row for each well and each batch.}
-  \item{logFile}{the name of the screen log file (see details).
+  \item{logFile}{optional; the name of the screen log file (see details).
     This argument is just passed on to the \code{\link{read.table}}
     function, so any of the valid argument
     types for \code{\link{read.table}} are valid here, too.}
@@ -28,10 +28,8 @@ configure(x, \dots)
 
 \details{
   \item{confFile}{This file is expected to be a tab-delimited file with
-at least four columns, and column names \code{Batch}, \code{Position},
-\code{Well} and \code{Content}. The contents of \code{Position} are expected
-to be integer.}
-  \item{logFile}{This file is expected to be a tab-delimited file with
+at least three columns, and column names \code{Batch}, \code{Well} and \code{Content}. The contents of \code{Batch} are expected to be integer.}
+  \item{logFile}{If given as an argument, it is expected to be a tab-delimited file with
 at least three columns, and column names \code{Filename}, \code{Well},
 and \code{Flag}. Further columns are allowed.}
   \item{descripFile}{This file is the screen description file with

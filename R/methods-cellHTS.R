@@ -48,21 +48,29 @@ annotate.cellHTS = function(x, geneIDFile, ...) {
 ##----------------------------------------
 configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
   conf = read.table(confFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
+
+  ## Check if the screen log file was given
+  if(!missing(logFile)) {
+
   slog = read.table(logFile,  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
-  descript = readLines(descripFile)
-
-  ## backward compatibility...
-  colnames(conf) = sub("^Pos$", "Position", colnames(conf))
-  checkColumns(conf, confFile, mandatory=c("Batch", "Position", "Well", "Content"),
-               numeric=c("Position"))
-
   ## Check if the screen log file is empty
   if (!dim(slog)[1])
     slog = NULL
   else
     checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
                  numeric=character(0))
+} else { slog = NULL }
 
+  descript = readLines(descripFile)
+
+  ## backward compatibility...
+  colnames(conf) = sub("^Pos$", "Position", colnames(conf))
+  checkColumns(conf, confFile, mandatory=c("Batch", "Well", "Content"),
+               numeric=c("Batch"))
+
+
+
+  if ("Position" %in% colnames(conf)) {
   ## check consistency between 'Position' and 'Well' columns
   badRows = which(conf$Position!=pos2i(conf$Well, x$pdim))
   if(length(badRows)>0) {
@@ -74,7 +82,11 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
                  sep="")
     stop(msg)
   }
-  
+} else {
+# creates the "Position" column
+conf$Position=pos2i(conf$Well, x$pdim)
+}
+
   ## expect prod(x$pdim) * x$nrBatch rows
   nrWpP   = prod(x$pdim)
   nrBatch = max(x$batch)
@@ -93,7 +105,7 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
   x$plateConf = conf
   x$screenLog = slog
   x$screenDesc = descript
-  
+
   ## Process the configuration file into wellAnno slot
   ## and set all 'empty' wells to NA in x
   conf$Content = tolower(conf$Content)  ## ignore case!
@@ -124,7 +136,7 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
     stopifnot(!any(is.na(ipl)), !any(is.na(irep)), !any(is.na(ich)))
     x$xraw[cbind(ipos, ipl, irep, ich)] = NA 
     finalWellAnno[cbind(ipos, ipl, irep, ich)] = "flagged"
-    
+
   } 
 
   x$finalWellAnno = finalWellAnno 

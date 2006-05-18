@@ -111,6 +111,9 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   nrReplicate = dim(x$xraw)[3]
   nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
 
+## current status indication
+cat(sprintf("\n Constructing the HTML quality report for '%s'.\n",x$name))
+
 
   ## Define the bins for the histograms (channel-dependent)
   if(x$state["configured"]) {
@@ -131,7 +134,11 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   colnames(url) = colnames(exptab)
   qmHaveBeenAdded = FALSE
   if (x$state["configured"]) {
-    for(p in 1:nrPlate){
+
+   ## current status indication
+    cat("\n Now, constructing the plate-wise HTML quality report for: \n")
+
+   for(p in 1:nrPlate){
       ##    for(ch in 1:nrChannel){
       nm = p
       wh = with(x$plateList, which(Plate==p & status=="OK"))
@@ -146,18 +153,21 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
           datPlat = x$xraw[, p,,, drop=FALSE]
           whatDat = "unnormalized"
         }
+
+    ## current status indication
+    cat(sprintf("................ Plate %d \n",p))
+
         res = QMbyPlate(datPlat, x$wellAnno[nrWell*(p-1)+(1:nrWell)], x$pdim, 
           name=sprintf("Plate %d (%s)", p, whatDat),
           basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE])
-        
-        
+
         url[wh, "status"] = res$url
         if(!qmHaveBeenAdded) {
          ##resChan = res$qmsummary[[1]]
          ##url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(resChan)))
          ##for (j in names(resChan)) exptab[, j] = rep("", nrow(exptab))
          ##qmHaveBeenAdded = TRUE
-         
+
          url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=3))
          TableNames = c("Replicate dynamic range", "Average dynamic range", "Spearman rank correlation")
          for (j in TableNames) exptab[, j] = rep("", nrow(exptab))
@@ -188,11 +198,15 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
     writeLines(txt, file.path(outdir, nm[w]))
     url[w, "Filename"] = nm[w]
   }
-  
+
   cat("<CENTER>", file=con)
   writeHTMLtable(exptab, url=url, con=con)
   cat("</CENTER><BR><BR>", file=con)
-  
+
+
+## Some status indication for the user
+cat("\n Now, constructing the experiment-wise HTML quality report. \n")
+
   ## Per experiment QC
   plotTable = QMexperiment(x, outdir, con)
 
@@ -200,7 +214,11 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   ## To do (wh 16.5.2006): the code within this monster if-statement would probably better
   ##   be encapsulated in a separate helper function?
   if(x$state["scored"]) {
-    ## Checks whether the number of channels has changed after normalization
+
+## Status indication
+cat("\n Now, constructing the hit list. \n")
+ 
+## Checks whether the number of channels has changed after normalization
     trueNrCh = dim(x$xraw)[4]
     w=1:length(x$score)
     out=data.frame(
@@ -259,10 +277,13 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
     out$score = round(out$score, 2)
     write.table(out, file=file.path(outdir, "topTable.txt"), sep="\t", row.names=FALSE, col.names=TRUE, quote = FALSE)
 
+## Status indication
+cat("\n Now, constructing the screen-wide QC image plot. \n")
     ## screen-wide QC (image plot with the z score values)
+
     makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
              fun = function() do.call("imageScreen", args=append(list(x=x), imageScreenArgs)), print=FALSE)
-    
+
 
     count = nrow(plotTable)
     plotTable = rbind(plotTable, rep("", length=prod(ncol(plotTable)* 2))) 
@@ -272,7 +293,7 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   } ## if scored
 
   writeHTMLtable4plots(plotTable, con=con)
-  
+
   writetail(con)
   return(indexFile)
 }
