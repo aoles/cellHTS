@@ -8,7 +8,7 @@
   by the argument 'x'.  
 }
 \usage{
-readPlateData(filename, path=dirname(filename), name, verbose=TRUE)
+readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE)
 }
 \arguments{
   \item{filename}{the name of the file table (see details).
@@ -20,6 +20,7 @@ readPlateData(filename, path=dirname(filename), name, verbose=TRUE)
     which to find the plate reader files. By default, 
     it can extract the path from \code{filename}.}
    \item{verbose}{a logical value, if TRUE, the function reports some of its intermediate progress.}
+   \item{importFun}{a function that should be used to read each plate result file. The default function works for plate reader data files. See details.}
 }
 
 \details{The file table is expected to be a tab-delimited file with at
@@ -32,6 +33,11 @@ readPlateData(filename, path=dirname(filename), name, verbose=TRUE)
   A plate result file contains the measurements results for all
   replicates and all channels of a plate, which is the physical carrier
   of the reagents. 
+
+\code{importFun} can be used to define other functions to import other data files, such as flow cytometry data files, etc. The \code{importFun} function should receive as an input the name of a result plate file to read, and return a data.frame with the following slots:
+\item{txt}{a character vector containing a copy of the imported input data file.}
+\item{well}{a character vector with the well identifier in the plate.}
+\item{val}{the intensity values measured at each well.}
 }
 
 \value{

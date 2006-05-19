@@ -1,5 +1,5 @@
 ## (C) Michael Boutros and Wolfgang Huber, Nov 2005
-readPlateData = function(filename, path=dirname(filename), name, verbose=TRUE)
+readPlateData = function(filename, path=dirname(filename), name, importFun, verbose=TRUE)
 {
 
   file = basename(filename)
@@ -14,6 +14,23 @@ readPlateData = function(filename, path=dirname(filename), name, verbose=TRUE)
                numeric=c("Plate", "Replicate", "Channel", "Batch"))
 
 
+## consistency check for "importFun"
+if (!missing(importFun)) {
+ if (class(importFun)!="function") stop("'importFun' should be a function to use to read the raw data files")
+} else {
+#3 default function (compatible with the file format of the plate reader)
+# input: 
+# output: data.frame with "txt", "well" and "val"
+importFun = function(f) {
+    txt = readLines(f)
+    sp  = strsplit(txt, "\t")
+    well     = sapply(sp, "[", 2)
+    val     = sapply(sp, "[", 3)
+out = data.frame(txt=I(txt), well=I(well), val=as.numeric(val))
+return(out)
+}
+}
+
 ## check if the data files are in the given directory
    a = unlist(sapply(pd$Filename, function(z) grep(z, dfiles, ignore.case=TRUE)))
    if (length(a)==0) stop(sprintf("None of the files were found in the given 'path': %s", path))
@@ -24,13 +41,10 @@ Let = c()
 Num = c()
 
 for (fi in f) {
-      txt = readLines(fi) 
-      sp  = strsplit(txt, "\t")
-      pos     = sapply(sp, "[", 2)
-
+well = importFun(fi)$well
       ##  check if the plate format is correct
-        let = substr(pos, 1, 1)
-        num = substr(pos, 2, 3)
+        let = substr(well, 1, 1)
+        num = substr(well, 2, 3)
         let = match(let, LETTERS)
         num = as.integer(num)
         Let=c(Let, max(let))
@@ -128,16 +142,20 @@ if (!(prod(pdim) %in% c(96, 384)) )
       names(intensityFiles)[i] = dfiles[ff]
 
       status[i] = tryCatch({
-        txt = readLines(f)
-        sp  = strsplit(txt, "\t")
-        plateID = sapply(sp, "[", 1)
-        pos     = sapply(sp, "[", 2)
-        val     = sapply(sp, "[", 3)
-        pos     = pos2i(pos, pdim)
-        val     = as.numeric(val)
+#         txt = readLines(f)
+#         sp  = strsplit(txt, "\t")
+#         plateID = sapply(sp, "[", 1)
+#         pos     = sapply(sp, "[", 2)
+#         val     = sapply(sp, "[", 3)
+#         pos     = pos2i(pos, pdim)
+#         val     = as.numeric(val)
+#         intensityFiles[[i]] = txt
+#         xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = val
 
-        intensityFiles[[i]] = txt
-        xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = val
+          out = importFun(f)
+          pos = pos2i(out$well, pdim)
+          intensityFiles[[i]] = out$txt
+          xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = out$val
   	"OK"
       },
               warning = function(e) {
