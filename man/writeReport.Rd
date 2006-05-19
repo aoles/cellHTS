@@ -7,7 +7,7 @@
   documenting the contents of a  cellHTS object.}
 \usage{
 writeReport(x, outdir=file.path(getwd(), x$name),
-  force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=NULL)
+  force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=NULL, posControls, negControls)
 }
 
 \arguments{
@@ -26,7 +26,10 @@ writeReport(x, outdir=file.path(getwd(), x$name),
     here because the production of the plate plots takes a long time.
     See details.}
   \item{imageScreenArgs}{a list with parameters for the function
-    \code{\link[cellhts]{imageScreen}}. See details.} }
+    \code{\link[cellhts]{imageScreen}}. See details.} 
+  \item{posControls}{a list with the name of the positive controls. See details.}
+  \item{negControls}{a list with the name of the negative controls. See details.}
+}
 
 \details{
    The following elements are recognized for \code{plotPlateArgs} and
@@ -36,11 +39,15 @@ writeReport(x, outdir=file.path(getwd(), x$name),
     \code{xcol}, the color scheme for the intensity plate plot,
     \code{xrange}, the intensity range to which the colors are mapped.
    If an element is not specified, default values are used.
-    
+
    The following elements are recognized for \code{imageScreenArgs} and
    passed on to \code{\link[cellhts]{imageScreen}}:
    \code{ar}, aspect ratio,
    \code{zrange}, range.
+
+  \code{posControls} and \code{negControls} should be given as lists of character(s) specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file. The length of these lists should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case 'x' contains multi-channel data that has been normalized by combining the values from two or more channels.
+  By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by deafult "neg" will be considered as the name used to annotated the negative controls.
+  The arguments \code{posControls} and \code{negControls} are particularly useful when different controls apply to different reporters (channels), or after normalizing multi-channel data.
 }
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},
@@ -53,7 +60,7 @@ writeReport(x, outdir=file.path(getwd(), x$name),
   file, this is an HTML file which can be read by a web browser.
 }
 
-\author{Ligia Bras \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
+\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 
 \examples{
  datadir = system.file("KcViabSmall", package = "cellHTS")
@@ -62,6 +69,9 @@ writeReport(x, outdir=file.path(getwd(), x$name),
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
  descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
+## pCtrls = list("pos")
+## nCtrls = list("neg") 
+## writeReport(x, posControls=pCtrls, negControls=nCtrls)
  writeReport(x)
  x = normalizePlates(x, normalizationMethod="median",zscore="-")
  x = summarizeReplicates(x, summary="min")

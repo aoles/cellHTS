@@ -1,4 +1,4 @@
-QMbyPlate = function(x, wellAnno, pdim, name, basePath, subPath, plotPlateArgs, brks, finalWellAnno){
+QMbyPlate = function(x, wellAnno, pdim, name, basePath, subPath, plotPlateArgs, brks, finalWellAnno, posControls, negControls) {
 
   fn  = file.path(subPath, "index.html")
   con = file(file.path(basePath, fn), "w")
@@ -25,11 +25,21 @@ QMbyPlate = function(x, wellAnno, pdim, name, basePath, subPath, plotPlateArgs, 
 
 
   ## define colors and comment on them
-  wellTypeColor=c(pos="#E41A1C", neg="#2040FF", empty="pink", other="#BEBADA", sample="#000000", flagged="black")
+  wellTypeColor=c(pos="#E41A1C", neg="#2040FF", controls="green", sample="#000000", empty="pink", other="#BEBADA", flagged="black")
+
+posCtrls = vector("list", length=nrChannel)
+negCtrls = vector("list", length=nrChannel)
+
   mt = match(wellAnno, names(wellTypeColor))
-  posCtrls = which(mt==1)
-  negCtrls = which(mt==2)
-  samples  = which(mt==5)
+  samples  = which(mt==which(names(wellTypeColor)=="sample"))
+for (ch in 1:nrChannel) {
+if (!is.null(posControls[[ch]])) 
+posCtrls[[ch]]= which(wellAnno %in% posControls[[ch]]) 
+
+if (!is.null(negControls[[ch]])) 
+negCtrls[[ch]]= which(wellAnno %in% negControls[[ch]]) 
+}
+
 
   ## calculate quality metrics
   for (ch in 1:nrChannel) {
@@ -37,14 +47,14 @@ QMbyPlate = function(x, wellAnno, pdim, name, basePath, subPath, plotPlateArgs, 
   qm = data.frame(metric=I(character(0)), value=numeric(0), comment=I(character(0)))
 count = 0
   ## 1. Dynamic range (neg / pos controls)
-  if(length(posCtrls)>0 && length(negCtrls)>0) {
+  if(length(posCtrls[[ch]])>0 && length(negCtrls[[ch]])>0) {
 
     ## make sure that data is in a positive scale
     if (prod(range(x[,,,ch], na.rm=TRUE))>0) {
       ## go to log-scale, average and take difference, then re-exponentiate -
       ##   this assumes that the data are on multplicative scale.
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
-        mean(log(v[negCtrls]), na.rm=TRUE) - mean(log(v[posCtrls]), na.rm=TRUE))
+        mean(log(v[negCtrls[[ch]]]), na.rm=TRUE) - mean(log(v[posCtrls[[ch]]]), na.rm=TRUE))
 
       ## consider also the dynamic range for each individual replicate
       for (r in 1:maxRep) {
@@ -57,13 +67,13 @@ count = 0
       ## this may happen when we have scored the replicates separately and saved the results in the x$xnorm slot
       ## determine the difference between the aritmetic mean between pos and negative controls
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
-        mean(v[posCtrls], na.rm=TRUE)- mean(v[negCtrls], na.rm=TRUE))
+        mean(v[posCtrls[[ch]]], na.rm=TRUE)- mean(v[negCtrls[[ch]]], na.rm=TRUE))
 
       ## Consider also the dynamic range for each replicate
       for (r in 1:maxRep) {
        if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=round(abs(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=NA, comment=I(sprintf("Replicate %d is missing", r))))
      }
-     
+
       dr = round(abs(mean(dr, na.rm=TRUE)), 2) 
       comm = "" }
 
@@ -78,7 +88,7 @@ count = 0
   ## 2. Correlation coefficient (just for samples wells)
   if (nrRep==2) {
     cc = round(cor(x[samples,,,ch], x[samples,,,ch], use="complete.obs", method="spearman")[1,2], 2)
-    comm = ""    
+    comm = ""
   } else {
     cc = as.numeric(NA)
     comm = sprintf("%d replicates", nrRep)
@@ -105,36 +115,56 @@ writeHTMLtable(qmplate, con=con, center=TRUE, extra=sprintf("Channel %d", 1:nrCh
   ## For the original configuration plate corrected by the screen log information:
 wellCount = data.frame(matrix(NA, ncol = nrChannel, nrow = 2))
 names(wellCount) = sprintf("Channel %d", 1:nrChannel)
-mtt = list()
-length(mtt) = nrChannel
+mtt = vector("list", length = nrChannel)
+iFE = which(names(wellTypeColor) %in% c("empty", "flagged"))
+iO= which(names(wellTypeColor)=="other")
+iC = which(names(wellTypeColor)=="controls")
+iP = which(names(wellTypeColor)=="pos")
+iN = which(names(wellTypeColor)=="neg")
 
 
 if (hasLessCh & nrChannel==1) {
 # The color code must have into account the common entries between channels and replicates 
+
   mtt[[1]] = mt
   fwa = matrix(finalWellAnno, ncol = prod(dim(finalWellAnno)[3:4]))
   mtrep = apply(fwa, 2, function(u) match(u, names(wellTypeColor)))
+ ## include the controls that were not annotated as "neg" or "pos":
+ mtrep[posCtrls[[1]],] [which(is.na(mtrep[posCtrls[[1]],]))]=iP
+ mtrep[negCtrls[[1]],] [which(is.na(mtrep[negCtrls[[1]],]))]=iN
+
+# replace the remaining NA positions by "other" (these corresponds to wells that although annotated as controls in the configuration file, don't behave as controls in the current channel
+mtrep[which(is.na(mtrep))]=iO
+
   aa = apply(fwa, 2, function(u) sum(u=="flagged"))
-  aa = order(aa, decreasing=TRUE)
+  aa = order(aa, decreasing=TRUE) # position 1 contains the replicate with more flagged values
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
-  
-  wellCount[1,1] = paste(sprintf("%s: %d", names(wellTypeColor)[c(3,6)], nrWellTypes[c(3,6)]), collapse=", ")
-  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[c(-3,-6)], names(wellTypeColor)[c(-3,-6)], nrWellTypes[c(-3,-6)]), collapse=", ")
-  mtt[[1]][is.na(mtt[[1]])]=4 
+
+# empty and flagged wells
+  wellCount[1,1] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
+  wellCount[2, 1] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[-c(iFE,iC)], names(wellTypeColor)[-c(iFE,iC)], nrWellTypes[-c(iFE, iC)]), collapse=", ")
+  mtt[[1]][is.na(mtt[[1]])]=apply(mtrep[is.na(mtt[[1]]),], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
   } else { 
-  
+
   for (ch in 1:nrChannel) {
   mtt[[ch]] = mt
   mtrep = apply(finalWellAnno[,,,ch, drop=FALSE], 3, function(u) match(u, names(wellTypeColor)))
+
+ ## include the controls that were not annotated as "neg" or "pos":
+ mtrep[posCtrls[[ch]],] [which(is.na(mtrep[posCtrls[[ch]],]))]=iP
+ mtrep[negCtrls[[ch]],] [which(is.na(mtrep[negCtrls[[ch]],]))]=iN
+
+# replace the remaining NA positions by "other" (these corresponds to wells that although annotated as controls in the configuration file, don't behave as controls in the current channel
+mtrep[which(is.na(mtrep))]=iO
+
   aa = apply(finalWellAnno[,,,ch, drop=FALSE], 3, function(u) sum(u=="flagged"))
   aa = order(aa, decreasing=TRUE)
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
 
-  wellCount[1,ch] = paste(sprintf("%s: %d", names(wellTypeColor)[c(3,6)], nrWellTypes[c(3,6)]), collapse=", ")
-  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[c(-3,-6)], names(wellTypeColor)[c(-3,-6)], nrWellTypes[c(-3,-6)]), collapse=", ")
-  mtt[[ch]][is.na(mtt[[ch]])]=4 } }
-
-
+  wellCount[1,ch] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
+  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[-c(iFE, iC)], names(wellTypeColor)[-c(iFE,iC)], nrWellTypes[-c(iFE, iC)]), collapse=", ")
+  mtt[[ch]][is.na(mtt[[ch]])]=apply(mtrep[is.na(mtt[[ch]]),], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
+} }
 
 cat("<BR>\n", file=con)
 cat("<BR>\n", file=con)
@@ -284,27 +314,37 @@ count = count+1
  } # plot plates
 
 
-	
+
 	## include also a "channel 2 vs channel 1" plot if the number of channels is 2
 if (nrChannel==2) {	
 	## correct the color code for the 2-channel scatterplot
 	## For the original configuration plate corrected by the screen log information:
 wellCount = data.frame(matrix(NA, ncol = maxRep, nrow = 2))
 names(wellCount) = sprintf("Replicate %d", 1:maxRep)
-mtt = list()
-length(mtt) = maxRep
+mtt = vector("list", length = maxRep)
+iFE = which(names(wellTypeColor) %in% c("empty", "flagged"))
+iO= which(names(wellTypeColor)=="other")
+ctrls=unique(c(unlist(posCtrls), unlist(negCtrls)))
+iPN = which(names(wellTypeColor) %in% c("pos", "neg"))
 
   for (r in 1:maxRep) {
   mtt[[r]] = mt
   mtrep = apply(finalWellAnno[,,r,, drop=FALSE], 4, function(u) match(u, names(wellTypeColor)))
+
+ # set the controls in any of the channels as "controls":
+
+ mtrep[ctrls,] [which(is.na(mtrep[ctrls,]) | mtrep[ctrls,] %in% iPN)]=which(names(wellTypeColor)=="controls")
+
   aa = apply(finalWellAnno[,,r,, drop=FALSE], 4, function(u) sum(u=="flagged"))
   aa = order(aa, decreasing=TRUE)
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
 
-  wellCount[1,r] = paste(sprintf("%s: %d", names(wellTypeColor)[c(3,6)], nrWellTypes[c(3,6)]), collapse=", ")
-  wellCount[2, r] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[c(-3,-6)], names(wellTypeColor)[c(-3,-6)],                  nrWellTypes[c(-3,-6)]), collapse=", ")
+  wellCount[1,r] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
+  wellCount[2, r] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[-c(iFE, iPN)], names(wellTypeColor)[-c(iFE, iPN)],                  nrWellTypes[-c(iFE, iPN)]), collapse=", ")
 
-  mtt[[r]][is.na(mtt[[r]])]=4 }
+  mtt[[r]][is.na(mtt[[r]])]=apply(mtrep[is.na(mtt[[r]]),], 1, max) # so "flagged" or "empty" always wins over "controls" or "sample"
+
+}
 
 
 plotTable$Channel2vs1 = ""

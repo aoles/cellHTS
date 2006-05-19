@@ -55,7 +55,7 @@ writeHTMLtable4plots = function(x, con,
   cat("<CENTER><TABLE border=0><TR>",
       paste(sprintf("<TH BGCOLOR=\"%s\">%s</TH>", colors[(1:nc)%%2+1], names(x)), collapse=""),
       "</TR>\n", sep="", file=con)
-  
+
   for(i in 1:nr) {
   	cat("<TR>",
         paste(sprintf("<TD BGCOLOR=\"%s\">%s</TD>", colors[2*(i%%2)+(1:nc)%%2+1], x[i,]), collapse=""),
@@ -70,8 +70,8 @@ writeHTMLtable4plots = function(x, con,
 
 
 writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
-  plotPlateArgs = FALSE, imageScreenArgs = NULL) {
- 
+  posControls, negControls, plotPlateArgs = FALSE, imageScreenArgs = NULL) {
+
   if(!inherits(x, "cellHTS"))
     stop("'x' must be a 'cellHTS' object")
 
@@ -138,6 +138,35 @@ cat(sprintf("\n Constructing the HTML quality report for '%s'.\n",x$name))
    ## current status indication
     cat("\n Now, constructing the plate-wise HTML quality report for: \n")
 
+
+	## to deal with the behaviour of "tolower", when it is called for NULL or NA.
+myTolower = function(z) {
+if (!is.null(z)) 
+	if (!all(is.na(z))) z=tolower(z) else z=NULL 
+return(z)
+}
+
+
+## controls annotation
+if (!missing(posControls)) {
+# consistency check
+if (class(posControls)!="list" | length(posControls)!=nrChannel) 
+	stop(sprintf("'posControls' should be a list with length %d", nrChannel))
+
+posControls = lapply(posControls, myTolower)
+} else { 
+posControls=as.list(rep("pos", nrChannel))
+}
+	
+if (!missing(negControls)) {
+# consistency check
+if (class(negControls)!="list" | length(negControls)!=nrChannel) 
+stop(sprintf("'negControls' should be a list with length %d", nrChannel))
+
+negControls = lapply(negControls, myTolower)
+} else { negControls=as.list(rep("neg", nrChannel))}
+
+
    for(p in 1:nrPlate){
       ##    for(ch in 1:nrChannel){
       nm = p
@@ -159,7 +188,7 @@ cat(sprintf("\n Constructing the HTML quality report for '%s'.\n",x$name))
 
         res = QMbyPlate(datPlat, x$wellAnno[nrWell*(p-1)+(1:nrWell)], x$pdim, 
           name=sprintf("Plate %d (%s)", p, whatDat),
-          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE])
+          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE], posControls, negControls)
 
         url[wh, "status"] = res$url
         if(!qmHaveBeenAdded) {
@@ -208,7 +237,7 @@ cat(sprintf("\n Constructing the HTML quality report for '%s'.\n",x$name))
 cat("\n Now, constructing the experiment-wise HTML quality report. \n")
 
   ## Per experiment QC
-  plotTable = QMexperiment(x, outdir, con)
+  plotTable = QMexperiment(x, outdir, con, posControls, negControls)
 
   ## Score table and screen-wide QC
   ## To do (wh 16.5.2006): the code within this monster if-statement would probably better
@@ -216,7 +245,7 @@ cat("\n Now, constructing the experiment-wise HTML quality report. \n")
   if(x$state["scored"]) {
 
 ## Status indication
-cat("\n Now, constructing the hit list. \n")
+cat("\n Now, generating the hit list. \n")
  
 ## Checks whether the number of channels has changed after normalization
     trueNrCh = dim(x$xraw)[4]
@@ -242,13 +271,13 @@ cat("\n Now, constructing the hit list. \n")
     ## median between replicates  
     for (ch in 1:trueNrCh) {
       if (nrReplicate > 1) {
-        out[sprintf("median_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)],1,median)
+        out[sprintf("median_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, median, na.rm=TRUE)
         if (nrReplicate ==2) { 
           ## Difference between replicates
           out[sprintf("diff_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, diff)
         } else {
           ## average between replicates
-          out[sprintf("average_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, mean)
+          out[sprintf("average_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, mean, na.rm=TRUE)
         } ## if
       } ## if
     } ## for ch

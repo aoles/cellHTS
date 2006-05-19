@@ -35,13 +35,13 @@ the ration between the second and the first channels, but other options can be d
 
 If \code{log = TRUE}, the data obtained after applying \code{fun} is 
 log2 transformed. The default is \code{log = FALSE}.
-  
+
 If \code{scmedian = TRUE}, plate median scaling will be further
 performed, by dividing each measurement by the median value across the
 wells annotated as \code{sample} in the respective plate and
 replicate. Note that if the data have been log transformed (\code{log = TRUE}), 
 the median is subtracted instead. The default is \code{scmedian = FALSE}.
-   
+
 If \code{zscore} is not missing, a robust z-score for each
 individual measurement will be determined for each plate and each well
 by subtracting the overall median and dividing by the overall mad. The
@@ -74,8 +74,21 @@ confFile = system.file("TwoColorScreen", "Plateconf.txt", package="cellHTS")
 logFile  = system.file("TwoColorScreen", "Screenlog.txt", package="cellHTS")
 descripFile  = system.file("TwoColorScreen", "Description.txt", package="cellHTS")
 x = configure(x, confFile, logFile, descripFile)
-#writeReport(x)
+
+## Define the controls for the different channels:
+negControls=vector("list", length=dim(x$xraw)[4])
+negControls[[1]]="geneA"
+negControls[[2]]=c("geneA", "geneB")
+posControls=vector("list", length=dim(x$xraw)[4])
+posControls[[2]]=c("geneC", "geneD")
+#writeReport(x, posControls=posControls, negControls=negControls)
 x = normalizeRatio(x, fun=function(x,y) x/y, log=TRUE, scmedian=TRUE)
-#writeReport(x, force=TRUE, plotPlateArgs=list(xrange=c(-3,3)))
+
+## Define the controls for the normalized intensities:
+negControls=vector("list", length=dim(x$xnorm)[4])
+negControls[[1]]=c("geneA", "geneB")
+posControls=vector("list", length=dim(x$xnorm)[4])
+posControls[[1]]=c("geneC", "geneD")
+#writeReport(x, force=TRUE, plotPlateArgs=list(xrange=c(-3,3)), posControls=posControls, negControls=negControls)
 }
 \keyword{manip}

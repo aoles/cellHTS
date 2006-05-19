@@ -1,9 +1,19 @@
-QMexperiment = function(x, path, con) {
+QMexperiment = function(x, path, con, posControls, negControls) {
 
-  posCtrls = which(x$wellAnno=="pos")
-  negCtrls = which(x$wellAnno=="neg")
+
   nrbxp = 1+x$state["normalized"]
   nrCh = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4]) 
+
+
+  posCtrls = vector("list", length=nrCh)
+  negCtrls = vector("list", length=nrCh)
+
+  for (ch in 1:nrCh) {
+    if (!is.null(posControls[[ch]])) 
+       posCtrls[[ch]]= which(x$wellAnno %in% posControls[[ch]]) 
+    if (!is.null(negControls[[ch]])) 
+       negCtrls[[ch]]= which(x$wellAnno %in% negControls[[ch]]) 
+}
 
 # Checks whether the number of channels has changed (e.g. normalized data)
   if (x$state["normalized"]) hasLessCh = dim(x$xraw)[4] > dim(x$xnorm)[4] else hasLessCh=FALSE
@@ -34,18 +44,18 @@ if (ch ==1) {
 plotTable[count + 1, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("boxplot_%d_%d.pdf", r, ch), sprintf("boxplot_%d_%d.png", r, ch)) 
 count = count + 1 
 
-      if ((length(posCtrls)>0 && length(negCtrls)>0) & (x$state["normalized"])) {
+      if ((length(posCtrls[[ch]])>0 && length(negCtrls[[ch]])>0) & (x$state["normalized"])) {
         makePlot(path, con=con,
                  name=sprintf("Controls_%d_%d", r, ch), w=5*nrbxp, h=5, fun = function() {
                    par(mfrow=c(1, nrbxp), mai=c(par("mai")[1:2], 0.01, 0.01))
                    xbp = x$xnorm[,,r,ch]
-                   xpos = xbp[posCtrls]
-                   xneg = xbp[negCtrls]
+                   xpos = xbp[posCtrls[[ch]]]
+                   xneg = xbp[negCtrls[[ch]]]
                    nrPlate = dim(xbp)[2]
                    nrWell = prod(x$pdim)
                    plt = rep(1:nrPlate,each=nrWell)
-                   ppos = plt[posCtrls]
-                   pneg = plt[negCtrls]
+                   ppos = plt[posCtrls[[ch]]]
+                   pneg = plt[negCtrls[[ch]]]
                    ## Note: the Z'-factor will be determined considering the median and mad,
                    ## instead of the mean and standard deviation
                    dr = abs(median(xpos, na.rm=TRUE) - median(xneg, na.rm=TRUE))
