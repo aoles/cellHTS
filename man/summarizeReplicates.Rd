@@ -19,7 +19,7 @@ summarizeReplicates(x, zscore, summary="min")
     or "-", specifying the sign to use for the calculated 
     z-scores (see details).}
   \item{summary}{a character string indicating how to summarize between replicated measurements. 
-    One of "min" (default), "mean", or "min" can be used (see details).}
+    One of "min" (default), "mean", "min", or "rms" can be used (see details).}
 }
 \details{
  Given the normalized values given in the slot \code{xnorm} of \code{x}, a single z-score is calculated for each probe.
@@ -35,9 +35,11 @@ summarizeReplicates(x, zscore, summary="min")
  such a phenotype will be represented by a negative z-score.  
  This option can be set to calculate the results to the commonly used convention.
  
- Finally, a single z-score per probe is calculated by summarizing between scored replicates. If \code{summary} is \code{mean}, 
- the average of replicate values is considered; if it is set to \code{max}, then the maximum of replicate
- intensities is taken, while if its value is set to \code{min}, the minimum is considered, instead (conservative).
+ Finally, a single z-score per probe is calculated by summarizing between scored replicates. If \code{summary="mean"}, 
+ the average of replicate values is considered; if 
+\code{summary="max"}, then the maximum of replicate
+ intensities is taken; if \code{summary="min"}, the minimum is considered, instead (conservative); if \code{summary="rms"}, the 
+square root of the mean squared value of the replicates (root mean square) is taken as a summary function.
 }
 
 \value{

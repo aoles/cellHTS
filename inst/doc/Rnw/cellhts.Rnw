@@ -344,8 +344,9 @@ Equation~\eqref{eq:scoresSummary}, the summary is taken over all
 replicates for probe $k$. 
 
 Depending on the intended stringency of the analysis, other plausible
-choices of summary function between replicates are the minimum and the
-maximum. In the first case, the analysis would be particularly
+choices of summary function between replicates are the minimum, the
+maximum, and the root mean square. In the first case, the analysis 
+would be particularly
 conservative: all replicate values have to be high in order for
 $z_{k}$ to be high.  In order to compare our results with those
 obtained in the paper of Boutros \textit{et al.}~\cite{Boutros2004},
