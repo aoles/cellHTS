@@ -14,14 +14,11 @@ normalizePlates(x, normalizationMethod="median", transform, zscore)
   \item{normalizationMethod}{a character specifying the normalization method 
   to use for performing the per-plate normalization. Allowed values are \code{"median"} (default), \code{"mean"},
   \code{"shorth"}, \code{"POC"} and \code{"NPI"} (see details).}
-  \item{transform}{a function that takes a numeric vector and returns a
-    numeric vector of the same length; for example, the logarithm
+  \item{transform}{a function that takes a numeric vector and returns a numeric vector of the same length; for example, the logarithm
     function \code{\link{log}}.}
-  \item{zscore}{indicates if the data should be centered and scaled after
-    normalization and transformation. If missing (default), the data will
-    not be centered and scaled. Otherwise, the value of this argument
-    should be a character string, either "+" or "-", which will be used to set the sign 
-    for the calculated z-scores (see details).}
+  \item{zscore}{indicates if the data should be centered and scaled after normalization and transformation. If missing (default), the data will not be centered and scaled. Otherwise, the value of this argument should be a character string, either "+" or "-", which will be used to set the sign for the calculated z-scores (see details).}
+  \item{posControls}{a list with the name of the positive controls. See details.}
+  \item{negControls}{a list with the name of the negative controls. See details.}
 }
 
 \details{
@@ -44,10 +41,13 @@ subtracting the overall \code{\link{median}} and dividing by the overall
 the distribution of intensities (over all plates) in the wells whose
 content is annotated as \code{sample}.  The allowed values for
 \code{zscore} ("+" or "-") are used to set the sign of the calculated z-scores.
-For example, with a \code{zscore="-"} a strong decrease in the signal will be 
-represented by a positive z-score, whereas setting \code{zscore="+"}, 
+For example, with a \code{zscore="-"} a strong decrease in the signal will be represented by a positive z-score, whereas setting \code{zscore="+"}, 
 such a phenotype will be represented by a negative z-score.  
 This option can be set to calculate the results to the commonly used convention.
+
+\code{posControls} and \code{negControls} should be given as lists of character(s) specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file. The length of these lists should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case 'x' contains multi-channel data that has been normalized by combining the values from two or more channels.
+  By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default "neg" will be considered as the name used to annotated the negative controls.
+    The arguments \code{posControls} and \code{negControls} are particularly useful in multi-channel data since the controls might be reporter-specific, or after normalizing multi-channel data.
 }
 
 \value{

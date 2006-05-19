@@ -17,9 +17,9 @@ ROC(x, positives="pos", negatives = "neg")
 }
 \arguments{
   \item{x}{a cellHTS object that has already been scored (see details).}
-  \item{positives}{a character string corresponding to the name used to
+  \item{positives}{a character giving the name(s) used to
     annotate the positive controls in the cellHTS object.}
-  \item{negatives}{a character string corresponding to the name used to
+  \item{negatives}{a character corresponding to the name(s) used to
     annotate the negative controls in the cellHTS object.}
   \item{col}{the graphical parameter for color; see \code{\link{par}} for details.}
   \item{type}{the graphical parameter giving the type of plot desired; see \code{\link{par}} for details.}

@@ -1,10 +1,9 @@
-  
 ROC = function(x, positives="pos", negatives="neg") {
   if(!"score" %in% names(x))
     stop("Please score 'x' (using for example the function 'calcZscore') before trying to calculate ROC.")
 
-  xneg = x$wellAnno==negatives
-  xpos = x$wellAnno==positives
+  xneg = x$wellAnno %in% negatives
+  xpos = x$wellAnno %in% positives
   if(!any(xneg))
     stop(sprintf("The 'wellAnno' slot does not contain any entries with value '%s'.", negatives))
   if(!any(xpos))
@@ -25,8 +24,12 @@ ROC = function(x, positives="pos", negatives="neg") {
   return(x)  
 }
 
-plot.ROC = function(x, col="darkblue", type="l", ...)
-  plot(x$FP, x$TP, xlab=x$negatives, ylab=x$positives, col=col, type=type, ...)
+plot.ROC = function(x, col="darkblue", type="l", ...) {
+if (length(x$negatives) > 1) xinfo=paste(x$negatives, collapse=", ") else xinfo=x$negatives
+if (length(x$positives) > 1) yinfo=paste(x$positives, collapse=", ") else yinfo=x$positives
+
+plot(x$FP, x$TP, xlab=xinfo, ylab=yinfo, col=col, type=type, ...)
+}
 
 lines.ROC = function(x, ...)
   lines(x$FP, x$TP, ...)

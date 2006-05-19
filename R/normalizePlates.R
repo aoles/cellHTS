@@ -1,4 +1,4 @@
-normalizePlates = function(x, normalizationMethod="median", transform, zscore){
+normalizePlates = function(x, normalizationMethod="median", transform, zscore, posControls, negControls) {
 
  ## Check the status of the 'cellHTS' object
   if(!x$state["configured"])
@@ -9,8 +9,8 @@ normalizePlates = function(x, normalizationMethod="median", transform, zscore){
     mean = scaleByPlateMean(x),
     median = scaleByPlateMedian(x),
     shorth = scaleByPlateShorth(x),
-    POC = POC(x),
-    NPI = NPI(x),
+    POC = if (missing(posControls)) POC(x) else POC(x, posControls),
+    NPI = if (missing(posControls) | missing(negControls)) NPI(x) else NPI(x, posControls, negControls),
     stop(sprintf("Invalid value '%s' for argument 'normalizationMethod'", normalizationMethodfun)))
 
  ## See if the data should be further transformed
