@@ -461,12 +461,6 @@ headers as well as the actual library is found by the compiler and
 linker. Please refer to the \textit{Writing R Extensions} manual and
 to the FAQ lists on www.r-project.org.
 
-Naturally, before facing an extensive installation struggle, you will
-want to explore the \Rpackage{cellHTS} package and see whether it is
-worthwhile. We have made available the result of the annotation with
-\Rpackage{biomaRt}, described below, as a precomputed R object:
-%
-
 %------------------------------------------------------------------
 \subsubsection{Using biomaRt to annotate the target genes online}
 %------------------------------------------------------------------
