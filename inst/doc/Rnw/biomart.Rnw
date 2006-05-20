@@ -92,8 +92,7 @@ x$geneAnno = bdgpbiomart
 @ 
 
 %% This is how the object is then saved in the data subdirectory of the package:
-<<saveAndStop, eval=TRUE>>=
+<<saveAndStop, echo=FALSE, eval=FALSE>>=
 save(bdgpbiomart, file="../../../data/bdgpbiomart.rda", compress=TRUE)
-stop()
 @ 
 

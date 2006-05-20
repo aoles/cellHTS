@@ -328,7 +328,7 @@ each gene. One option would be to take the root mean square
 of the $z$-scores from the replicates:
 \begin{eqnarray}
 z_{ki} &=& \pm \frac{x'_{ki}-\hat{\mu}}{\hat{\sigma}} \label{eq:defz} \\
-z_{k}  &=& \sqr{\frac{1}{n_{\mbox{\scriptsize rep}}} \sum_{i} z_{ki}^2} \label{eq:scoresSummary}.
+z_{k}  &=& \sqrt{\frac{1}{n_{\mbox{\scriptsize rep}}} \sum_{i} z_{ki}^2} \label{eq:scoresSummary}.
 \end{eqnarray}
 Here $\hat{\mu}$ and $\hat{\sigma}$ are estimators of location and
 scale of the distribution of $x'_{ki}$.  We use robust estimators,
@@ -438,7 +438,7 @@ package or do not want to use it. If you do skip this section, then
 for the purpose of this vignette, please load a cached version of the
 gene annotation:
 
-<<bdgpbiomart1, eval=FALSE>>=
+<<bdgpbiomart1, eval=TRUE>>=
 data("bdgpbiomart")
 x$geneAnno = bdgpbiomart
 @ 
@@ -475,15 +475,14 @@ will demonstrate how to obtain the dataframe \Robject{bdgpbiomart} by
 querying the online webservice \textit{BioMart} and through it the
 Ensembl genome annotation database~\cite{Ensembl2006}.
 
-
-<<runBiomart, echo=FALSE, eval=TRUE>>=
+%
+<<runBiomart, echo=FALSE, eval=FALSE>>=
 setwd("Rnw")
 Sweave("biomart.Rnw")
 setwd("..")
 stop()
 @ 
-
-
+%
 \input{Rnw/biomart.tex}
 
 %------------------------------------------------------------
