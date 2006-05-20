@@ -5,14 +5,6 @@ NPI = function(x, posControls, negControls){
  ## Check consistency for posControls and negControls (if provided)
  nrChannel = dim(x$xraw)[4]
 
-## to deal with the behaviour of "tolower", when it is called for NULL or NA.
-myTolower = function(z) {
-if (!is.null(z)) 
-  if (!all(is.na(z))) z=tolower(z) else z=NULL 
-return(z)
-}
-
-
 if (!missing(posControls)) {
 if (class(posControls)!="list" | length(posControls)!=nrChannel) 
 	stop(sprintf("'posControls' should be a list with length %d", nrChannel))

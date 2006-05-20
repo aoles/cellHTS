@@ -144,7 +144,13 @@ where necessary.
 > id = x$geneAnno$GeneID
 > bmAll = cbind(oneRowPerId(bm1, id), oneRowPerId(bm2, id), oneRowPerId(bm3, 
 +     id))
+> bdgpbiomart = cbind(x$geneAnno, bmAll)
+> x$geneAnno = bdgpbiomart
 \end{Sinput}
 \end{Schunk}
 
-
+%% This is how the object is then saved in the data subdirectory of the package:
+\begin{Schunk}
+\begin{Sinput}
+> save(bdgpbiomart, file = "../../../data/bdgpbiomart.rda", compress = TRUE)
+> stop()

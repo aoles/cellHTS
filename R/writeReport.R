@@ -64,11 +64,16 @@ writeHTMLtable4plots = function(x, con,
   cat("</TABLE><CENTER>\n", file=con)
 }
 
+##----------------------------------------------------------------------------
+## internal function: to deal with the behaviour of "tolower", when it is called for NULL or NA.
+myTolower = function(z) {
+  if (!is.null(z)) 
+    if (!all(is.na(z))) z=tolower(z) else z=NULL 
+  return(z)
+}
 
 
-
-
-
+##----------------------------------------------------------------------------
 writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   posControls, negControls, plotPlateArgs = FALSE, imageScreenArgs = NULL) {
 
@@ -111,21 +116,38 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   nrReplicate = dim(x$xraw)[3]
   nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
 
-## current status indication
-cat(sprintf("\n Constructing the HTML quality report for '%s'.\n",x$name))
+  ## current status indication
+  if(interactive())
+    cat(sprintf("\nConstructing the HTML quality report for '%s'.\n",x$name))
 
-
-  ## Define the bins for the histograms (channel-dependent)
-  if(x$state["configured"]) {
-    if(x$state["normalized"]) {
-      brks = apply(x$xnorm, 4, range, na.rm=TRUE)
-    } else {
-      brks = apply(x$xraw, 4, range, na.rm=TRUE)
-    }
-
-    brks = apply(brks, 2, function(s)seq(s[1], s[2], length=ceiling(nrWell/10)))
+  ## controls annotation
+  if (!missing(posControls)) {
+    ## check
+    if (class(posControls)!="list" | length(posControls)!=nrChannel) 
+      stop(sprintf("'posControls' should be a list with length %d", nrChannel))
+    
+    posControls = lapply(posControls, myTolower)
+  } else { 
+    posControls=as.list(rep("pos", nrChannel))
+  }
+  
+  if (!missing(negControls)) {
+    ## check
+    if (class(negControls)!="list" | length(negControls)!=nrChannel) 
+      stop(sprintf("'negControls' should be a list with length %d", nrChannel))
+    
+    negControls = lapply(negControls, myTolower)
+  } else {
+    negControls=as.list(rep("neg", nrChannel))
   }
 
+  ## Define the bins for the histograms (channel-dependent)
+  ## FIXME: could use the function "base:pretty" instead here
+  if(x$state["configured"]) {
+    brks = apply(if(x$state["normalized"]) { x$xnorm } else { x$xraw },
+      4, range, na.rm=TRUE)
+    brks = apply(brks, 2, function(s) seq(s[1], s[2], length=ceiling(nrWell/10)))
+  }
 
   ## the overview table of the plate result files in the experiment,
   ##   plus the (possible) urls for each table cell
@@ -134,38 +156,6 @@ cat(sprintf("\n Constructing the HTML quality report for '%s'.\n",x$name))
   colnames(url) = colnames(exptab)
   qmHaveBeenAdded = FALSE
   if (x$state["configured"]) {
-
-   ## current status indication
-    cat("\n Now, constructing the plate-wise HTML quality report for: \n")
-
-
-	## to deal with the behaviour of "tolower", when it is called for NULL or NA.
-myTolower = function(z) {
-if (!is.null(z)) 
-	if (!all(is.na(z))) z=tolower(z) else z=NULL 
-return(z)
-}
-
-
-## controls annotation
-if (!missing(posControls)) {
-# consistency check
-if (class(posControls)!="list" | length(posControls)!=nrChannel) 
-	stop(sprintf("'posControls' should be a list with length %d", nrChannel))
-
-posControls = lapply(posControls, myTolower)
-} else { 
-posControls=as.list(rep("pos", nrChannel))
-}
-	
-if (!missing(negControls)) {
-# consistency check
-if (class(negControls)!="list" | length(negControls)!=nrChannel) 
-stop(sprintf("'negControls' should be a list with length %d", nrChannel))
-
-negControls = lapply(negControls, myTolower)
-} else { negControls=as.list(rep("neg", nrChannel))}
-
 
    for(p in 1:nrPlate){
       ##    for(ch in 1:nrChannel){
@@ -183,12 +173,10 @@ negControls = lapply(negControls, myTolower)
           whatDat = "unnormalized"
         }
 
-    ## current status indication
-    cat(sprintf("................ Plate %d \n",p))
-
         res = QMbyPlate(datPlat, x$wellAnno[nrWell*(p-1)+(1:nrWell)], x$pdim, 
           name=sprintf("Plate %d (%s)", p, whatDat),
-          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks, finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE], posControls, negControls)
+          basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks,
+          finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE], posControls, negControls)
 
         url[wh, "status"] = res$url
         if(!qmHaveBeenAdded) {
@@ -232,9 +220,6 @@ negControls = lapply(negControls, myTolower)
   writeHTMLtable(exptab, url=url, con=con)
   cat("</CENTER><BR><BR>", file=con)
 
-
-## Some status indication for the user
-cat("\n Now, constructing the experiment-wise HTML quality report. \n")
 
   ## Per experiment QC
   plotTable = QMexperiment(x, outdir, con, posControls, negControls)
