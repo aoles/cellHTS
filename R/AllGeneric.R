@@ -5,3 +5,6 @@ annotate = function (x, ...)
 
 configure = function (x, ...) 
   UseMethod("configure")
+
+writeTab = function(x, ...)
+  UseMethod("writeTab")

@@ -143,3 +143,22 @@ conf$Position=pos2i(conf$Well, x$pdim)
   x$state["configured"] = TRUE
   return(x)
 }
+
+##----------------------------------------
+## export data to file as .txt
+##----------------------------------------
+writeTab.cellHTS = function(x, file=paste(x$name, "txt", sep="."), ...) {
+
+  toMatrix = function(y, prefix) {
+    m = matrix(y, nrow=prod(dim(y)[1:2]), ncol=dim(y)[3:4])
+    colnames(m) = sprintf("%sc%dr%d", prefix, rep(1:dim(y)[3], dim(y)[4]), rep(1:dim(y)[4], each=dim(y)[3]))	
+    return(m)
+  }      
+
+   out = cbind(x$geneAnno, toMatrix(x$xraw, "R"))
+   if(x$state["normalized"])		    
+     out = cbind(out, toMatrix(x$xnorm, "N")) 
+  
+  write.table(out, file=file, quote=FALSE, sep="\t", row.names=FALSE, col.names=TRUE)
+  return(file)
+}

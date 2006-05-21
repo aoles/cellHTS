@@ -1,6 +1,7 @@
 export("readPlateData",
        "annotate",
        "configure",
+       "writeTab",
        "normalizePlates",
        "normalizeRatio",
        "oneRowPerId",
@@ -16,8 +17,9 @@ export("readPlateData",
 
 S3method("annotate", "cellHTS")   
 S3method("configure", "cellHTS")
-S3method("print", "cellHTS")
+S3method("writeTab", "cellHTS")
 
+S3method("print", "cellHTS")
 S3method("lines", "ROC")
 S3method("plot", "ROC")
 
