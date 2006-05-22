@@ -13,10 +13,9 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
   checkColumns(pd, file, mandatory=c("Filename", "Plate", "Replicate"),
                numeric=c("Plate", "Replicate", "Channel", "Batch"))
 
-
 ## consistency check for "importFun"
 if (!missing(importFun)) {
- if (class(importFun)!="function") stop("'importFun' should be a function to use to read the raw data files")
+ if (!is(importFun, "function")) stop("'importFun' should be a function to use to read the raw data files")
 } else {
 #3 default function (compatible with the file format of the plate reader)
 # input: 

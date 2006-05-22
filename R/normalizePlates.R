@@ -9,9 +9,9 @@ normalizePlates = function(x, normalizationMethod="median", transform, zscore, p
     mean = scaleByPlateMean(x),
     median = scaleByPlateMedian(x),
     shorth = scaleByPlateShorth(x),
-    POC = if (missing(posControls)) POC(x) else POC(x, posControls),
-    NPI = if (missing(posControls) | missing(negControls)) NPI(x) else NPI(x, posControls, negControls),
-    stop(sprintf("Invalid value '%s' for argument 'normalizationMethod'", normalizationMethodfun)))
+    POC = POC(x, posControls),
+    NPI = NPI(x, posControls, negControls),
+    stop(sprintf("Invalid value '%s' for argument 'normalizationMethod'", normalizationMethod)))
 
  ## See if the data should be further transformed
   if(!missing(transform)) {

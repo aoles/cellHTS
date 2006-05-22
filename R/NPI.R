@@ -1,12 +1,11 @@
 NPI = function(x, posControls, negControls){
-## Normalized Percent Inhibition: for each plate, subtracts each measurement from the mean of the positive controls, and divides the result by the different between the mean of positive and negative controls (plate dynamic range), in an antagonist assay.
-
+## Normalized Percent Inhibition: for each plate, subtracts each measurement from the mean of the positive controls, and divides the result by the difference between the mean of positive and negative controls (plate dynamic range), in an antagonist assay.
 
  ## Check consistency for posControls and negControls (if provided)
  nrChannel = dim(x$xraw)[4]
 
 if (!missing(posControls)) {
-if (class(posControls)!="list" | length(posControls)!=nrChannel) 
+if (!is(posControls, "list") | length(posControls)!=nrChannel) 
 	stop(sprintf("'posControls' should be a list with length %d", nrChannel))
 
 posControls = lapply(posControls, myTolower)
@@ -18,7 +17,7 @@ posControls=as.list(rep("pos", nrChannel))
 
 if (!missing(negControls)) {
 # consistency check
-if (class(negControls)!="list" | length(negControls)!=nrChannel) 
+if (!is(negControls, "list") | length(negControls)!=nrChannel) 
 stop(sprintf("'negControls' should be a list with length %d", nrChannel))
 
 negControls = lapply(negControls, myTolower)

@@ -5,7 +5,6 @@ writeheader = function(x, level, con)
     cat(sprintf("<HTML><HEAD><TITLE>%s</TITLE></HEAD>\n<BODY><CENTER><H%d>%s</H%d></CENTER>\n\n",
                 as.character(x), as.integer(level), as.character(x), as.integer(level)), file=con)
 
-
 writeExperimentHeader = function(xy, x, y, url, level, con)
     cat(sprintf("<HTML><HEAD><TITLE>%s</TITLE></HEAD>\n<BODY><CENTER><H%d>%s<A HREF=\"%s\">%s</A></H%d></CENTER>\n\n",
                 as.character(xy), as.integer(level), as.character(x), url,  as.character(y), as.integer(level)), file=con)
@@ -87,7 +86,7 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
       stop(sprintf("'%s' must be a directory.", outdir))
     outdirContents = dir(outdir, all.files = TRUE)
     outdirContents = setdiff(outdirContents, c(".", ".."))
-    
+
     if(length(outdirContents)>0) {
       if(!force)
         stop(sprintf("'%s' is not empty.", outdir))
@@ -117,29 +116,31 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
 
   ## current status indication
-  if(interactive())
-    cat(sprintf("\nConstructing the HTML quality report for '%s'.\n",x$name))
+  if(interactive() & plotPlateArgs!=FALSE)
+    cat(sprintf("\nCreating HTML pages for '%s'. This can take a few minutes, please wait.\n", x$name))
 
   ## controls annotation
+if(x$state["configured"]) {
   if (!missing(posControls)) {
     ## check
-    if (class(posControls)!="list" | length(posControls)!=nrChannel) 
+    if (!is(posControls, "list") | length(posControls)!=nrChannel) 
       stop(sprintf("'posControls' should be a list with length %d", nrChannel))
-    
+
     posControls = lapply(posControls, myTolower)
   } else { 
     posControls=as.list(rep("pos", nrChannel))
   }
-  
+
   if (!missing(negControls)) {
     ## check
-    if (class(negControls)!="list" | length(negControls)!=nrChannel) 
+    if (!is(negControls, "list") | length(negControls)!=nrChannel) 
       stop(sprintf("'negControls' should be a list with length %d", nrChannel))
-    
+
     negControls = lapply(negControls, myTolower)
   } else {
     negControls=as.list(rep("neg", nrChannel))
   }
+}
 
   ## Define the bins for the histograms (channel-dependent)
   ## FIXME: could use the function "base:pretty" instead here
@@ -229,8 +230,8 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
   ##   be encapsulated in a separate helper function?
   if(x$state["scored"]) {
 
-## Status indication
-cat("\n Now, generating the hit list. \n")
+# ## Status indication
+# cat("\n Now, generating the hit list. \n")
  
 ## Checks whether the number of channels has changed after normalization
     trueNrCh = dim(x$xraw)[4]
@@ -291,8 +292,8 @@ cat("\n Now, generating the hit list. \n")
     out$score = round(out$score, 2)
     write.table(out, file=file.path(outdir, "topTable.txt"), sep="\t", row.names=FALSE, col.names=TRUE, quote = FALSE)
 
-## Status indication
-cat("\n Now, constructing the screen-wide QC image plot. \n")
+# ## Status indication
+# cat("\n Now, constructing the screen-wide QC image plot. \n")
     ## screen-wide QC (image plot with the z score values)
 
     makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,

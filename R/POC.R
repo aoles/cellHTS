@@ -1,12 +1,12 @@
-POC = function(x, posControls){
+POC = function(x, posControls) {
 ## determines the percentage of control, as the ratio between the raw measurement and the mean of the measurements in the positive controls in an antagonist assay.
 
 
- ## Check consistency for posControls (if provided)
- nrChannel = dim(x$xraw)[4]
+## Check consistency for posControls (if provided)
+nrChannel = dim(x$xraw)[4]
 
 if (!missing(posControls)) {
-if (class(posControls)!="list" | length(posControls)!=nrChannel) 
+if (!is(posControls, "list") | length(posControls)!=nrChannel) 
 	stop(sprintf("'posControls' should be a list with length %d", nrChannel))
 
 posControls = lapply(posControls, myTolower)
@@ -28,6 +28,4 @@ xn = array(as.numeric(NA), dim=dim(x$xraw))
 	for(r in 1:(dim(x$xraw)[3]))
         xn[, p, r, ch] = 100 * x$xraw[, p, r, ch] / mean(x$xraw[pos, p, r, ch], na.rm=TRUE)
   } }
-
-  return(xn)
-}
+  return(xn) }
