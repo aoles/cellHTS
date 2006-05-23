@@ -68,11 +68,11 @@ in the slot \code{state} to \code{state["normalized"]=TRUE}.  }
 \references{..}
 
 \examples{
-datadir = system.file("TwoColorScreen", package = "cellHTS")
+datadir = system.file("DualChannelScreen", package = "cellHTS")
 x = readPlateData("Platelist.txt", "TwoColorData", path=datadir)
-confFile = system.file("TwoColorScreen", "Plateconf.txt", package="cellHTS")
-logFile  = system.file("TwoColorScreen", "Screenlog.txt", package="cellHTS")
-descripFile  = system.file("TwoColorScreen", "Description.txt", package="cellHTS")
+confFile = system.file("DualChannelScreen", "Plateconf.txt", package="cellHTS")
+logFile  = system.file("DualChannelScreen", "Screenlog.txt", package="cellHTS")
+descripFile  = system.file("DualChannelScreen", "Description.txt", package="cellHTS")
 x = configure(x, confFile, logFile, descripFile)
 
 ## Define the controls for the different channels:

@@ -254,15 +254,15 @@ if(x$state["configured"]) {
     for (ch in 1:trueNrCh)
       out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$xraw[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
 
-    ## median between replicates  
+    ## median between replicates (raw data) 
     for (ch in 1:trueNrCh) {
       if (nrReplicate > 1) {
         out[sprintf("median_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, median, na.rm=TRUE)
         if (nrReplicate ==2) { 
-          ## Difference between replicates
+          ## Difference between replicates (raw data)
           out[sprintf("diff_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, diff)
         } else {
-          ## average between replicates
+          ## average between replicates (raw data)
           out[sprintf("average_ch%d", ch)] = apply(out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)], 1, mean, na.rm=TRUE)
         } ## if
       } ## if
