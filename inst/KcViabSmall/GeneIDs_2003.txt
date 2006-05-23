@@ -1,4 +1,4 @@
-Plate	Well	HFAid	GeneID
+Plate	Well	HFAID	GeneID
 1	A01	NA	NA
 1	A02	NA	NA
 1	A03	HFA00274	CG11371
