@@ -1,25 +1,23 @@
-\name{normalizeRatio}
-\alias{normalizeRatio}
-\title{Normalization of two-color data and data transformation}
+\name{normalizeChannels}
+\alias{normalizeChannels}
+\title{Normalization of dual-channel data and data transformation}
 \description{
-  Normalizes and/or transforms two-channel data \code{xraw} of a given 'cellHTS' object by applying the function defined in \code{fun}. The default is to take the ratio between the 2 channels (R2/R1).
-  Plate median scaling may also be performed.
+  Normalizes and/or transforms dual-channel data \code{xraw} of a given 'cellHTS' object by applying the function defined in \code{fun}. The default is to take the ratio between the second and first channels (R2/R1).
+  Correction of plate-to-plate variations may also be performed.
 }
 \usage{
-normalizeRatio(x, fun=function(r1,r2) r2/r1, log=FALSE, scmedian=FALSE, zscore)
+normalizeChannels(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlates, zscore)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been configured (see details).}
   \item{fun}{a function defined by the user to relate the signal in the
-    two color channels \code{r1} and \code{r2}. \code{fun} takes two
+    two channels \code{r1} and \code{r2}. \code{fun} takes two
     numeric vectors and returns a numeric vector of the same length. The
-    default is to take the ration between the two channel.}
+    default is to take the ration between the second and first channels.}
   \item{log}{a logical value indicating whether the result obtained after applying 
     \code{fun} should be log2 transformed. The default is \code{log = FALSE}, 
-    and the data is not log transformed.}
-  \item{scmedian}{a logical value indicating whether plate median
-    scaling should be performed after applying \code{fun} (see details).
-    The default is \code{scmedian = FALSE}.}
+    and the data is not log2 transformed.}
+  \item{adjustPlates}{character string indicating the correction factor to apply to adjust for plate-to-plate varations, after applying \code{fun} and eventually log transforming the values (see details). If \code{adjustPlates} is missing (the default), no plate-wise correction will be performed.}
   \item{zscore}{indicates if the z-scores should be determined after
     normalization and transformation. If missing (default),
     the data will not be scored. Otherwise, it should be a character
@@ -31,23 +29,19 @@ normalizeRatio(x, fun=function(r1,r2) r2/r1, log=FALSE, scmedian=FALSE, zscore)
 For each plate and replicate of a two-color experiment, the function
 defined in \code{fun} is applied to relate the intensity values in the
 two channels of the \code{cellHTS} object. The default is to calculate
-the ration between the second and the first channels, but other options can be defined.
+the ratio between the second and the first channels, but other options can be defined.
 
 If \code{log = TRUE}, the data obtained after applying \code{fun} is 
 log2 transformed. The default is \code{log = FALSE}.
 
-If \code{scmedian = TRUE}, plate median scaling will be further
-performed, by dividing each measurement by the median value across the
-wells annotated as \code{sample} in the respective plate and
-replicate. Note that if the data have been log transformed (\code{log = TRUE}), 
-the median is subtracted instead. The default is \code{scmedian = FALSE}.
+If \code{adjustPlates} is not missing, the obtained values will be further corrected for plate effects by considering the chosen per-plate factor. If \code{adjustPlates="mean"}, this factor will be the plate mean, if \code{adjustPlates="median"}, the plate median, whereas if \code{adjustPlates="shorth"}, the midpoint of the shorth (see \code{\link[genefilter:shorth]{shorth}}) of the distribution of values. In either case, the median, mean or midpoint of the shorth is determined for the distribution of values in the wells annotated as \code{sample} in \code{x$wellAnno}, for a given replicated plate. If the data have not been log transformed (\code{log=FALSE}), each measurement is divided by the per-plate plate factor, while if the data values are in log2 scale (\code{log=TRUE}), the per-plate factor will be subtracted from each measurement. By default, \code{adjustPlates} is missing.
 
 If \code{zscore} is not missing, a robust z-score for each
 individual measurement will be determined for each plate and each well
 by subtracting the overall median and dividing by the overall mad. The
 overall median and mad are taken by considering the distribution of
 intensities (over all plates) in the wells whose content is annotated as
-\code{sample}.  
+\code{sample}.
 The allowed values for \code{zscore} ("+" or "-") are used to set the sign of 
 the calculated z-scores. For example, with a \code{zscore="-"} a strong decrease 
 in the signal will be represented by a positive z-score, whereas setting \code{zscore="+"}, 
@@ -92,7 +86,7 @@ posControls = vector("character", length=dim(x$xraw)[4])
  posControls[2]="(?i)^geneC$|^geneD$"
 
 #writeReport(x, posControls=posControls, negControls=negControls)
-x = normalizeRatio(x, fun=function(x,y) x/y, log=TRUE, scmedian=TRUE)
+x = normalizeChannels(x, fun=function(x,y) x/y, log=TRUE, adjustPlates=TRUE)
 
 ## Define the controls for the normalized intensities (only one channel):
 negControls = vector("character", length=dim(x$xnorm)[4])

@@ -1,10 +1,10 @@
-normalizeRatio = function(x, fun=function(r1,r2) r2/r1, log=FALSE, scmedian=FALSE, zscore){
+normalizeChannels = function(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlates, zscore){
 
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
 
   if(dim(x$xraw)[4] != 2)
-    stop("Currently this function is implemented only for 2-color data.")
+    stop("Currently this function is implemented only for dual-channel data.")
 
   xn = array(as.numeric(NA), dim=c(dim(x$xraw)[-4], 1))
   nrWpP = dim(x$xraw)[1]
@@ -18,15 +18,15 @@ normalizeRatio = function(x, fun=function(r1,r2) r2/r1, log=FALSE, scmedian=FALS
 ## log2 transformes the result of 'fun'
   if (log) xn = log2(xn)
 
-
-  if(scmedian) {
-## Apply plate median scaling
-    for(p in 1:(dim(x$xraw)[2])) {
-        samples = (x$wellAnno[(1:nrWpP)+nrWpP*(p-1)]=="sample")
-        for(r in 1:(dim(x$xraw)[3]))
-	 if (log) {xn[, p, r, 1] = xn[, p, r, 1] - median(xn[samples, p, r, 1], na.rm=TRUE)} 
-		else {xn[, p, r, 1] = xn[, p, r, 1] / median(xn[samples, p, r, 1], na.rm=TRUE)}
-  } }
+if (!missing(adjustPlates)) {
+x$xnorm = xn
+ ## Apply the chosen plate-wise normalization function
+ xn = switch(adjustPlates,
+    mean = scaleByPlateMean(x, what="xnorm", isInLogScale=log),
+    median = scaleByPlateMedian(x, what="xnorm", isInLogScale=log),
+    shorth = scaleByPlateShorth(x, what="xnorm", isInLogScale=log),
+    stop(sprintf("Invalid value '%s' for argument 'adjustPlates'", adjustPlates)))
+}
 
 ## calculates the z-score for each replicate separately
   if(!missing(zscore)) {

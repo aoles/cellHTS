@@ -24,11 +24,11 @@ normalizePlates(x, normalizationMethod="median", transform, zscore, posControls,
 \details{
 The normalization is performed in a per-plate fashion.
 If \code{normalizationMethod="median"}, plates effects are corrected by dividing each measurement 
-by the median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate, replicate and batch.
+by the median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate and replicate.
 If \code{normalizationMethod="mean"}, the average in the \code{sample} wells is consider instead.
-If \code{normalizationMethod="shorth"}, for each plate, replicate and batch, the midpoint of the shorth (see \code{\link[genefilter:shorth]{shorth}}) of the distribution of values in the wells annotated as \code{sample} is
+If \code{normalizationMethod="shorth"}, for each plate and replicate, the midpoint of the shorth (see \code{\link[genefilter:shorth]{shorth}}) of the distribution of values in the wells annotated as \code{sample} is
 calculated. Then, every measurement is divided by this value.
-If \code{normalizationMethod="POC"}, for each plate, replicate and batch, each measurement is divided by the average of the measurements on the plate positive controls.
+If \code{normalizationMethod="POC"}, for each plate and replicate, each measurement is divided by the average of the measurements on the plate positive controls.
 If \code{normalizationMethod="NPI"}, each measurement is subtracted from the average of the intensities on the plate positive controls, and this result is divided by the difference between the means of the measurements on the positive and the negative controls. 
 
 If \code{transform} is not missing, the chosen data transformation is applied. 
