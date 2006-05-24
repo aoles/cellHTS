@@ -75,20 +75,33 @@ logFile  = system.file("DualChannelScreen", "Screenlog.txt", package="cellHTS")
 descripFile  = system.file("DualChannelScreen", "Description.txt", package="cellHTS")
 x = configure(x, confFile, logFile, descripFile)
 
+table(x$wellAnno)
+
 ## Define the controls for the different channels:
-negControls=vector("list", length=dim(x$xraw)[4])
-negControls[[1]]="geneA"
-negControls[[2]]=c("geneA", "geneB")
-posControls=vector("list", length=dim(x$xraw)[4])
-posControls[[2]]=c("geneC", "geneD")
+negControls=vector("character", length=dim(x$xraw)[4])
+
+ # channel 1 - gene A
+ negControls[1]= "(?i)^geneA$" # case-insensitive and match the empty string at the beginning and end of a line (to distinguish between "geneA" and "geneAB", for example. Although it is not a problem for the present well annotation)
+ 
+ # channel 2 - gene A and geneB
+ negControls[2]= "(?i)^geneA$|^geneB$" 
+
+posControls = vector("character", length=dim(x$xraw)[4])
+ # channel 1 - no controls
+ # channel 2 - geneC and geneD
+ posControls[2]="(?i)^geneC$|^geneD$"
+
 #writeReport(x, posControls=posControls, negControls=negControls)
 x = normalizeRatio(x, fun=function(x,y) x/y, log=TRUE, scmedian=TRUE)
 
-## Define the controls for the normalized intensities:
-negControls=vector("list", length=dim(x$xnorm)[4])
-negControls[[1]]=c("geneA", "geneB")
-posControls=vector("list", length=dim(x$xnorm)[4])
-posControls[[1]]=c("geneC", "geneD")
+## Define the controls for the normalized intensities (only one channel):
+negControls = vector("character", length=dim(x$xnorm)[4])
+# For the single channel, the negative controls are geneA and geneB 
+negControls[1]= "(?i)^geneA$|^geneB$" 
+
+posControls = vector("character", length=dim(x$xnorm)[4])
+# For the single channel, the negative controls are geneC and geneD 
+posControls[1]="(?i)^geneC$|^geneD$"
 #writeReport(x, force=TRUE, plotPlateArgs=list(xrange=c(-3,3)), posControls=posControls, negControls=negControls)
 }
 \keyword{manip}

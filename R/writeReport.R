@@ -65,16 +65,15 @@ writeHTMLtable4plots = function(x, con,
 
 ##----------------------------------------------------------------------------
 ## internal function: to deal with the behaviour of "tolower", when it is called for NULL or NA.
-myTolower = function(z) {
-  if (!is.null(z)) 
-    if (!all(is.na(z))) z=tolower(z) else z=NULL 
-  return(z)
-}
+# myTolower = function(z) {
+#   if (!is.null(z)) 
+#     if (!all(is.na(z))) z=tolower(z) else z=NULL 
+#   return(z)
+# }
 
 
 ##----------------------------------------------------------------------------
-writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
-  posControls, negControls, plotPlateArgs = FALSE, imageScreenArgs = NULL) {
+writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE, plotPlateArgs = FALSE, imageScreenArgs = NULL, posControls, negControls) {
 
   if(!inherits(x, "cellHTS"))
     stop("'x' must be a 'cellHTS' object")
@@ -123,31 +122,32 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE,
 if(x$state["configured"]) {
   if (!missing(posControls)) {
     ## check
-    if (!is(posControls, "list") | length(posControls)!=nrChannel) 
-      stop(sprintf("'posControls' should be a list with length %d", nrChannel))
+    if (!is(posControls, "vector") | length(posControls)!=nrChannel | mode(posControls)!="character") 
+      stop(sprintf("'posControls' should be a vector of regular expression with length %d", nrChannel))
 
-    posControls = lapply(posControls, myTolower)
+    #posControls = lapply(posControls, myTolower)
   } else { 
-    posControls=as.list(rep("pos", nrChannel))
+    posControls=as.vector(rep("^pos$", nrChannel))
   }
 
   if (!missing(negControls)) {
     ## check
-    if (!is(negControls, "list") | length(negControls)!=nrChannel) 
-      stop(sprintf("'negControls' should be a list with length %d", nrChannel))
+    if (!is(negControls, "vector") | length(negControls)!=nrChannel | mode(negControls)!="character") 
+      stop(sprintf("'negControls' should be a vector of regular expression with length %d", nrChannel))
 
-    negControls = lapply(negControls, myTolower)
+    #negControls = lapply(negControls, myTolower)
   } else {
-    negControls=as.list(rep("neg", nrChannel))
+    negControls=as.vector(rep("^neg$", nrChannel))
   }
 }
 
   ## Define the bins for the histograms (channel-dependent)
-  ## FIXME: could use the function "base:pretty" instead here
   if(x$state["configured"]) {
     brks = apply(if(x$state["normalized"]) { x$xnorm } else { x$xraw },
       4, range, na.rm=TRUE)
-    brks = apply(brks, 2, function(s) seq(s[1], s[2], length=ceiling(nrWell/10)))
+    #brks = apply(brks, 2, function(s) seq(s[1], s[2], length=ceiling(nrWell/10)))
+    brks = apply(brks, 2, function(s) pretty(s, n=ceiling(nrWell/10))) 
+    if(!is(brks, "list")) brks=list(brks) # put as list also for the case ch=1
   }
 
   ## the overview table of the plate result files in the experiment,
@@ -174,7 +174,7 @@ if(x$state["configured"]) {
           whatDat = "unnormalized"
         }
 
-        res = QMbyPlate(datPlat, x$wellAnno[nrWell*(p-1)+(1:nrWell)], x$pdim, 
+        res = QMbyPlate(datPlat, as.character(x$wellAnno[nrWell*(p-1)+(1:nrWell)]), x$pdim, 
           name=sprintf("Plate %d (%s)", p, whatDat),
           basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks,
           finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE], posControls, negControls)

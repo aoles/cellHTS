@@ -27,8 +27,8 @@ writeReport(x, outdir=file.path(getwd(), x$name),
     See details.}
   \item{imageScreenArgs}{a list with parameters for the function
     \code{\link[cellhts]{imageScreen}}. See details.} 
-  \item{posControls}{a list with the name of the positive controls. See details.}
-  \item{negControls}{a list with the name of the negative controls. See details.}
+  \item{posControls}{a vector of regular expressions specifying the name of the positive controls. See details.}
+  \item{negControls}{a vector of regular expressions specifying the name of the negative controls. See details.}
 }
 
 \details{
@@ -45,8 +45,10 @@ writeReport(x, outdir=file.path(getwd(), x$name),
    \code{ar}, aspect ratio,
    \code{zrange}, range.
 
-  \code{posControls} and \code{negControls} should be given as lists of character(s) specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file. The length of these lists should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case 'x' contains multi-channel data that has been normalized by combining the values from two or more channels.
-  By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default "neg" will be considered as the name used to annotated the negative controls.
+  \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case 'x' contains multi-channel data that has been normalized by combining the values from two or more channels.
+  By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default "neg" will be considered as the name used to annotated the negative controls. 
+  The content of \code{posControls} and \code{negControls} will be passed to \code{\link[base:regexpr]{regexpr}} for pattern matching within the well annotation given in \code{x$wellAnno} (see examples). If no controls are available for a given channel, use \code{""} or \code{NA} for that channel. For example, \code{posControls = c("", "(?i)^diap$")} means that channel 1 has no controls, while "diap" is the positive control for channel 2.
+
   The arguments \code{posControls} and \code{negControls} are particularly useful in multi-channel data since the controls might be reporter-specific, or after normalizing multi-channel data.
 }
 \seealso{
@@ -69,8 +71,11 @@ writeReport(x, outdir=file.path(getwd(), x$name),
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
  descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
-## pCtrls = list("pos")
-## nCtrls = list("neg") 
+## pCtrls = c("pos") 
+## nCtrls = c("neg") 
+   # or for safety reasons (not a problem for the current well annotation, however) 
+   # pCtrls = c("^pos$") 
+   # nCtrls = c("^neg$")
 ## writeReport(x, posControls=pCtrls, negControls=nCtrls)
  writeReport(x)
  x = normalizePlates(x, normalizationMethod="median",zscore="-")

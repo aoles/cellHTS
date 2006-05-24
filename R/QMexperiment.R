@@ -7,12 +7,13 @@ QMexperiment = function(x, path, con, posControls, negControls) {
 
   posCtrls = vector("list", length=nrCh)
   negCtrls = vector("list", length=nrCh)
+  wellAnno = as.character(x$wellAnno)
 
   for (ch in 1:nrCh) {
-    if (!is.null(posControls[[ch]])) 
-       posCtrls[[ch]]= which(x$wellAnno %in% posControls[[ch]]) 
-    if (!is.null(negControls[[ch]])) 
-       negCtrls[[ch]]= which(x$wellAnno %in% negControls[[ch]]) 
+    if (!(posControls[ch] %in% c(NA, "")))
+       posCtrls[[ch]]= which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0)
+    if (!(negControls[ch] %in% c(NA, "")))
+      negCtrls[[ch]]= which(regexpr(negControls[ch], wellAnno, perl=TRUE)>0)
 }
 
 # Checks whether the number of channels has changed (e.g. normalized data)
@@ -109,7 +110,7 @@ legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("red"
 
 controlsplot = function(xpos, xneg, ppos, pneg,...) {
 ylim = range(c(xpos,xneg), na.rm=TRUE)
-if (prod(ylim)<0) ylim = sign(ylim)*1.15*abs(ylim) else ylim = c(0.85*ylim[1], 1.15*ylim[2])
+if (prod(ylim)<0) ylim = sign(ylim)*1.25*abs(ylim) else ylim = c(0.85*ylim[1], 1.25*ylim[2])
 plot(ppos, xpos, pch=16, cex=0.5, ylim=ylim, xlab="Plate", ylab="", col="red", xaxt="n", ...)
 points(pneg, xneg, pch=16, cex=0.5, col="blue")
 legend("top",legend =c("'pos' controls", "'neg' controls"), col=c("red","blue"),

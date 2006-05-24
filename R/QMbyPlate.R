@@ -33,11 +33,11 @@ negCtrls = vector("list", length=nrChannel)
   mt = match(wellAnno, names(wellTypeColor))
   samples  = which(mt==which(names(wellTypeColor)=="sample"))
 for (ch in 1:nrChannel) {
-if (!is.null(posControls[[ch]])) 
-posCtrls[[ch]]= which(wellAnno %in% posControls[[ch]]) 
+if (!(posControls[ch] %in% c(NA, "")))
+ posCtrls[[ch]]= which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0)
 
-if (!is.null(negControls[[ch]])) 
-negCtrls[[ch]]= which(wellAnno %in% negControls[[ch]]) 
+if (!(negControls[ch] %in% c(NA, "")))
+negCtrls[[ch]]= which(regexpr(negControls[ch], wellAnno, perl=TRUE)>0)
 }
 
 
@@ -215,7 +215,7 @@ count= count + 1
     makePlot(file.path(basePath, subPath), con=con,
               name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz/2*maxRep, fun = function() {
                par(mai=c(0.5,0.25,0.01,0.01))
-               hist(x[,,r,ch], xlab ="", breaks=brks[,ch],
+               hist(x[,,r,ch], xlab ="", breaks=brks[[ch]],
                     col = gray(0.95), yaxt = "n", main="")
                rug(x[,,r,ch])
              }, print=FALSE)
