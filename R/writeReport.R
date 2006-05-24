@@ -114,9 +114,6 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE, plotPl
   nrReplicate = dim(x$xraw)[3]
   nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
 
-  ## current status indication
-  if(interactive() & plotPlateArgs!=FALSE)
-    cat(sprintf("\nCreating HTML pages for '%s'. This can take a few minutes, please wait.\n", x$name))
 
   ## controls annotation
 if(x$state["configured"]) {
@@ -156,10 +153,15 @@ if(x$state["configured"]) {
   url = matrix(as.character(NA), nrow=nrow(exptab), ncol=ncol(exptab))
   colnames(url) = colnames(exptab)
   qmHaveBeenAdded = FALSE
-  if (x$state["configured"]) {
 
-   for(p in 1:nrPlate){
-      ##    for(ch in 1:nrChannel){
+
+ if (x$state["configured"]) {
+
+if (interactive()) {
+   require("prada")
+   progress(message = sprintf("\nCreating HTML pages for '%s'", x$name)) }
+
+for(p in 1:nrPlate){
       nm = p
       wh = with(x$plateList, which(Plate==p & status=="OK"))
       if(length(wh)>0) {
@@ -169,7 +171,6 @@ if(x$state["configured"]) {
           ## datPlat = x$xnorm[, p,, ch, drop=FALSE]
           whatDat = "normalized"
         } else {
-          ## datPlat = x$xraw[, p,, ch, drop=FALSE]
           datPlat = x$xraw[, p,,, drop=FALSE]
           whatDat = "unnormalized"
         }
@@ -201,8 +202,10 @@ if(x$state["configured"]) {
           ## for(j in names(resCh)[(nrReplicate+1):) exptab[whCh, j] =resCh[j]
         } # channel
       } ## if
-    }
-  } # if configured
+if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
+
+} ## for p plates
+} #if configured
 
   ## Report pages per plate result file 
   ## dir.create(file.path(outdir, "in"))
