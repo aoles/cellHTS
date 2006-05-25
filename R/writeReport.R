@@ -50,7 +50,7 @@ writeHTMLtable4plots = function(x, con,
 
   nr = nrow(x)
   nc = ncol(x)
- 
+
   cat("<CENTER><TABLE border=0><TR>",
       paste(sprintf("<TH BGCOLOR=\"%s\">%s</TH>", colors[(1:nc)%%2+1], names(x)), collapse=""),
       "</TR>\n", sep="", file=con)
@@ -78,6 +78,24 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE, plotPl
   if(!inherits(x, "cellHTS"))
     stop("'x' must be a 'cellHTS' object")
 
+
+  nrWell    = dim(x$xraw)[1]
+  nrPlate   = dim(x$xraw)[2]
+  nrReplicate = dim(x$xraw)[3]
+  nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
+  timeCounter=0
+  fz =!is.logical(plotPlateArgs)
+
+## Rough estimation of the total computation time that the function will take
+# 1 = one time unit
+if (interactive()) {
+    totalTime= 2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) + 0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +(x$state["scored"])*nrChannel*14 + 0.2
+   require("prada")
+   progress(message = sprintf("\nCreating HTML pages for '%s'", x$name)) 
+   timeCounter=1
+   updateProgress(100*timeCounter/totalTime, autoKill = TRUE)
+}
+
   ## See if output directory exists. If not, create. If yes, check if it is empty,
   ## and if not, depending on parameter 'force', throw an error or clean it up.
   if(file.exists(outdir)){
@@ -103,20 +121,25 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE, plotPl
   dir.create(file.path(outdir, "in"))
   nm = file.path("in", "Description.txt")
 
+if(timeCounter) {
+   timeCounter=timeCounter+2
+   updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+
+
   if(x$state["configured"]) {
   writeLines(x$screenDesc, file.path(outdir, nm))
   writeExperimentHeader(paste("Experiment report for ", x$name), "Experiment report for ", x$name, nm, 1, con)
   } else { writeheader(paste("Experiment report for", x$name), 1, con)}
- 
-  ## QC per plate & channel
-  nrWell    = dim(x$xraw)[1]
-  nrPlate   = dim(x$xraw)[2]
-  nrReplicate = dim(x$xraw)[3]
-  nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
+
 
 
   ## controls annotation
 if(x$state["configured"]) {
+
+  if(timeCounter) {
+   timeCounter=timeCounter+2
+   updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+
   if (!missing(posControls)) {
     ## check
     if (!is(posControls, "vector") | length(posControls)!=nrChannel | mode(posControls)!="character") 
@@ -140,12 +163,21 @@ if(x$state["configured"]) {
 
   ## Define the bins for the histograms (channel-dependent)
   if(x$state["configured"]) {
+    if(timeCounter) {
+      timeCounter=timeCounter+2
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+
     brks = apply(if(x$state["normalized"]) { x$xnorm } else { x$xraw },
       4, range, na.rm=TRUE)
     #brks = apply(brks, 2, function(s) seq(s[1], s[2], length=ceiling(nrWell/10)))
     brks = apply(brks, 2, function(s) pretty(s, n=ceiling(nrWell/10))) 
     if(!is(brks, "list")) brks=list(brks) # put as list also for the case ch=1
   }
+
+
+
+  ## QC per plate & channel
+
 
   ## the overview table of the plate result files in the experiment,
   ##   plus the (possible) urls for each table cell
@@ -157,11 +189,8 @@ if(x$state["configured"]) {
 
  if (x$state["configured"]) {
 
-if (interactive()) {
-   require("prada")
-   progress(message = sprintf("\nCreating HTML pages for '%s'", x$name)) }
-
 for(p in 1:nrPlate){
+
       nm = p
       wh = with(x$plateList, which(Plate==p & status=="OK"))
       if(length(wh)>0) {
@@ -202,10 +231,15 @@ for(p in 1:nrPlate){
           ## for(j in names(resCh)[(nrReplicate+1):) exptab[whCh, j] =resCh[j]
         } # channel
       } ## if
-if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
+
+    if(timeCounter) {
+      timeCounter=timeCounter+(nrReplicate*nrChannel)*(1+2*fz)
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
 
 } ## for p plates
 } #if configured
+
+
 
   ## Report pages per plate result file 
   ## dir.create(file.path(outdir, "in"))
@@ -218,6 +252,11 @@ if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
                    as.integer(w), nm[w]))
     writeLines(txt, file.path(outdir, nm[w]))
     url[w, "Filename"] = nm[w]
+
+   if(timeCounter) {
+      timeCounter=timeCounter + 0.01
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+
   }
 
   cat("<CENTER>", file=con)
@@ -228,14 +267,13 @@ if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
   ## Per experiment QC
   plotTable = QMexperiment(x, outdir, con, posControls, negControls)
 
-  ## Score table and screen-wide QC
-  ## To do (wh 16.5.2006): the code within this monster if-statement would probably better
-  ##   be encapsulated in a separate helper function?
-  if(x$state["scored"]) {
+   if(timeCounter) {
+      timeCounter=timeCounter+(5*nrReplicate*nrChannel)
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
 
-# ## Status indication
-# cat("\n Now, generating the hit list. \n")
- 
+  ## Score table and screen-wide QC
+  ## To do (wh 16.5.2006): the code within this monster if-statement would probably better be encapsulated in a separate helper function?
+  if(x$state["scored"]) {
 ## Checks whether the number of channels has changed after normalization
     trueNrCh = dim(x$xraw)[4]
     w=1:length(x$score)
@@ -248,10 +286,14 @@ if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
     for (ch in 1:nrChannel)
       out[sprintf("normalized_r%d_ch%d", 1:nrReplicate, ch)] = round(matrix(x$xnorm[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate), 3)
 
-    
+
     ## include also the final well annotation (after the screen log file)
     for (ch in 1:trueNrCh)
       out[sprintf("finalWellAnno_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$finalWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+
+  if(timeCounter) {
+      timeCounter=timeCounter+ nrChannel
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
 
     ## include also the raw values for each replicate and channel	 
     for (ch in 1:trueNrCh)
@@ -270,6 +312,11 @@ if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
         } ## if
       } ## if
     } ## for ch
+
+  if(timeCounter) {
+      timeCounter=timeCounter+ 3*nrChannel
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+
     ## raw/plateMedian
     xn = array(as.numeric(NA), dim=dim(x$xraw))
     for(p in 1:nrPlate) {
@@ -278,8 +325,16 @@ if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
         for (ch in 1:trueNrCh) 
           xn[, p, r, ch] = x$xraw[, p, r, ch] / median(x$xraw[samples, p, r, ch], na.rm=TRUE)
     }
+
+  if(timeCounter) {
+      timeCounter=timeCounter+ 3*nrChannel
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+
+
+
     for (ch in 1:trueNrCh)
       out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch)] = signif(matrix(xn[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate), 3)
+
 
     if(x$state["annotated"]) {
       out = cbind(out, x$geneAnno)
@@ -294,23 +349,35 @@ if (interactive()) updateProgress(100*p/nrPlate, autoKill = TRUE)
     out = out[order(out$score, decreasing=TRUE), ]
     out$score = round(out$score, 2)
     write.table(out, file=file.path(outdir, "topTable.txt"), sep="\t", row.names=FALSE, col.names=TRUE, quote = FALSE)
-
-# ## Status indication
-# cat("\n Now, constructing the screen-wide QC image plot. \n")
-    ## screen-wide QC (image plot with the z score values)
+ 
+    if(timeCounter) {
+      timeCounter=timeCounter+ nrChannel
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
 
     makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
              fun = function() do.call("imageScreen", args=append(list(x=x), imageScreenArgs)), print=FALSE)
 
+  if(timeCounter) {
+      timeCounter=timeCounter+ 4*nrChannel
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
 
     count = nrow(plotTable)
     plotTable = rbind(plotTable, rep("", length=prod(ncol(plotTable)* 2))) 
     plotTable[count + 1, 2] = "<H3 align=center>Screen-wide image plot of the scored values</H3>"
     plotTable[count + 2, 1] = sprintf("<CENTER><A HREF=\"topTable.txt\"><em>%s</em></A></CENTER><BR>\n", ttInfo)
     plotTable[count + 2, 2] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", "imageScreen.pdf", "imageScreen.png") 
+
+   if(timeCounter) {
+      timeCounter=timeCounter+ 2*nrChannel
+      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+
   } ## if scored
 
   writeHTMLtable4plots(plotTable, con=con)
+
+  if(timeCounter) {
+      updateProgress(100, autoKill = TRUE)}
+
 
   writetail(con)
   return(indexFile)
