@@ -8,7 +8,7 @@
   by the argument 'x'.  
 }
 \usage{
-readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE)
+readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE, plateType)
 }
 \arguments{
   \item{filename}{the name of the file table (see details).
@@ -19,8 +19,9 @@ readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE)
   \item{path}{a character of length 1 indicating the path in
     which to find the plate reader files. By default, 
     it can extract the path from \code{filename}.}
-   \item{verbose}{a logical value, if TRUE, the function reports some of its intermediate progress.}
    \item{importFun}{a function that should be used to read each plate result file. The default function works for plate reader data files. See details.}
+   \item{verbose}{a logical value, if TRUE, the function reports some of its intermediate progress.}
+   \item{plateType}{(deprecated argument) a character of length 1 giving the format of the plate: "96" for  96-well plate format, or "384" for a 384-well plate format.}
 }
 
 \details{The file table is expected to be a tab-delimited file with at

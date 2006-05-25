@@ -1,9 +1,12 @@
 ## (C) Michael Boutros and Wolfgang Huber, Nov 2005
-readPlateData = function(filename, path=dirname(filename), name, importFun, verbose=TRUE)
+readPlateData = function(filename, path=dirname(filename), name, importFun, verbose=TRUE, plateType)
 {
 
   file = basename(filename)
   dfiles = dir(path)
+
+
+if(!missing(plateType)) warning("The argument 'plateType' is deprecated!")
 
   if(!(is.character(path)&&length(path)==1))
     stop("'path' must be character of length 1")
@@ -54,7 +57,6 @@ well = importFun(fi)$well
 pdim = c(nrow=max(Let), ncol=max(Num))
 if (!(prod(pdim) %in% c(96, 384)) ) 
   stop(sprintf("Invalid plate format! Allowed formats are 96- or 384-well plates!"))
-
 
 # 
 #   pdim = switch(plateType,
