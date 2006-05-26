@@ -2,7 +2,7 @@ summarizeReplicates=function(x, zscore, summary="min") {
 ## Note: If data has not been scored yet, sign must be given in order to calculate the z-score value for each replicate.
 
   if(!x$state["normalized"])
-    stop("Please normalize 'x' (using for example the function 'normalizePlateMedian') before summarizing the replicates.")
+    stop("Please normalize 'x' (using for example the function 'normalizePlates') before summarizing the replicates.")
   if(dim(x$xnorm)[4]!=1)
     stop("Currently this function is implemented only for single-color data.")
 
