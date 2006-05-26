@@ -58,7 +58,7 @@ of R (version 2.3 or greater) together with a recent version of the package
 
 To reproduce the computations shown here, you do not need to type them
 or copy-paste them from the PDF file; rather, you can take the file
-\textit{cellhts.Rnw} in the \textit{doc/Rnw} directory of the package,
+\textit{cellhts.Rnw} in the \textit{doc} directory of the package,
 open it in a text editor, run it using the R command
 \Rfunction{Sweave}, and modify it to your needs.
 
@@ -89,9 +89,9 @@ The experiments were done in duplicate, and the viability of the cells after
 treatment was recorded by a plate reader measuring luciferase activity, which
 is indicative of ATP levels. Although this set of example data corresponds to a
 single-channel screening assay, the \Rpackage{cellHTS} package can also 
-deal with cases where there are readings from more color channels, corresponding 
+deal with cases where there are readings from more channels, corresponding 
 to different reporters.
-Usually, the measurements from each replicate and each color channel 
+Usually, the measurements from each replicate and each channel 
 come in individual result files. The set of available result files and 
 the information about them (which plate,
 which replicate, which channel) is contained in a spreadsheet, which
@@ -256,12 +256,25 @@ allows to have different plate configurations (see Section~\ref{sec:multPlateCon
 The \emph{Well} column 
 contains the name of each well of the plate, in letter-number format 
 (in this case, \Robject{A01} to \Robject{P24}). 
-The \emph{Content} column can contain one of the 
-following: \textit{sample} (for wells that
-contain genes of interest), \textit{pos} (for positive controls),
-\textit{neg} (for negative controls), \textit{empty} (for empty
-wells), and \textit{other} (for anything that does not fit into the
-four other categories). Note that these annotations are used by the
+As the name suggests, the \emph{Content} column provides the content of each well 
+in the plate (here referred to as the \textit{well annotation}). 
+Mainly, this annotation falls into four categories: empty wells, wells containing 
+genes of interest, control wells, and wells containing other things that do not 
+fit in the previous categories. The first two types of wells should be indicated in the 
+\textit{Content} column of the
+plate configuration file by \textit{empty} and \textit{sample}, respectively, while the 
+last type of wells should be indicated by \textit{other}. The designation for the 
+control wells in the \textit{Content} conlumn is more flexible. By default, the software
+expects them to be indicated by \textit{pos} (for positive controls), or \textit{neg} 
+(for negative controls). However, other names are allowed, given that they are 
+specified by the user  whenever necessary (for example, when calling the 
+\Rfunction{writeReport} function). This versatility for the control wells' annotation 
+is justified by the fact that,sometimes, multiple positive and/or negative controls 
+can be employed in a given screen, making it useful to give different names 
+to the distinct controls in the \textit{Content} column. Moreover, this versatility is 
+also required in multi-channel screens for which we frequently have reporter-specific 
+controls.
+Note that the well annotations mentioned above are used by the
 software in the normalization, quality control, and gene selection
 calculations. Data from wells that are annotated as \textit{empty} are
 ignored, i.\,e.\ they are set to \Robject{NA}. Here we look at the frequency of
@@ -658,11 +671,64 @@ cellHTS:::dataframeOutput(res, header=TRUE,
   label="enrichedGoCateg", gotable=TRUE)
 @ 
 %
+
+%------------------------------------------------------------
+\section{Comparison with the results previously reported}
+%------------------------------------------------------------
+
+In this section we compare the current results obtained using \Rpackage{cellHTS} 
+package, with the ones previously reported in Boutros 
+\textit{et al.}~\cite{Boutros2004}. The file ``Analysis2003.txt'' in the 
+same directory as the input data files, i.\,e.\, in \Robject{\Sexpr{experimentName}} 
+directory of the \Rpackage{cellHTS} package.
+First, We will load this file:
+%
+<<load file with previous analysis>>=
+data2003 = read.table(paste(dataPath, "Analysis2003.txt", sep="/"), header=TRUE, 
+as.is=TRUE, sep="\t")
+@ 
+% 
+The file contains the columns \Robject{\Sexpr{paste(names(data2003), collapse=", ")}}.
+The scored values in the \Robject{Scores} column will be compared with the ones 
+obtained in our analysis. For that, I will start by adding to \Robject{data2003}, a 
+column with the corresponding $z$-score values calculated using the \Rpackage{cellHTS} 
+package. 
+% 
+<<add the current scored values>>=
+i = data2003$Position + 384*(data2003$Plate-1)
+data2003$ourScore = x$score[i]
+@ 
+%
+%
+\myincfig{cellhts-scoresComparison}{\textwidth}{Scored 
+values obtained in the paper of Boutros \textit{et al.} against the scored 
+values calculated herein. Each panel corresponds to one 384-well plate.}
+%
+<<scoresComparison,echo=FALSE,results=hide,fig=TRUE,include=FALSE,width=5,width=5>>=
+require("geneplotter")
+par(mfrow=c(7,9), mai=c(0,0,0,0))
+for(i in 1:max(data2003$Plate)) {
+   sel = (data2003$Plate==i)
+   plot(data2003$ourScore[sel], data2003$Score[sel], pch=19, cex=0.6)
+  }
+@ 
+%
+Figure~\ref{cellhts-scoresComparison} shows the scatterplot between Boutros 
+\textit{et al.}' scores and our scores in each of the 384-well plates.
+The results between the two analyses are very similar, except for two minor 
+details: use of robust estimators of location and spread (median and mad 
+instead of mean and standard deviation), and a estimation of mad over 
+the whole experiment instead of plate-by-plate.
+In fact, Figure~\ref{cellhts-scoresComparison} evidenciates how the scored values
+exactly agree up to an offset (mean versus median) and scale 
+(standard deviation versus mad).
+%
+
 %------------------------------------------------------------
 \section{Appendix: Data transformation}
 %------------------------------------------------------------
-\myincfig{cellhts-transfplots}{0.95\textwidth}{Comparison between untransformed (left) and 
-logarithmically (base 2) transformed (right), normalized data. 
+\myincfig{cellhts-transfplots}{0.95\textwidth}{Comparison between untransformed 
+(left) and logarithmically (base 2) transformed (right), normalized data. 
 Upper: histogram of intensity values of replicate 1. 
 Middle: scatterplots of standard deviation versus mean of the two replicates. 
 Bottom: Normal quantile-quantile plots.}
@@ -705,39 +771,6 @@ dvlog = matrix(xlog$xnorm, nrow=prod(dim(xlog$xnorm)[1:2]), ncol=dim(xlog$xnorm)
 myPlots(dvlog, main="log2")
 @ 
 %
-
-%------------------------------------------------------------
-\section{Appendix: Multiple channel experiments}
-%------------------------------------------------------------
-
-Under construction!
-
-The \Rpackage{cellHTS} includes an example of a two-color screen performed 
-with \textit{D. melanogaster} cells. Two reporters were used. 
-The first reporter is specific for ...., while the second reporter is indicative of 
-...
-
-reporter $R1$ could monitor the total number of viable cells in a
-well, another reporter $R2$ the activity of a particular
-pathway. 
-Such experimental setups are typically used in screens for
-signaling pathway components, where a pathway-inducible readout is
-normalized against a constitutive reporter. 
-In this way, it becomes possible to
-distinguish between changes in the readout caused by depletion of
-specific pathway components versus changes in the overall cell number.
-The \textit{cellHTS} package provides a function to perform plate
-median normalization on the ratios $R2/R1$, which can be used as a
-measure of pathway activity per cell.
-
-This approach can be expanded to other types of reporters and to
-experiments with more than two reporters. Taking the in-built
-normalization functions of \textit{cellHTS} as a template, one can
-employ the extensive statistical modeling capabilities of the R
-programming language to consider more general analysis strategies that
-are adapted to the biological system and the question of
-interest.
-
 
 %------------------------------------------------------------
 %Bibliography

@@ -1,6 +1,7 @@
 QMexperiment = function(x, path, con, posControls, negControls) {
 
 
+
   nrbxp = 1+x$state["normalized"]
   nrCh = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4]) 
 
@@ -9,12 +10,15 @@ QMexperiment = function(x, path, con, posControls, negControls) {
   negCtrls = vector("list", length=nrCh)
   wellAnno = as.character(x$wellAnno)
 
+
+if(x$state["configured"]) {
   for (ch in 1:nrCh) {
     if (!(posControls[ch] %in% c(NA, "")))
        posCtrls[[ch]]= which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0)
     if (!(negControls[ch] %in% c(NA, "")))
       negCtrls[[ch]]= which(regexpr(negControls[ch], wellAnno, perl=TRUE)>0)
 }
+} 
 
 # Checks whether the number of channels has changed (e.g. normalized data)
   if (x$state["normalized"]) hasLessCh = dim(x$xraw)[4] > dim(x$xnorm)[4] else hasLessCh=FALSE
