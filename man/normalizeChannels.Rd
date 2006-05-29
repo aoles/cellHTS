@@ -86,7 +86,7 @@ posControls = vector("character", length=dim(x$xraw)[4])
  posControls[2]="(?i)^geneC$|^geneD$"
 
 #writeReport(x, posControls=posControls, negControls=negControls)
-x = normalizeChannels(x, fun=function(x,y) x/y, log=TRUE, adjustPlates="median")
+x = normalizeChannels(x, fun=function(x,y) y/x, log=TRUE, adjustPlates="median")
 
 ## Define the controls for the normalized intensities (only one channel):
 negControls = vector("character", length=dim(x$xnorm)[4])
