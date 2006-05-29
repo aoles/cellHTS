@@ -279,7 +279,7 @@ for(p in 1:nrPlate){
     w=1:length(x$score)
     out=data.frame(
       plate=1 + (w-1)%/%nrWell,
-      pos=1+(w-1)%%nrWell,
+      position=1+(w-1)%%nrWell,
       score=x$score, wellAnno = x$wellAnno)
 
     ## Include the normalized values
