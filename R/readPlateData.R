@@ -20,7 +20,7 @@ if(!missing(plateType)) warning("The argument 'plateType' is deprecated!")
 if (!missing(importFun)) {
  if (!is(importFun, "function")) stop("'importFun' should be a function to use to read the raw data files")
 } else {
-#3 default function (compatible with the file format of the plate reader)
+# default function (compatible with the file format of the plate reader)
 # input: 
 # output: data.frame with "txt", "well" and "val"
 importFun = function(f) {
@@ -38,7 +38,7 @@ return(out)
    if (length(a)==0) stop(sprintf("None of the files were found in the given 'path': %s", path))
 
 ## check the plate format
-f = file.path(path, names(a))
+f = file.path(path, dfiles[a])
 Let = c()
 Num = c()
 
