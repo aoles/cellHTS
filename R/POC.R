@@ -21,8 +21,10 @@ xn = array(as.numeric(NA), dim=dim(x$xraw))
     wellAnno = as.character(x$wellAnno[(1:nrWpP)+nrWpP*(p-1)])
 
       for(ch in 1:(dim(x$xraw)[4])) {
-	pos = regexpr(posControls[ch], wellAnno, perl=TRUE)>0
-        if (sum(pos)==0) stop(sprintf("No positive controls were found in plate %s! Please, use a different normalization function.", p))
+      pos = FALSE
+        if (!(posControls[ch] %in% c(NA, ""))) {
+	  pos = regexpr(posControls[ch], wellAnno, perl=TRUE)>0 } 
+        if (!sum(pos)) stop(sprintf("No positive controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch))
 
 	for(r in 1:(dim(x$xraw)[3]))
         xn[, p, r, ch] = 100 * x$xraw[, p, r, ch] / mean(x$xraw[pos, p, r, ch], na.rm=TRUE)

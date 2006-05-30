@@ -30,9 +30,13 @@ NPI = function(x, posControls, negControls){
     wellAnno = as.character(x$wellAnno[(1:nrWpP)+nrWpP*(p-1)])
 
       for(ch in 1:(dim(x$xraw)[4])) {
-	pos = regexpr(posControls[ch], wellAnno, perl=TRUE)>0
-	neg = regexpr(negControls[ch], wellAnno, perl=TRUE)>0
-	if (sum(pos)==0 | sum(neg)==0) stop(sprintf("No positive or/and negative controls were found in plate %s! Please, use a different normalization function.", p))
+  pos = FALSE
+  neg = FALSE
+        if (!(posControls[ch] %in% c(NA, ""))) {
+	pos = regexpr(posControls[ch], wellAnno, perl=TRUE)>0 }
+        if (!(negControls[ch] %in% c(NA, ""))) {
+	neg = regexpr(negControls[ch], wellAnno, perl=TRUE)>0 }
+	if (sum(pos)==0 | sum(neg)==0) stop(sprintf("No positive or/and negative controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch))
 
     for(r in 1:(dim(x$xraw)[3]))
         xn[, p, r, ch] = (mean(x$xraw[pos, p, r, ch], na.rm=TRUE) - x$xraw[, p, r, ch]) / (mean(x$xraw[pos, p, r, ch], na.rm=TRUE) - mean(x$xraw[neg, p, r, ch], na.rm=TRUE))
