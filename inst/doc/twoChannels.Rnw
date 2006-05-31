@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{Analysis of multi-channel cell-based screens}
+%\Vignetteindexentry{Analysis of multi-channel cell-based screens}
 %\VignetteKeywords{Mutiple channel screens, Cell based assays}
 %\VignettePackage{cellHTS}
 
@@ -34,7 +34,7 @@ pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 %------------------------------------------------------------
 \title{Analysis of multi-channel cell-based screens}
 %------------------------------------------------------------
-\author{Michael Boutros, L\'igia Br\'as and Wolfgang Huber}
+\author{L\'igia Br\'as, Michael Boutros and Wolfgang Huber}
 \maketitle
 \tableofcontents
 
@@ -96,7 +96,7 @@ Here, we consider a sample data of a dual-channel experiment performed
 with \textit{D. melanogaster} cells. The screen was conducted  
 in microtiter plate format using a library of double-stranded RNAs (dsRNAs), in duplicates.
 The example data set corresponds to three 384-well plates. 
-The purpose of the screen is to find signalling components of a given pathway.
+The purpose of the screen is to find signaling components of a given pathway.
 In the screen, one reporter (assigned to channel 1, and denoted here by $R_1$) 
 monitors cell growth and viability, while the other reporter (assigned to channel 2 and 
 denoted here by $R_2$) is indicative of pathway activity.
@@ -238,14 +238,19 @@ the report:
 browseURL(out)
 @ 
 %
-In this experiment, reporter 1 ($R_1$) monitors cell viability. Thus, low intensities in $R_1$ 
-should be masked, because they are not related with the studied signalling pathway, 
-but with cell viability.
-The selection of the threshold for the minimum intensity in $R_1$ is more or less arbitrary. 
-Here, we have chosen to set this cut-off as a low quantile ($5\%$) of the overall distribution 
-of corrected intensity values in the $R_1$ channel of each replicate. 
-However, to be able to use the overall distribution of intensities in the three plates, first we need to remove the plate-to-plate variations.
-This will be performed by applying plate median scaling to each replicate and channel using the function \Rfunction{normalizePlates}:
+In this experiment, reporter 1 ($R_1$) monitors cell viability. Thus,
+wells with low intensities in $R_1$ should be masked: these cells are not
+responding to a specific perturbation of the studied signaling pathway, 
+but show a more unspecific cell viability phenotype.
+There is no obvious choice for a threshold for the minimum intensity
+$R_1$ that we consider still viable; here, we have chosen to set this
+cut-off as a low quantile ($5\%$) of the overall distribution of
+corrected intensity values in the $R_1$ channel of each replicate.
+However, to be able to use the overall distribution of intensities in
+the three plates, first we need to remove the plate-to-plate
+variations.  This will be performed by applying plate median scaling
+to each replicate and channel using the function
+\Rfunction{normalizePlates}:
 %
 <<plateMedianChannels>>=
 x = normalizePlates(x,normalizationMethod="median")
@@ -335,20 +340,16 @@ we have to redefine the positive and negative controls for the normalized data
 The controls for the normalized data values are the same as those of the raw data channel $R_2$.
 
 %
-<<RedefineControls, echo=FALSE>>=
+<<RedefineControls>>=
 ## Define the controls for the normalized intensities (only one channel):
-negControls = vector("character", length=dim(x$xnorm)[4])
 # For the single channel, the negative controls are geneA and geneB 
-negControls[1]= "(?i)^geneA$|^geneB$" 
-
-posControls = vector("character", length=dim(x$xnorm)[4])
-# For the single channel, the negative controls are geneC and geneD 
-posControls[1]="(?i)^geneC$|^geneD$"
+negControls= "(?i)^geneA$|^geneB$" 
+posControls= "(?i)^geneC$|^geneD$"
 @ 
 <<report2Show, eval=FALSE>>=
 out=writeReport(x, outdir="logRatio", posControls=posControls, negControls=negControls)
 @
-<<report2Do, results=hide>>=
+<<report2Do, results=hide, echo=FALSE>>=
 out=writeReport(x, force=TRUE, outdir="logRatio", posControls=posControls, negControls=negControls)
 @
 %
@@ -391,7 +392,7 @@ browseURL(out)
 Finally, we will save the data set to a file. 
 %
 <<savex>>=
-save(x, file=paste(experimentName, ".rda", sep=""), compress=TRUE)
+save(x, file=paste(experimentName, ".rda", sep=""))
 @ 
 % 
 

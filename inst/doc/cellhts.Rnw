@@ -345,7 +345,7 @@ z_{k}  &=& \sqrt{\frac{1}{n_{\mbox{\scriptsize rep}}} \sum_{i} z_{ki}^2} \label{
 \end{eqnarray}
 Here $\hat{\mu}$ and $\hat{\sigma}$ are estimators of location and
 scale of the distribution of $x'_{ki}$.  We use robust estimators,
-namely, median and median absolute deviation (mad).  As the values
+namely, median and median absolute deviation (MAD).  As the values
 $x'_{ki}$ were obtained using plate median
 normalization~\eqref{eq:normalizePlateMedian}, it holds that
 $\hat{\mu}=1$.  The symbol $\pm$ indicates that we allow for either
@@ -684,7 +684,7 @@ directory of the \Rpackage{cellHTS} package.
 First, We will load this file:
 %
 <<load file with previous analysis>>=
-data2003 = read.table(paste(dataPath, "Analysis2003.txt", sep="/"), header=TRUE, 
+data2003 = read.table(file.path(dataPath, "Analysis2003.txt"), header=TRUE, 
 as.is=TRUE, sep="\t")
 @ 
 % 
@@ -702,7 +702,8 @@ data2003$ourScore = x$score[i]
 %
 \myincfig{cellhts-scoresComparison}{\textwidth}{Scored 
 values obtained in the paper of Boutros \textit{et al.} against the scored 
-values calculated herein. Each panel corresponds to one 384-well plate.}
+values calculated herein. Each panel corresponds to one 384-well plate. 
+Axis labels are not pretty - they overlap with neighboring panels due to space constraints.}
 %
 <<scoresComparison,echo=FALSE,results=hide,fig=TRUE,include=FALSE,width=5,width=5>>=
 require("geneplotter")
@@ -714,14 +715,14 @@ for(i in 1:max(data2003$Plate)) {
 @ 
 %
 Figure~\ref{cellhts-scoresComparison} shows the scatterplot between Boutros 
-\textit{et al.}' scores and our scores in each of the 384-well plates.
+\textit{et al.}'s scores and our scores in each of the 384-well plates.
 The results between the two analyses are very similar, except for two minor 
-details: use of robust estimators of location and spread (median and mad 
-instead of mean and standard deviation), and a estimation of mad over 
+details: use of robust estimators of location and spread (median and MAD 
+instead of mean and standard deviation), and estimation of MAD over 
 the whole experiment instead of plate-by-plate.
 In fact, Figure~\ref{cellhts-scoresComparison} evidenciates how the scored values
 exactly agree up to an offset (mean versus median) and scale 
-(standard deviation versus mad).
+(standard deviation versus MAD).
 %
 
 %------------------------------------------------------------
