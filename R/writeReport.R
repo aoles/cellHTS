@@ -343,11 +343,13 @@ for(p in 1:nrPlate){
     } else {
       ttInfo = "Table of scored probes"
     }
+
+## 01.06.2006 Export everything to topTable.txt
     ## consider only the wells with sample and controls, at least for one of the replicates
-    toconsider = which(!apply(out[,grep("finalWellAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
-    out = out[toconsider, ]
-    toconsider = !is.na(out$score)
-    out = out[toconsider,]
+#     toconsider = which(!apply(out[,grep("finalWellAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
+#     out = out[toconsider, ]
+#     toconsider = !is.na(out$score)
+#     out = out[toconsider,]
     out = out[order(out$score, decreasing=TRUE), ]
     out$score = round(out$score, 2)
     write.table(out, file=file.path(outdir, "topTable.txt"), sep="\t", row.names=FALSE, col.names=TRUE, quote = FALSE)
