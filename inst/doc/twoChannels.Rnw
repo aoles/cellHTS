@@ -257,8 +257,7 @@ x = normalizePlates(x,normalizationMethod="median")
 @ 
 %
 <<set cut-off for R1, echo=TRUE, results=hide>>=
-ctoff = data.frame(min=NA)
-for (r in 1:dim(x$xraw)[3]) ctoff[r,] = quantile(x$xnorm[,,r,2], probs = 0.05, na.rm = TRUE)
+ctoff = apply(x$xnorm[,,,2], 3, quantile, probs=0.05, na.rm=TRUE)
 @ 
 %
 
@@ -283,10 +282,10 @@ ind = apply(cbind(R[,r],F[,r]), 1, function(z) any(is.na(z)))
 plot(R[!ind,r],F[!ind,r], col= densCols(cbind(R[!ind,r], F[!ind,r])), pch=16,cex=0.7,
      xlab="R1 (log scale)", ylab="R2 (log scale)", log="xy", 
      ylim=ylim, xlim=xlim)
-abline(v=ctoff[r,], col="grey", lty=2, lwd=2)
+abline(v=ctoff[r], col="grey", lty=2, lwd=2)
 points(R[posC,r],F[posC,r], col="red", pch=20, cex=0.9)
 points(R[negC,r],F[negC,r], col="green", pch=20, cex=0.9)
-ind = which(x$xnorm[,,r,1] <= ctoff[r,])
+ind = which(x$xnorm[,,r,1] <= ctoff[r])
 points(R[ind,r],F[ind,r], col="grey", pch=20, cex=0.9)
 #legend("topleft", col=c("grey", "red", "green"), legend=c("masked", "positive controls","negative controls"),  bty="n", pch=20, cex=0.9)
  }
@@ -304,7 +303,7 @@ subsequent preprocessing will be applied on this array.
 %
 <<masking, results=hide>>=
 for(r in 1:dim(x$xnorm)[3]) {
-ind = x$xnorm[,,r,1]<=ctoff[r,]
+ind = x$xnorm[,,r,1]<=ctoff[r]
 x$xraw[,,r,][ind]=NA
 }
 @ 

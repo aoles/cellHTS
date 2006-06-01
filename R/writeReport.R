@@ -143,7 +143,7 @@ if(x$state["configured"]) {
   if (!missing(posControls)) {
     ## check
     if (!is(posControls, "vector") | length(posControls)!=nrChannel | mode(posControls)!="character") 
-      stop(sprintf("'posControls' should be a vector of regular expression with length %d", nrChannel))
+      stop(sprintf("'posControls' should be a vector of regular expressions with length %d", nrChannel))
 
     #posControls = lapply(posControls, myTolower)
   } else { 
@@ -153,7 +153,7 @@ if(x$state["configured"]) {
   if (!missing(negControls)) {
     ## check
     if (!is(negControls, "vector") | length(negControls)!=nrChannel | mode(negControls)!="character") 
-      stop(sprintf("'negControls' should be a vector of regular expression with length %d", nrChannel))
+      stop(sprintf("'negControls' should be a vector of regular expressions with length %d", nrChannel))
 
     #negControls = lapply(negControls, myTolower)
   } else {
