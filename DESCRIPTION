@@ -5,7 +5,7 @@ Title: Analysis of cell-based screens
 Author: Wolfgang Huber <huber@ebi.ac.uk>, Ligia Bras <ligia@ebi.ac.uk>, Michael Boutros <m.boutros@dkfz.de>
 Maintainer: Wolfgang Huber <huber@ebi.ac.uk>
 Depends: R (>= 2.3.0), prada (>= 1.9.4), RColorBrewer, Biobase (>= 1.11.12), genefilter (>= 1.11.2)
-Suggests: 
+Suggests: Category, GO
 Description: Analysis of cell-based high-throughput screens
 Reference: M. Boutros, L. Bras and W. Huber, TBA
 License: LGPL
