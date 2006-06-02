@@ -14,10 +14,10 @@ Assay: Cell viability by ATP-luminescence
 Assaytype: homogenous
 Assaydescription:  Cells were treated with 21306 dsRNAs for 120 hours in 384-well plates
 Web: http://www.dkfz.de/signaling/viability
-License: LGPL [??]
+License: 
 
 [Files]
 plateList: Platelist.txt
-annotation: GeneIDs.txt
+annotation: GeneIDs_Dm_HFA_1.1.txt
 plateConf: Plateconf.txt
 screenLog: Screenlog.txt

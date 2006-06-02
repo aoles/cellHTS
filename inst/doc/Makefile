@@ -11,8 +11,8 @@ pdf:	twoChannels.tex cellhts.tex
 	pdflatex twoChannels
 
 clean:
-	/bin/rm -f *.out *.bbl *.log *.aux *.blg *.toc *.tex
+	/bin/rm -f *.out *.bbl *.log *.aux *.blg *.brf *.toc *.tex
 	/bin/rm -f *.dvi *.ps cellhts-* twoChannels-* tmp_*
-	/bin/rm -rf raw KcViab logRatio
+	/bin/rm -rf raw KcViab logRatio KcViab.rda  DualChannelScreen.rda
 
 

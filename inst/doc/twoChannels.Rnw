@@ -398,7 +398,7 @@ save(x, file=paste(experimentName, ".rda", sep=""))
 %------------------------------------------------------------
 %Bibliography
 %------------------------------------------------------------
-\bibliography{twoChannels}
+\bibliography{cellhts}
 \bibliographystyle{plain}
 
 \end{document}

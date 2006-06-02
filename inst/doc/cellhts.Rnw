@@ -425,7 +425,7 @@ Table~\ref{tab:geneID}, where we have associated each probe with
 CG-identifiers for the genes of \textit{Drosophila melanogaster}.
 %
 <<geneIDs>>=
-geneIDFile = file.path(dataPath, "GeneIDs.txt")
+geneIDFile = file.path(dataPath, "GeneIDs_Dm_HFA_1.1.txt")
 x = annotate(x, geneIDFile)
 @ 
 %% Create the example table:

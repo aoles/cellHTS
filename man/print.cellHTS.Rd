@@ -21,10 +21,10 @@
  print(x)
  confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
  logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
- descripFile  = system.file("KcViabSmall", "DESCRIPTION.txt", package="cellHTS")
+ descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
  x = configure(x, confFile, logFile, descripFile)
  print(x)
- geneIDFile = system.file("KcViabSmall", "GeneIDs.txt", package="cellHTS")
+ geneIDFile = system.file("KcViabSmall", "GeneIDs_Dm_HFAsubset_1.0.txt", package="cellHTS")
  x = annotate(x, geneIDFile)
  print(x)
 }

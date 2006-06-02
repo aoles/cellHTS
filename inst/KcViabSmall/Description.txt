@@ -14,10 +14,10 @@ Assay: Cell viability by ATP-luminescence
 Assaytype: homogenous
 Assaydescription:  Subset of the 'KcViab' screen, consisting of the first three plates.
 Web: http://www.dkfz.de/signaling/viability
-License: LGPL [??]
+License: 
 
 [Files]
 plateList: Platelist.txt
-annotation: GeneIDs.txt
+annotation: GeneIDs_Dm_HFAsubset_1.0.txt
 plateConf: Plateconf.txt
 screenLog: Screenlog.txt
