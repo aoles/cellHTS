@@ -91,7 +91,7 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE, plotPl
 if (interactive()) {
     totalTime= 2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) + 0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +(x$state["scored"])*nrChannel*14 + 0.2
    require("prada")
-   progress(message = sprintf("\nCreating HTML pages for '%s'", x$name)) 
+   progress(title="cellHTS is busy", message = sprintf("\nCreating HTML pages for '%s'", x$name)) 
    timeCounter=1
    updateProgress(100*timeCounter/totalTime, autoKill = TRUE)
 }

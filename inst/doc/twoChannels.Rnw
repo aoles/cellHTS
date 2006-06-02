@@ -1,4 +1,4 @@
-%\Vignetteindexentry{Analysis of multi-channel cell-based screens}
+%\VignetteindexEntry{Analysis of multi-channel cell-based screens}
 %\VignetteKeywords{Mutiple channel screens, Cell based assays}
 %\VignettePackage{cellHTS}
 

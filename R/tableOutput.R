@@ -30,12 +30,9 @@ tableOutput = function(fn, nm, header=TRUE, dropColumns, selRows=1:5) {
     x[[i]][length(x[[i]])]="..."
   }
 
-  shortfn = strsplit(fn, .Platform$file.sep)[[1]]
-  shortfn = shortfn[length(shortfn)]
-
   dataframeOutput(x, header=header,
     caption=sprintf("Selected lines from the example %s file \\texttt{%s}.", 
-      nm, shortfn),
+      nm, gsub("_", "\\\\_", basename(fn))),
     label = gsub(" ", "", nm))
 
 }
