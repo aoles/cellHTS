@@ -185,10 +185,10 @@ count = 1
   if(nrRep==2) {
     makePlot(file.path(basePath, subPath), con=con,
              name=sprintf("scp_Channel%d", ch), w=plsiz, h=plsiz, fun = function() {
-      par(mai=c(0.5,0.5,0.1,0.1))
+      par(mai=c(0.9,0.9,0.01,0.01))
       ylim=c(min(x[,,,ch], na.rm=TRUE), max(x[,,,ch], na.rm=TRUE))
       plot(x[,,whHasData[[ch]][1],ch], x[,,whHasData[[ch]][2],ch], pch=16, cex=0.5,
-           ylim=ylim, xlab="Replicate 1", ylab="Replicate 2", col=wellTypeColor[mtt[[ch]]])
+           ylim=ylim, xlab="replicate 1", ylab="replicate 2", col=wellTypeColor[mtt[[ch]]])
       abline(a=0, b=1, col="lightblue")
     }, print=FALSE)
 
@@ -214,8 +214,8 @@ count= count + 1
        if (r %in% whHasData[[ch]]){
     makePlot(file.path(basePath, subPath), con=con,
               name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz/2*maxRep, fun = function() {
-               par(mai=c(0.5,0.25,0.01,0.01))
-               hist(x[,,r,ch], xlab ="", breaks=brks[[ch]],
+               par(mai=c(1,0.25,0.01,0.01))
+               hist(x[,,r,ch], xlab ="intensity", breaks=brks[[ch]],
                     col = gray(0.95), yaxt = "n", main="")
                rug(x[,,r,ch])
              }, print=FALSE)

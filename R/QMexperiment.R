@@ -32,13 +32,14 @@ names(plotTable) = c("", paste("Channel", 1:nrCh, sep=" "))
     for (r in 1:(dim(x$xraw)[3])) {
       makePlot(path, con=con,
            name=sprintf("boxplot_%d_%d", r, ch), w=5*(nrbxp-hasLessCh), h=5, fun = function() {
-             par(mfrow=c(1, (nrbxp-hasLessCh)), mai=c(par("mai")[1:2], 0.01, 0.01))
+             par(mfrow=c(1, (nrbxp-hasLessCh)), mai=c(1, 1,, 0.01, 0.01))
              if (!hasLessCh) {
-             xbp = x$xraw[,,r,ch]
-             boxplotwithNA(xbp, col(xbp), col="pink", outline=FALSE, main="")}
+               xbp = x$xraw[,,r,ch]
+               boxplotwithNA(xbp, col(xbp), col="pink", outline=FALSE, main="", xlab="plate", ylab="raw intensity")
+             }
              if(x$state["normalized"]) {
                xbp = x$xnorm[,,r,ch]
-               boxplotwithNA(xbp, col(xbp), col="lightblue", outline=FALSE, main="")
+               boxplotwithNA(xbp, col(xbp), col="lightblue", outline=FALSE, main="", xlab="plate", ylab="normalized intensity")
              }
            }, print=FALSE)
 
@@ -103,7 +104,7 @@ dpos=density(xpos, na.rm=TRUE, adjust=3)
 ymax = max(dpos$y, dneg$y)*1.1
 xmax = max(dpos$x, dneg$x)
 xmin = min(dpos$x, dneg$x)
-plot(dpos, xlim = c(xmin, xmax) ,ylim=c(0, ymax), col="red", yaxt="n",ylab="", xlab="", ...)
+plot(dpos, xlim = c(xmin, xmax), ylim=c(0, ymax), col="red", yaxt="n",ylab="", xlab="normalized intensity", ...)
 lines(dneg, col="blue")
 #axis(1, labels =TRUE)
 legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("red","blue"), 
@@ -115,7 +116,7 @@ legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("red"
 controlsplot = function(xpos, xneg, ppos, pneg,...) {
 ylim = range(c(xpos,xneg), na.rm=TRUE)
 if (prod(ylim)<0) ylim = sign(ylim)*1.25*abs(ylim) else ylim = c(0.85*ylim[1], 1.25*ylim[2])
-plot(ppos, xpos, pch=16, cex=0.5, ylim=ylim, xlab="Plate", ylab="", col="red", xaxt="n", ...)
+plot(ppos, xpos, pch=16, cex=0.5, ylim=ylim, xlab="plate", ylab="normalized intensity", col="red", xaxt="n", ...)
 points(pneg, xneg, pch=16, cex=0.5, col="blue")
 legend("top",legend =c("'pos' controls", "'neg' controls"), col=c("red","blue"),
        horiz=TRUE, pch=16, pt.cex=0.5, bg="white", cex=0.9)
