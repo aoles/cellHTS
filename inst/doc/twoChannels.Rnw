@@ -1,5 +1,5 @@
-%\VignetteindexEntry{Analysis of multi-channel cell-based screens}
-%\VignetteKeywords{Mutiple channel screens, Cell based assays}
+%\VignetteIndexEntry{Analysis of multi-channel cell-based screens}
+%\VignetteKeywords{Cell based assays}
 %\VignettePackage{cellHTS}
 
 \documentclass[11pt]{article}
