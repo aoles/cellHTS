@@ -171,8 +171,7 @@ if(x$state["configured"]) {
       4, range, na.rm=TRUE)
     #brks = apply(brks, 2, function(s) seq(s[1], s[2], length=ceiling(nrWell/10)))
     brks = apply(brks, 2, function(s) pretty(s, n=ceiling(nrWell/10))) 
-    if(!is(brks, "list")) brks=list(brks) # put as list also for the case ch=1
-  }
+    }
 
 
 
