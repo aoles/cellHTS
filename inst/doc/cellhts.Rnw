@@ -579,7 +579,7 @@ and replicate 2, respectively (content of \Robject{x\$xraw});
 if the number of replicates is equal to two); 
 \item \emph{average_ch1} corresponds to the average between replicate raw intensities 
 (only given if the number of replicates is higher than two);
-\item \emph{raw/PlateMedian_r1_ch1} and \emph{raw/PlateMedian_r2_ch1} give the ratio between each raw measurement and the median intensity in each plate for replicate 1 and replicate 2, respectively. The plate median is determined for the raw intensities, using exclusively the wells annotated as ``sample'';
+\item \emph{raw/PlateMedian_r1_ch1} and \emph{raw/PlateMedian_r2_ch1} give the ratio between each raw measurement and the median intensity in each plate for replicate 1 and replicate 2, respectively. The plate median is determined for the raw intensities, using exclusively the wells annotated as ``sample''.
 \end{itemize} 
 
 Additionally, if \Robject{x} has been annotated (as in the present case), 
@@ -599,9 +599,11 @@ Its columns correspond to the content of
 \Robject{x\$geneAnno} (that is, the gene annotation information), together with the raw 
 measurements, and if available, the normalized intensities for each replicate and channel.
 The name for the columns containing the raw intensities starts with ``R'' and is followed 
-by the replicate identifier ``r'', and by the channel identifier ``c''. For example, \emph{Rr2c1} refers to replicate 2, channel 1. For the normalized data, the column names start with ``N'' instead of ``R''. 
+by the replicate identifier ``r'', and by the channel identifier ``c''. 
+For example, \emph{Rr2c1} refers to replicate 2, channel 1. For the normalized data, 
+the column names start with ``N'' instead of ``R''. 
 %
-<<exportData, results=FALSE>>=
+<<exportData, results=hide>>=
 writeTab(x, file="Data.txt")
 @ 
 %
