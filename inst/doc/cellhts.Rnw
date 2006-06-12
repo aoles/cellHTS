@@ -559,27 +559,27 @@ link to a file called \emph{topTable.txt} that contains the list of scored probe
 ordered by decreasing $z$-score values. This file has one row for each well and plate, 
 and for the present example data set, it has the following columns:
 \begin{itemize}
-\item \emph{plate}
-\item \emph{position} position of the well in the plate (runs from 1 to the total 
+\item \verb=plate=;
+\item \verb=position= gives the position of the well in the plate (runs from 1 to the total 
 number of wells in the plate); 
-\item \emph{score} score for the probe (content of \Robject{x\$score});
-\item \emph{wellAnno} well annotation (as given by the plate configuration file;
-\item \emph{normalized_r1_ch1} and \emph{normalized_r2_ch1} give the normalized 
+\item \verb=score= corresponds to the score calculated for the probe (content of \Robject{x\$score});
+\item \verb=wellAnno= corresponds to the well annotation (as given by the plate configuration file;
+\item \verb=normalized_r1_ch1= and \verb=normalized_r2_ch1= give the normalized 
 intensities for replicate 1 and replicate 2, respectively ('ch' refers to channel).
 This corresponds to the content of \Robject{x\$xnorm}; 
-\item \emph{finalWellAnno_r1_ch1} and \emph{finalWellAnno_r2_ch1} give the final well 
+\item \verb=finalWellAnno_r1_ch1= and \verb=finalWellAnno_r2_ch1= give the final well 
 annotation for replicate 1 and 2, respectively, which combines the information given 
 in the plate configuration file and the screen log file, so that the wells that were 
-flagged in the latter file appear with the annotation \emph{flagged}. This information 
+flagged in the latter file appear with the annotation \verb=flagged}. This information 
 corresponds to the content of \Robject{x\$finalWellAnno};
-\item \emph{raw_r1_ch1} and \emph{raw_r2_ch1} contain the raw intensities for replicate 1 
+\item \verb=raw_r1_ch1= and \verb=raw_r2_ch1= contain the raw intensities for replicate 1 
 and replicate 2, respectively (content of \Robject{x\$xraw});
-\item \emph{median_ch1} corresponds to the median of raw measurements across replicates;
-\item \emph{diff_ch1} gives the difference between replicated raw measurements (only given
+\item \verb=median_ch1= corresponds to the median of raw measurements across replicates;
+\item \verb=diff_ch1} gives the difference between replicated raw measurements (only given
 if the number of replicates is equal to two); 
-\item \emph{average_ch1} corresponds to the average between replicate raw intensities 
+\item \verb=average_ch1} corresponds to the average between replicate raw intensities 
 (only given if the number of replicates is higher than two);
-\item \emph{raw/PlateMedian_r1_ch1} and \emph{raw/PlateMedian_r2_ch1} give the ratio between each raw measurement and the median intensity in each plate for replicate 1 and replicate 2, respectively. The plate median is determined for the raw intensities, using exclusively the wells annotated as ``sample''.
+\item \verb=raw/PlateMedian_r1_ch1= and \verb=raw/PlateMedian_r2_ch1= give the ratio between each raw measurement and the median intensity in each plate for replicate 1 and replicate 2, respectively. The plate median is determined for the raw intensities, using exclusively the wells annotated as ``sample''.
 \end{itemize} 
 
 Additionally, if \Robject{x} has been annotated (as in the present case), 
@@ -600,10 +600,11 @@ Its columns correspond to the content of
 measurements, and if available, the normalized intensities for each replicate and channel.
 The name for the columns containing the raw intensities starts with ``R'' and is followed 
 by the replicate identifier ``r'', and by the channel identifier ``c''. 
-For example, \emph{Rr2c1} refers to replicate 2, channel 1. For the normalized data, 
+For example, \Robject{Rr2c1} refers to the raw data for replicate 2 in channel 1. 
+For the normalized data, 
 the column names start with ``N'' instead of ``R''. 
 %
-<<exportData, results=hide>>=
+<<exportData, results=hide, eval=FALSE>>=
 writeTab(x, file="Data.txt")
 @ 
 %
@@ -615,7 +616,7 @@ function \Rfunction{write.tabdel}~\footnote{This function is a wrapper of the fu
 \Rfunction{write.table}, whereby you just need to specify the name of the data object and 
 the file} also provided in the \Rpackage{cellHTS} package.
 %
-<<exportOtherData>>=
+<<exportOtherData, eval=FALSE>>=
 # determine the ratio between each well and the plate median
 y = array(as.numeric(NA), dim=dim(x$xraw))
 nrWell = dim(x$xraw)[1]
@@ -626,7 +627,9 @@ for(p in 1:(dim(x$xraw)[2])) {
 y=signif(y, 4)
 out = matrix(y, nrow=prod(dim(y)[1:2]), ncol=dim(y)[3:4])
 out = cbind(x$geneAnno, x$wellAnno, out)
-colnames(out) = c(names(x$geneAnno), "wellAnno", sprintf("Well/Median_r%d_ch%d", rep(1:dim(y)[3], dim(y)[4]), rep(1:dim(y)[4], each=dim(y)[3])))
+colnames(out) = c(names(x$geneAnno), "wellAnno", 
+sprintf("Well/Median_r%d_ch%d", rep(1:dim(y)[3], dim(y)[4]), 
+rep(1:dim(y)[4], each=dim(y)[3])))
 write.tabdel(out, file="WellMedianRatio.txt")
 @ 
  
