@@ -588,7 +588,7 @@ the original gene anotation file that was stored in \Robject{x\$geneAnno}.
 
 
 %------------------------------------------------------------
-\subsection{Saving data to a tab-delimited file}
+\subsection{Exporting data to a tab-delimited file}
 %------------------------------------------------------------
 
 The \Rpackage{cellHTS} package contains a function called \Rfunction{writeTab} to save 
