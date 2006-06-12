@@ -570,14 +570,14 @@ This corresponds to the content of \Robject{x\$xnorm};
 \item \verb=finalWellAnno_r1_ch1= and \verb=finalWellAnno_r2_ch1= give the final well 
 annotation for replicate 1 and 2, respectively, which combines the information given 
 in the plate configuration file and the screen log file, so that the wells that were 
-flagged in the latter file appear with the annotation \verb=flagged}. This information 
+flagged in the latter file appear with the annotation \emph{flagged}. This information 
 corresponds to the content of \Robject{x\$finalWellAnno};
 \item \verb=raw_r1_ch1= and \verb=raw_r2_ch1= contain the raw intensities for replicate 1 
 and replicate 2, respectively (content of \Robject{x\$xraw});
 \item \verb=median_ch1= corresponds to the median of raw measurements across replicates;
-\item \verb=diff_ch1} gives the difference between replicated raw measurements (only given
+\item \verb=diff_ch1= gives the difference between replicated raw measurements (only given
 if the number of replicates is equal to two); 
-\item \verb=average_ch1} corresponds to the average between replicate raw intensities 
+\item \verb=average_ch1= corresponds to the average between replicated raw intensities 
 (only given if the number of replicates is higher than two);
 \item \verb=raw/PlateMedian_r1_ch1= and \verb=raw/PlateMedian_r2_ch1= give the ratio between each raw measurement and the median intensity in each plate for replicate 1 and replicate 2, respectively. The plate median is determined for the raw intensities, using exclusively the wells annotated as ``sample''.
 \end{itemize} 
