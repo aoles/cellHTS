@@ -151,7 +151,7 @@ writeTab.cellHTS = function(x, file=paste(x$name, "txt", sep="."), ...) {
 
   toMatrix = function(y, prefix) {
     m = matrix(y, nrow=prod(dim(y)[1:2]), ncol=dim(y)[3:4])
-    colnames(m) = sprintf("%sc%dr%d", prefix, rep(1:dim(y)[3], dim(y)[4]), rep(1:dim(y)[4], each=dim(y)[3]))	
+    colnames(m) = sprintf("%sr%dc%d", prefix, rep(1:dim(y)[3], dim(y)[4]), rep(1:dim(y)[4], each=dim(y)[3]))	
     return(m)
   }      
 

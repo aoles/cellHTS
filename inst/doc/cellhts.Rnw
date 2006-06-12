@@ -554,10 +554,87 @@ contain the data that we want to visualize in the HTML quality reports.
 On the other hand, \Robject{x\$score} should always contain the final list of 
 scored probes (one value per probe).
 
+The quality report produced by \Rfunction{writeReport} function has also a 
+link to a file called \emph{topTable.txt} that contains the list of scored probes 
+ordered by decreasing $z$-score values. This file has one row for each well and plate, 
+and for the present example data set, it has the following columns:
+\begin{itemize}
+\item \emph{plate}
+\item \emph{position} position of the well in the plate (runs from 1 to the total 
+number of wells in the plate); 
+\item \emph{score} score for the probe (content of \Robject{x\$score});
+\item \emph{wellAnno} well annotation (as given by the plate configuration file;
+\item \emph{normalized_r1_ch1} and \emph{normalized_r2_ch1} give the normalized 
+intensities for replicate 1 and replicate 2, respectively ('ch' refers to channel).
+This corresponds to the content of \Robject{x\$xnorm}; 
+\item \emph{finalWellAnno_r1_ch1} and \emph{finalWellAnno_r2_ch1} give the final well 
+annotation for replicate 1 and 2, respectively, which combines the information given 
+in the plate configuration file and the screen log file, so that the wells that were 
+flagged in the latter file appear with the annotation \emph{flagged}. This information 
+corresponds to the content of \Robject{x\$finalWellAnno};
+\item \emph{raw_r1_ch1} and \emph{raw_r2_ch1} contain the raw intensities for replicate 1 
+and replicate 2, respectively (content of \Robject{x\$xraw});
+\item \emph{median_ch1} corresponds to the median of raw measurements across replicates;
+\item \emph{diff_ch1} gives the difference between replicated raw measurements (only given
+if the number of replicates is equal to two); 
+\item \emph{average_ch1} corresponds to the average between replicate raw intensities 
+(only given if the number of replicates is higher than two);
+\item \emph{raw/PlateMedian_r1_ch1} and \emph{raw/PlateMedian_r2_ch1} give the ratio between each raw measurement and the median intensity in each plate for replicate 1 and replicate 2, respectively. The plate median is determined for the raw intensities, using exclusively the wells annotated as ``sample'';
+\end{itemize} 
+
+Additionally, if \Robject{x} has been annotated (as in the present case), 
+it also contains the data given in 
+the original gene anotation file that was stored in \Robject{x\$geneAnno}.
+
+
+%------------------------------------------------------------
+\subsection{Saving data to a tab-delimited file}
+%------------------------------------------------------------
+
+The \Rpackage{cellHTS} package contains a function called \Rfunction{writeTab} to save 
+\Robject{x\$xraw} and, if available, \Robject{x\$xnorm} data from a \Rpackage{cellHTS} 
+object to a tab-delimited file to a file. The rows of the file are sorted by plate and 
+well, and there is one row for each plate and well. 
+Its columns correspond to the content of 
+\Robject{x\$geneAnno} (that is, the gene annotation information), together with the raw 
+measurements, and if available, the normalized intensities for each replicate and channel.
+The name for the columns containing the raw intensities starts with ``R'' and is followed 
+by the replicate identifier ``r'', and by the channel identifier ``c''. For example, \emph{Rr2c1} refers to replicate 2, channel 1. For the normalized data, the column names start with ``N'' instead of ``R''. 
+%
+<<exportData, results=FALSE>>=
+writeTab(x, file="Data.txt")
+@ 
+%
+Since you might be interestered in saving other values to a tab delimited file,
+below we demonstrate how you can create a matrix with the ratio between each 
+raw measurement and the plate median, together with the gene and well 
+annotation, and export it to a tab-delimited file using the 
+function \Rfunction{write.tabdel}~\footnote{This function is a wrapper of the function 
+\Rfunction{write.table}, whereby you just need to specify the name of the data object and 
+the file} also provided in the \Rpackage{cellHTS} package.
+%
+<<exportOtherData>>=
+# determine the ratio between each well and the plate median
+y = array(as.numeric(NA), dim=dim(x$xraw))
+nrWell = dim(x$xraw)[1]
+for(p in 1:(dim(x$xraw)[2])) {
+  samples = (x$wellAnno[(1:nrWell)+nrWell*(p-1)]=="sample")
+  y[, p, , ] = apply(x$xraw[, p, , , drop=FALSE], 3:4, 
+     function(w) w/median(w[samples], na.rm=TRUE)) }
+y=signif(y, 4)
+out = matrix(y, nrow=prod(dim(y)[1:2]), ncol=dim(y)[3:4])
+out = cbind(x$geneAnno, x$wellAnno, out)
+colnames(out) = c(names(x$geneAnno), "wellAnno", sprintf("Well/Median_r%d_ch%d", rep(1:dim(y)[3], dim(y)[4]), rep(1:dim(y)[4], each=dim(y)[3])))
+write.tabdel(out, file="WellMedianRatio.txt")
+@ 
+ 
+%
 At this point we are finished with the basic analysis of the
 screen. As one example for how one could continue to further mine the
 screen results for biologically relevant patterns, we demonstrate an
 application of category analysis.
+
+
 
 %------------------------------------------------------------
 \section{Category analysis}
