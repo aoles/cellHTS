@@ -86,8 +86,10 @@ count = 0
   qm = rbind(qm, data.frame(metric=I("Dynamic range"), value=dr, comment=I(comm)))
 
   ## 2. Correlation coefficient (just for samples wells)
+
+
   if (nrRep==2) {
-    cc = round(cor(x[samples,,,ch], x[samples,,,ch], use="complete.obs", method="spearman")[1,2], 2)
+    cc = round(cor(x[samples,,whHasData[[ch]],ch], x[samples,,whHasData[[ch]],ch], use="complete.obs", method="spearman")[1,2], 2)
     comm = ""
   } else {
     cc = as.numeric(NA)
