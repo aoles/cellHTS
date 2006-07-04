@@ -33,8 +33,8 @@ negCtrls = vector("list", length=nrChannel)
   mt = match(wellAnno, names(wellTypeColor))
   samples  = which(mt==which(names(wellTypeColor)=="sample"))
 for (ch in 1:nrChannel) {
-if (!(posControls[ch] %in% c(NA, "")))
- posCtrls[[ch]]= which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0)
+if (!(posControls[ch] %in% c(NA, ""))) {
+ posCtrls[[ch]] = which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0) } else { posCtrls[[ch]] = numeric() }
 
 if (!(negControls[ch] %in% c(NA, "")))
 negCtrls[[ch]]= which(regexpr(negControls[ch], wellAnno, perl=TRUE)>0)
@@ -145,7 +145,9 @@ mtrep[which(is.na(mtrep))]=iO
 # empty and flagged wells
   wellCount[1,1] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
   wellCount[2, 1] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[-c(iFE,iC)], names(wellTypeColor)[-c(iFE,iC)], nrWellTypes[-c(iFE, iC)]), collapse=", ")
-  mtt[[1]][is.na(mtt[[1]])]=apply(mtrep[is.na(mtt[[1]]),], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
+  mtt[[1]][is.na(mtt[[1]])]=apply(mtrep[is.na(mtt[[1]]),, drop=FALSE], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
+  mtt[[1]][!is.na(mtt[[1]])]=apply(mtrep[!is.na(mtt[[1]]),, drop=FALSE], 1, max) # so "controls" always win over "pos" or "neg" or "sample"
+
   } else { 
 
   for (ch in 1:nrChannel) {
@@ -153,11 +155,20 @@ mtrep[which(is.na(mtrep))]=iO
   mtrep = apply(finalWellAnno[,,,ch, drop=FALSE], 3, function(u) match(u, names(wellTypeColor)))
 
  ## include the controls that were not annotated as "neg" or "pos":
- mtrep[posCtrls[[ch]],] [which(is.na(mtrep[posCtrls[[ch]],]))]=iP
- mtrep[negCtrls[[ch]],] [which(is.na(mtrep[negCtrls[[ch]],]))]=iN
-
+if (length(posCtrls[[ch]])) { mtrep[posCtrls[[ch]],][which(is.na(mtrep[posCtrls[[ch]],]))]=iP } else {
+# replace possible wells annotated as "pos" by NA, because they shouldn't be considered as a positive control for this channel:
+if (any(mtt[[ch]] %in% iP)) {
+mtrep[mtt[[ch]] %in% iP,]=NA
+mtt[[ch]][mtt[[ch]] %in% iP]=NA }
+}
+# same for the negative controls
+if (length(negCtrls[[ch]])) {
+ mtrep[negCtrls[[ch]],] [which(is.na(mtrep[negCtrls[[ch]],]))]=iN } else {
+if (any(mtt[[ch]] %in% iN)) {
+mtrep[mtt[[ch]] %in% iN,]=NA
+mtt[[ch]][mtt[[ch]] %in% iN]=NA }}
 # replace the remaining NA positions by "other" (these corresponds to wells that although annotated as controls in the configuration file, don't behave as controls in the current channel
-mtrep[which(is.na(mtrep))]=iO
+  mtrep[which(is.na(mtrep))]=iO
 
   aa = apply(finalWellAnno[,,,ch, drop=FALSE], 3, function(u) sum(u=="flagged"))
   aa = order(aa, decreasing=TRUE)
@@ -165,7 +176,7 @@ mtrep[which(is.na(mtrep))]=iO
 
   wellCount[1,ch] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
   wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[-c(iFE, iC)], names(wellTypeColor)[-c(iFE,iC)], nrWellTypes[-c(iFE, iC)]), collapse=", ")
-  mtt[[ch]][is.na(mtt[[ch]])]=apply(mtrep[is.na(mtt[[ch]]),], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
+  mtt[[ch]][is.na(mtt[[ch]])]=apply(mtrep[is.na(mtt[[ch]]),, drop=FALSE], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
 } }
 
 cat("<BR>\n", file=con)
@@ -344,8 +355,8 @@ iPN = which(names(wellTypeColor) %in% c("pos", "neg"))
   wellCount[1,r] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
   wellCount[2, r] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[-c(iFE, iPN)], names(wellTypeColor)[-c(iFE, iPN)],                  nrWellTypes[-c(iFE, iPN)]), collapse=", ")
 
-  mtt[[r]][is.na(mtt[[r]])]=apply(mtrep[is.na(mtt[[r]]),], 1, max) # so "flagged" or "empty" always wins over "controls" or "sample"
-  mtt[[r]][!is.na(mtt[[r]])]=apply(mtrep[!is.na(mtt[[r]]),], 1, max)
+  mtt[[r]][is.na(mtt[[r]])]=apply(mtrep[is.na(mtt[[r]]),, drop=FALSE], 1, max) # so "flagged" or "empty" always wins over "controls" or "sample"
+  mtt[[r]][!is.na(mtt[[r]])]=apply(mtrep[!is.na(mtt[[r]]),, drop=FALSE], 1, max) # so "controls" always win over "pos" or "neg" or "sample"
 
 }
 
