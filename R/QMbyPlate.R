@@ -25,7 +25,7 @@ QMbyPlate = function(x, wellAnno, pdim, name, basePath, subPath, plotPlateArgs, 
 
 
   ## define colors and comment on them
-  wellTypeColor=c(pos="#E41A1C", neg="#2040FF", controls="green", sample="#000000", empty="pink", other="#BEBADA", flagged="black")
+  wellTypeColor=c(pos="#E41A1C", neg="#2040FF", sample="#000000", controls="green",  other="#BEBADA", empty="pink", flagged="black")
 
 posCtrls = vector("list", length=nrChannel)
 negCtrls = vector("list", length=nrChannel)
@@ -345,6 +345,7 @@ iPN = which(names(wellTypeColor) %in% c("pos", "neg"))
   wellCount[2, r] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[-c(iFE, iPN)], names(wellTypeColor)[-c(iFE, iPN)],                  nrWellTypes[-c(iFE, iPN)]), collapse=", ")
 
   mtt[[r]][is.na(mtt[[r]])]=apply(mtrep[is.na(mtt[[r]]),], 1, max) # so "flagged" or "empty" always wins over "controls" or "sample"
+  mtt[[r]][!is.na(mtt[[r]])]=apply(mtrep[!is.na(mtt[[r]]),], 1, max)
 
 }
 
