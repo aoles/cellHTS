@@ -28,7 +28,9 @@ importFun = function(f) {
     sp  = strsplit(txt, "\t")
     well     = sapply(sp, "[", 2)
     val     = sapply(sp, "[", 3)
-out = data.frame(txt=I(txt), well=I(well), val=as.numeric(val))
+out = list(data.frame(well=I(well), val=as.numeric(val)),
+	txt = I(txt))
+#data.frame(txt=I(txt), well=I(well), val=as.numeric(val))
 return(out)
 }
 }
@@ -37,13 +39,18 @@ return(out)
    a = unlist(sapply(pd$Filename, function(z) grep(z, dfiles, ignore.case=TRUE)))
    if (length(a)==0) stop(sprintf("None of the files were found in the given 'path': %s", path))
 
+## check if 'imporFun' gives the output in the desired form
+aux = importFun(f[1])
+if (which(unlist(lapply(aux, is, "data.frame"))) != 1 | !all(c("val", "well") %in% names(aux[[1]])) | length(aux)!=2)
+	stop("The output of 'importFun' must be a list with 2 components; the first component should be a 'data.frame' with slots 'well' and 'val'.")
+
 ## check the plate format
 f = file.path(path, dfiles[a])
 Let = c()
 Num = c()
 
 for (fi in f) {
-well = importFun(fi)$well
+well = importFun(fi)[[1]]$well
       ##  check if the plate format is correct
         let = substr(well, 1, 1)
         num = substr(well, 2, 3)
@@ -154,9 +161,9 @@ if (!(prod(pdim) %in% c(96, 384)) )
 #         xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = val
 
           out = importFun(f)
-          pos = pos2i(out$well, pdim)
-          intensityFiles[[i]] = out$txt
-          xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = out$val
+          pos = pos2i(out[[1]]$well, pdim)
+          intensityFiles[[i]] = out[[2]]
+          xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = out[[1]]$val
   	"OK"
       },
               warning = function(e) {

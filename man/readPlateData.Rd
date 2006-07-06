@@ -35,10 +35,11 @@ readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE, p
   replicates and all channels of a plate, which is the physical carrier
   of the reagents. 
 
-\code{importFun} can be used to define other functions to import other data files, such as flow cytometry data files, etc. The \code{importFun} function should receive as an input the name of a result plate file to read, and return a data.frame with the following slots:
-\item{txt}{a character vector containing a copy of the imported input data file.}
+\code{importFun} can be used to define other functions to import other data files, such as flow cytometry data files, etc. The \code{importFun} function should receive as an input the name of a result plate file to read, and return a list with two components. The first component should be a 'data.frame' with the following slots:
 \item{well}{a character vector with the well identifier in the plate.}
 \item{val}{the intensity values measured at each well.}
+
+The second component of this list can be of any type. The idea is that it contains a copy of the imported input data file.}
 }
 
 \value{
@@ -50,7 +51,8 @@ readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE, p
     measurement data.}
   \item{pdim}{a numeric vector of length 2 containg the number of rows
     and columns in a plate. The product of these two numbers is the
-    first dimension of \code{xraw}. This corresponds to the plate    	format used in the screen, and it is automatically determined from the plate result files. The allowed formats are 96-well  or 384-well plates.
+    first dimension of \code{xraw}. This corresponds to the plate    	
+format used in the screen, and it is automatically determined from the plate result files. The allowed formats are 96-well  or 384-well plates.
 }
   \item{batch}{an integer vector with the batch number (1, 2, ...)
     for each plate. Its length corresponds to the second dimension of 
@@ -60,7 +62,7 @@ readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE, p
     the string "OK" if the data import
     appeared to have gone well, and the respective error or warning
     message otherwise.}
-  \item{intensityFiles}{a list of character vectors, each containing a
+  \item{intensityFiles}{a list, where each component contains a
     copy of the imported input data files. Its length corresponds to the
     number of rows of \code{plateList}.}
   \item{state}{a logical vector representing the processing status of
