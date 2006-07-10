@@ -70,17 +70,19 @@ imageScreen = function (x, ar=3/5, zrange) {
 
   ## Include the color scale bar
   ## Just to make sure that we will have enough columns for the color bar
-  newmat = matrix(NA, nrow =Nrow+22, ncol = Ncol) 
+  extraRows = max(10, ceiling(0.15*Nrow)) 
+  newmat = matrix(NA, nrow =Nrow+extraRows, ncol = Ncol) 
 
-  ## add the color scale bar
+  ## add the color scale bar (size depends on the plate size and number)
   xbar  = seq(0, 1, length=7)
   xval  = signif(reverseMap(xbar), 2)
-  
-  newmat[13:16, 1:(length(xbar)*3)] = matrix(data=rep(xbar, each = 3, times=4),
-                                             nrow = 4, ncol=length(xbar)*3, byrow=TRUE)
-  newmat[22+(1:Nrow),] = mat
+  nColBar = 1+(Ncol>25)+(Ncol>100)
+  nRowBar = 1+(Nrow>50)+(Nrow>100)+(Nrow>150)
+  yBar.start = ifelse(extraRows==10, 0.4*extraRows, 0.6*extraRows)
+  newmat[yBar.start + (1:nRowBar), 1:(length(xbar)*nColBar)] = matrix(data=rep(xbar, each = nColBar, times=nRowBar), nrow = nRowBar, ncol=length(xbar)*nColBar, byrow=TRUE)
+  newmat[extraRows+(1:Nrow),] = mat
 
-  image((1:Ncol), 1:(Nrow+22), z=t(newmat), zlim=c(0,1), axes=FALSE, col=colrs, add = FALSE, ylab="", xlab="")
-  text(seq(3*0.625, length(xbar)*3+1, by=3), y=6, offset=0, cex = 1, srt=90, 
-       labels=c(paste(c("< ", rep("", length(xval)-2), ">"), xval, sep="")))
+  image((1:Ncol), 1:(Nrow+extraRows), z=t(newmat), zlim=c(0,1), axes=FALSE, col=colrs, add = FALSE, ylab="", xlab="")
+  text(seq(0.5*nColBar+0.5, length(xbar)*nColBar, by=nColBar), y=ifelse(extraRows==10, 3, 0.25*extraRows), offset=0, cex = 1, srt=90, labels=c(paste(c("< ", rep("", length(xval)-2), ">"), xval, sep="")))
+
 }
