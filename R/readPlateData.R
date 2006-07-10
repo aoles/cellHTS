@@ -39,16 +39,19 @@ return(out)
    a = unlist(sapply(pd$Filename, function(z) grep(z, dfiles, ignore.case=TRUE)))
    if (length(a)==0) stop(sprintf("None of the files were found in the given 'path': %s", path))
 
+
+
+f = file.path(path, dfiles[a])
+
 ## check if 'imporFun' gives the output in the desired form
 aux = importFun(f[1])
 if (which(unlist(lapply(aux, is, "data.frame"))) != 1 | !all(c("val", "well") %in% names(aux[[1]])) | length(aux)!=2)
 	stop("The output of 'importFun' must be a list with 2 components; the first component should be a 'data.frame' with slots 'well' and 'val'.")
 
-## check the plate format
-f = file.path(path, dfiles[a])
+
 Let = c()
 Num = c()
-
+## check the plate format
 for (fi in f) {
 well = importFun(fi)[[1]]$well
       ##  check if the plate format is correct

@@ -17,10 +17,12 @@ annotate.cellHTS = function(x, geneIDFile, ...) {
   geneIDs = read.table(geneIDFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", quote="",fill=TRUE)
 
 
+
   checkColumns(geneIDs, geneIDFile, mandatory=c("Plate", "Well", "GeneID"),
                numeric=c("Plate"))
 
- 
+# sort the data by Plate and then by well
+ geneIDs = geneIDs[order(geneIDs$Plate, geneIDs$Well),]
   ## Some checkings for dimension of "Plate" and "Well"
   ## expect prod(x$pdim) * x$nrPlate rows
   nrWpP   = prod(x$pdim)
@@ -33,7 +35,7 @@ annotate.cellHTS = function(x, geneIDFile, ...) {
                " rows, one for each well and for each plate. Please see the vignette for",
                " an example.\n", sep=""))
 
-  
+
 
   ## flag 'NA' values in the "GeneID" column:
   geneIDs$GeneID[geneIDs$GeneID %in% "NA"] = NA
@@ -113,7 +115,8 @@ conf$Position=pos2i(conf$Well, x$pdim)
   for(p in seq(along=x$batch)) {
     wa = conf$Content[ conf$Batch==x$batch[p] ]
     wellAnno[(1:nrWpP)+nrWpP*(p-1)] = wa
-    x$xraw[ wa=="empty", p,,] = NA
+    x$xraw[ wa=="em
+pty", p,,] = NA
   }
   x$wellAnno=wellAnno
   
@@ -126,7 +129,8 @@ conf$Position=pos2i(conf$Well, x$pdim)
 
     mt = match(slog$Filename, x$plateList$Filename)
     if(any(is.na(mt)))
-      stop(paste("'Filename' column in the screen log file '", logFile, "' contains invalid entries\n",
+      stop(paste("'
+Filename' column in the screen log file '", logFile, "' contains invalid entries\n",
                  "(i.e. files that were not listed in the plateList file):\n",
                  paste(slog$Filename[is.na(mt)], collapse=", "), "\n", sep=""))
     ipl  = x$plateList$Plate[mt]
