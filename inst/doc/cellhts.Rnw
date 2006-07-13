@@ -338,14 +338,16 @@ after which the normalized intensities are stored in the slot
 
 We can now summarize the replicates, calculating a single score for
 each gene. One option would be to take the root mean square
-of the $z$-scores from the replicates:
+of the values from the replicates:
 \begin{eqnarray}
 z_{ki} &=& \pm \frac{x'_{ki}-\hat{\mu}}{\hat{\sigma}} \label{eq:defz} \\
-z_{k}  &=& \sqrt{\frac{1}{n_{\mbox{\scriptsize rep}}} \sum_{i} z_{ki}^2} \label{eq:scoresSummary}.
+z_{k}  &=& \sqrt{\frac{1}{n_{\mbox{\scriptsize rep}_k}} \sum_{r=1}^{n_{\mbox{\scriptsize rep}_k}} z_{kr}^2} \label{eq:scoresSummary}.
 \end{eqnarray}
+
+Before summarizing the replicate, we standardize the values for each replicate experiment using Equation~\eqref{eq:defz}.  
 Here $\hat{\mu}$ and $\hat{\sigma}$ are estimators of location and
 scale of the distribution of $x'_{ki}$ taken across all plates and wells of a given replicate experiment. We use robust estimators,
-namely, median and median absolute deviation (MAD). Moreover, we only considered the wells containing ``sample'' for estimating $\hat{\mu}$ and $\hat{\sigma}$.
+namely, median and median absolute deviation (MAD). Moreover, we only consider the wells containing ``sample'' for estimating $\hat{\mu}$ and $\hat{\sigma}$.
 As the values
 $x'_{ki}$ were obtained using plate median
 normalization~\eqref{eq:normalizePlateMedian}, it holds that
@@ -355,11 +357,11 @@ useful in the application to an inhibitor assay, where an effect
 results in a decrease of the signal and we may want to see this
 represented by a large $z$-score.  Then, in
 Equation~\eqref{eq:scoresSummary}, the summary is taken over all
-replicates for probe $k$. 
+the $n_{\mbox{\scriptsize rep}_k}$ replicates of probe $k$. 
 
 Depending on the intended stringency of the analysis, other plausible
 choices of summary function between replicates are the minimum, the
-maximum, and the root mean square. In the first case, the analysis 
+maximum, and the mean. In the first case, the analysis 
 would be particularly
 conservative: all replicate values have to be high in order for
 $z_{k}$ to be high.  In order to compare our results with those
