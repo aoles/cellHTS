@@ -92,8 +92,9 @@ if (interactive()) {
     totalTime= 2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) + 0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +(x$state["scored"])*nrChannel*14 + 0.2
    require("prada")
    progress(title="cellHTS is busy", message = sprintf("\nCreating HTML pages for '%s'", x$name)) 
+   on.exit(killProgress(), add=TRUE)
    timeCounter=1
-   updateProgress(100*timeCounter/totalTime, autoKill = TRUE)
+   updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
 }
 
   ## See if output directory exists. If not, create. If yes, check if it is empty,
@@ -115,7 +116,7 @@ if (interactive()) {
 
   indexFile = file.path(outdir, "index.html") 
   con = file(indexFile, "w")
-  on.exit(close(con))
+  on.exit(close(con), add=TRUE)
 
 
   dir.create(file.path(outdir, "in"))
@@ -123,7 +124,7 @@ if (interactive()) {
 
 if(timeCounter) {
    timeCounter=timeCounter+2
-   updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+   updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
 
   if(x$state["configured"]) {
@@ -138,7 +139,7 @@ if(x$state["configured"]) {
 
   if(timeCounter) {
    timeCounter=timeCounter+2
-   updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+   updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
   if (!missing(posControls)) {
     ## check
@@ -165,7 +166,7 @@ if(x$state["configured"]) {
   if(x$state["configured"]) {
     if(timeCounter) {
       timeCounter=timeCounter+2
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
     brks = apply(if(x$state["normalized"]) { x$xnorm } else { x$xraw },
       4, range, na.rm=TRUE)
@@ -235,7 +236,7 @@ for(p in 1:nrPlate){
 
     if(timeCounter) {
       timeCounter=timeCounter+(nrReplicate*nrChannel)*(1+2*fz)
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
 } ## for p plates
 } #if configured
@@ -256,7 +257,7 @@ for(p in 1:nrPlate){
 
    if(timeCounter) {
       timeCounter=timeCounter + 0.01
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
   }
 
@@ -270,7 +271,7 @@ for(p in 1:nrPlate){
 
    if(timeCounter) {
       timeCounter=timeCounter+(5*nrReplicate*nrChannel)
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
   ## Score table and screen-wide QC
   ## To do (wh 16.5.2006): the code within this monster if-statement would probably better be encapsulated in a separate helper function?
@@ -294,7 +295,7 @@ for(p in 1:nrPlate){
 
   if(timeCounter) {
       timeCounter=timeCounter+ nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
     ## include also the raw values for each replicate and channel	 
     for (ch in 1:trueNrCh)
@@ -316,7 +317,7 @@ for(p in 1:nrPlate){
 
   if(timeCounter) {
       timeCounter=timeCounter+ 3*nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
     ## raw/plateMedian
     xn = array(as.numeric(NA), dim=dim(x$xraw))
@@ -329,7 +330,7 @@ for(p in 1:nrPlate){
 
   if(timeCounter) {
       timeCounter=timeCounter+ 3*nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
 
 
@@ -357,14 +358,14 @@ for(p in 1:nrPlate){
  
     if(timeCounter) {
       timeCounter=timeCounter+ nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
     makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
              fun = function() do.call("imageScreen", args=append(list(x=x), imageScreenArgs)), print=FALSE)
 
   if(timeCounter) {
       timeCounter=timeCounter+ 4*nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
     count = nrow(plotTable)
     plotTable = rbind(plotTable, rep("", length=prod(ncol(plotTable)* 2))) 
@@ -374,15 +375,14 @@ for(p in 1:nrPlate){
 
    if(timeCounter) {
       timeCounter=timeCounter+ 2*nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
   } ## if scored
 
   writeHTMLtable4plots(plotTable, con=con)
 
   if(timeCounter) {
-      updateProgress(100, autoKill = TRUE)}
-
+      updateProgress(100, autoKill = !TRUE)}
 
   writetail(con)
   return(indexFile)
