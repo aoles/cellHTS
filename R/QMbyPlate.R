@@ -117,12 +117,13 @@ writeHTMLtable(qmplate, con=con, center=TRUE, extra=sprintf("Channel %d", 1:nrCh
   ## For the original configuration plate corrected by the screen log information:
 wellCount = data.frame(matrix(NA, ncol = nrChannel, nrow = 2))
 names(wellCount) = sprintf("Channel %d", 1:nrChannel)
-mtt = vector("list", length = nrChannel)
-iFE = which(names(wellTypeColor) %in% c("empty", "flagged"))
-iO= which(names(wellTypeColor)=="other")
-iC = which(names(wellTypeColor)=="controls")
-iP = which(names(wellTypeColor)=="pos")
-iN = which(names(wellTypeColor)=="neg")
+mtt <- vector("list", length = nrChannel)
+iF <- which(names(wellTypeColor)=="flagged")
+iE <- which(names(wellTypeColor)=="empty")
+iO <- which(names(wellTypeColor)=="other")
+iC <- which(names(wellTypeColor)=="controls")
+iP <- which(names(wellTypeColor)=="pos")
+iN <- which(names(wellTypeColor)=="neg")
 
 
 if (hasLessCh & nrChannel==1) {
@@ -135,16 +136,17 @@ if (hasLessCh & nrChannel==1) {
  mtrep[posCtrls[[1]],] [which(is.na(mtrep[posCtrls[[1]],]))]=iP
  mtrep[negCtrls[[1]],] [which(is.na(mtrep[negCtrls[[1]],]))]=iN
 
-# replace the remaining NA positions by "other" (these corresponds to wells that although annotated as controls in the configuration file, don't behave as controls in the current channel
-mtrep[which(is.na(mtrep))]=iO
+  ## replace the remaining NA positions by "other" (these corresponds to wells that although annotated as controls in the configuration file, don't behave as controls in the current channel
+  mtrep[which(is.na(mtrep))]=iO
 
   aa = apply(fwa, 2, function(u) sum(u=="flagged"))
   aa = order(aa, decreasing=TRUE) # position 1 contains the replicate with more flagged values
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
 
-# empty and flagged wells
-  wellCount[1,1] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
-  wellCount[2, 1] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[-c(iFE,iC)], names(wellTypeColor)[-c(iFE,iC)], nrWellTypes[-c(iFE, iC)]), collapse=", ")
+  ## flagged wells
+  wellCount[1,1] = paste(sprintf("%s: %d", names(wellTypeColor)[iF], nrWellTypes[iF]), collapse=", ")
+## all the other wells, except controls
+  wellCount[2, 1] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[-c(iF,iC)], names(wellTypeColor)[-c(iF,iC)], nrWellTypes[-c(iF, iC)]), collapse=", ")
   mtt[[1]][is.na(mtt[[1]])]=apply(mtrep[is.na(mtt[[1]]),, drop=FALSE], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
   mtt[[1]][!is.na(mtt[[1]])]=apply(mtrep[!is.na(mtt[[1]]),, drop=FALSE], 1, max) # so "controls" always win over "pos" or "neg" or "sample"
 
@@ -174,8 +176,10 @@ mtt[[ch]][mtt[[ch]] %in% iN]=NA }}
   aa = order(aa, decreasing=TRUE)
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
 
-  wellCount[1,ch] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
-  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>",       wellTypeColor[-c(iFE, iC)], names(wellTypeColor)[-c(iFE,iC)], nrWellTypes[-c(iFE, iC)]), collapse=", ")
+## flagged wells
+  wellCount[1,ch] = paste(sprintf("%s: %d", names(wellTypeColor)[iF], nrWellTypes[iF]), collapse=", ")
+## the other wells, except controls
+  wellCount[2, ch] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[-c(iF, iC)], names(wellTypeColor)[-c(iF,iC)], nrWellTypes[-c(iF, iC)]), collapse=", ")
   mtt[[ch]][is.na(mtt[[ch]])]=apply(mtrep[is.na(mtt[[ch]]),, drop=FALSE], 1, max) # so "flagged" always wins over "pos", "neg" or "sample"
 } }
 
@@ -334,11 +338,12 @@ if (nrChannel==2) {
 	## For the original configuration plate corrected by the screen log information:
 wellCount = data.frame(matrix(NA, ncol = maxRep, nrow = 2))
 names(wellCount) = sprintf("Replicate %d", 1:maxRep)
-mtt = vector("list", length = maxRep)
-iFE = which(names(wellTypeColor) %in% c("empty", "flagged"))
-iO= which(names(wellTypeColor)=="other")
-ctrls=unique(c(unlist(posCtrls), unlist(negCtrls)))
-iPN = which(names(wellTypeColor) %in% c("pos", "neg"))
+mtt <- vector("list", length = maxRep)
+iF <- which(names(wellTypeColor)=="flagged")
+iE <- which(names(wellTypeColor)=="empty")
+iO <- which(names(wellTypeColor)=="other")
+ctrls <- unique(c(unlist(posCtrls), unlist(negCtrls)))
+iPN <- which(names(wellTypeColor) %in% c("pos", "neg"))
 
   for (r in 1:maxRep) {
   mtt[[r]] = mt
@@ -352,12 +357,11 @@ iPN = which(names(wellTypeColor) %in% c("pos", "neg"))
   aa = order(aa, decreasing=TRUE)
   nrWellTypes = sapply(seq(along=wellTypeColor), function(i) sum(mtrep[,aa[1]]==i, na.rm=TRUE))
 
-  wellCount[1,r] = paste(sprintf("%s: %d", names(wellTypeColor)[iFE], nrWellTypes[iFE]), collapse=", ")
-  wellCount[2, r] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[-c(iFE, iPN)], names(wellTypeColor)[-c(iFE, iPN)],                  nrWellTypes[-c(iFE, iPN)]), collapse=", ")
+  wellCount[1,r] = paste(sprintf("%s: %d", names(wellTypeColor)[iF], nrWellTypes[iF]), collapse=", ")
+  wellCount[2, r] = paste(sprintf("<FONT COLOR=\"%s\">%s: %d</FONT>", wellTypeColor[-c(iF, iPN)], names(wellTypeColor)[-c(iF, iPN)],                  nrWellTypes[-c(iF, iPN)]), collapse=", ")
 
   mtt[[r]][is.na(mtt[[r]])]=apply(mtrep[is.na(mtt[[r]]),, drop=FALSE], 1, max) # so "flagged" or "empty" always wins over "controls" or "sample"
   mtt[[r]][!is.na(mtt[[r]])]=apply(mtrep[!is.na(mtt[[r]]),, drop=FALSE], 1, max) # so "controls" always win over "pos" or "neg" or "sample"
-
 }
 
 
