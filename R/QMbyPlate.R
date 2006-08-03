@@ -56,27 +56,44 @@ count = 0
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
         mean(log(v[negCtrls[[ch]]]), na.rm=TRUE) - mean(log(v[posCtrls[[ch]]]), na.rm=TRUE))
 
+      dr[is.na(dr)]=as.numeric(NA)
       ## consider also the dynamic range for each individual replicate
       for (r in 1:maxRep) {
-       if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",r)), value=round(exp(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",r)), value=NA, comment=I(sprintf("Replicate %s is missing", r))))
+       if (r %in% whHasData[[ch]]) { 
+           if (is.na(dr[r])) commR = I("No available values for one of the controls") else commR = I("")
+           qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",r)), value=round(exp(dr[r]), 2), comment=commR)) 
+       } else {
+       qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %s)",r)), value=NA, comment=I(sprintf("Replicate %s is missing", r))))}
      }
 
-      dr = round(exp(mean(dr, na.rm=TRUE)), 2)
-      comm = ""
+        dr = round(exp(mean(dr, na.rm=TRUE)), 2)
+	if (is.na(dr)) { 
+	dr = as.numeric(NA) 
+	comm="No availale values for one of the controls in all replicates" 
+        } else {comm = "" }
     } else {
       ## this may happen when we have scored the replicates separately and saved the results in the x$xnorm slot
       ## determine the difference between the aritmetic mean between pos and negative controls
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
         mean(v[posCtrls[[ch]]], na.rm=TRUE)- mean(v[negCtrls[[ch]]], na.rm=TRUE))
-
+      dr[is.na(dr)]=as.numeric(NA)
       ## Consider also the dynamic range for each replicate
       for (r in 1:maxRep) {
-       if (r %in% whHasData[[ch]]) qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=round(abs(dr[r]), 2), comment=I(""))) else qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=NA, comment=I(sprintf("Replicate %d is missing", r))))
+       if (r %in% whHasData[[ch]]) {
+
+         if (is.na(dr[r])) commR = I("No available values for one of the controls") else commR = I("")
+
+       qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=round(abs(dr[r]), 2), comment=commR)) 
+       } else {
+       qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range (replicate %d)",r)), value=NA, comment=I(sprintf("Replicate %d is missing", r)))) }
      }
 
       dr = round(abs(mean(dr, na.rm=TRUE)), 2) 
-      comm = "" }
-
+if (is.na(dr)) { 
+      dr = as.numeric(dr)
+      comm="No availale values for one of the controls in all replicates" 
+      } else {comm = "" } 
+}
  } else {
     dr = as.numeric(NA)
     comm = "No controls ('pos' and 'neg') were found."
@@ -99,7 +116,7 @@ count = 0
 
 if (exists("qmplate")) qmplate = cbind(qmplate, qm) else qmplate = qm
 
-## summary of the quality metrics in 'qm', to be returned from this function:
+## summary of the quality metrics in 'qm' to be returned by this function:
 
 if (!exists("qmsummary")) {
 qmsummary=list()

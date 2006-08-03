@@ -4,7 +4,7 @@ QMexperiment = function(x, path, con, posControls, negControls) {
 
   nrbxp = 1+x$state["normalized"]
   nrCh = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4]) 
-
+  nrPlate = dim(x$xraw)[2]
 
   posCtrls = vector("list", length=nrCh)
   negCtrls = vector("list", length=nrCh)
@@ -34,11 +34,13 @@ names(plotTable) = c("", paste("Channel", 1:nrCh, sep=" "))
            name=sprintf("boxplot_%d_%d", r, ch), w=5*(nrbxp-hasLessCh), h=5, fun = function() {
              par(mfrow=c(1, (nrbxp-hasLessCh)), mai=c(1, 1,, 0.01, 0.01))
              if (!hasLessCh) {
-               xbp = x$xraw[,,r,ch]
+           ## to deal with cases where nrPlate=1
+               if (nrPlate==1) xbp = matrix(x$xraw[,,r,ch]) else xbp = x$xraw[,,r,ch]
                boxplotwithNA(xbp, col(xbp), col="pink", outline=FALSE, main="", xlab="plate", ylab="raw intensity")
              }
              if(x$state["normalized"]) {
-               xbp = x$xnorm[,,r,ch]
+	## to deal with cases where nrPlate=1
+	if (nrPlate==1) xbp = matrix(x$xnorm[,,r,ch]) else xbp = x$xnorm[,,r,ch]
                boxplotwithNA(xbp, col(xbp), col="lightblue", outline=FALSE, main="", xlab="plate", ylab="normalized intensity")
              }
            }, print=FALSE)
@@ -51,30 +53,46 @@ plotTable[count + 1, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></
 count = count + 1 
 
       if ((length(posCtrls[[ch]])>0 && length(negCtrls[[ch]])>0) & (x$state["normalized"])) {
+
+	           if (nrPlate==1) xbp = matrix(x$xnorm[,,r,ch]) else xbp = x$xnorm[,,r,ch]
+xpos = xbp[posCtrls[[ch]]]
+xneg = xbp[negCtrls[[ch]]]
+#                   if (all(is.na(xpos))) xpos=NA
+#                  if (all(is.na(xneg))) xneg=NA
+ if (!all(is.na(c(xpos, xneg)))) {
         makePlot(path, con=con,
                  name=sprintf("Controls_%d_%d", r, ch), w=5*nrbxp, h=5, fun = function() {
                    par(mfrow=c(1, nrbxp), mai=c(par("mai")[1:2], 0.01, 0.01))
-                   xbp = x$xnorm[,,r,ch]
-                   xpos = xbp[posCtrls[[ch]]]
-                   xneg = xbp[negCtrls[[ch]]]
-                   nrPlate = dim(xbp)[2]
+                   ## to deal with cases where nrPlate=1
+                   #nrPlate = dim(xbp)[2]
                    nrWell = prod(x$pdim)
                    plt = rep(1:nrPlate,each=nrWell)
                    ppos = plt[posCtrls[[ch]]]
                    pneg = plt[negCtrls[[ch]]]
+                   controlsplot(xpos, xneg, ppos, pneg, main="")
+		# density function needs at least 2 points
+		# dealing with the case where we have a single positive or negative control well, and a single plate, so that a single measurement is available in either xpos or xneg or both.
+   xpos = xpos[!is.na(xpos)]
+   xneg=xneg[!is.na(xneg)]
+
+		if (length(xpos)>1 & length(xneg)>1) { 
                    ## Note: the Z'-factor will be determined considering the median and mad,
                    ## instead of the mean and standard deviation
                    dr = abs(median(xpos, na.rm=TRUE) - median(xneg, na.rm=TRUE))
                    ssd = mad(xpos, na.rm=TRUE) + mad(xneg, na.rm=TRUE)
                    zfac = 1-3*ssd/dr 
-                   controlsplot(xpos, xneg, ppos, pneg, main="")
-                   densityplot(xpos, xneg, zfac, main="")
-                 }, print=FALSE)
-
+                   densityplot(xpos, xneg, zfac, main="") }
+                 }, print=FALSE) 
 plotTable[count + 1, 1] = "<CENTER></CENTER>"
 plotTable[count + 1, ch+1] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", sprintf("Controls_%d_%d.pdf", r, ch), sprintf("Controls_%d_%d.png", r, ch)) 
 
       } else {
+
+plotTable[count + 1, 1] = "<CENTER></CENTER>"
+plotTable[count + 1, ch+1] = "<CENTER><i>Values for 'pos' and 'neg' controls are missing.</i></CENTER>\n"
+}
+
+} else {
 plotTable[count + 1, 1] = "<CENTER></CENTER>"
 plotTable[count + 1, ch+1] = "<CENTER><i>No controls ('pos' and 'neg') were found and/or 'x' is not normalized yet.</i></CENTER>\n"
 }
@@ -89,7 +107,7 @@ return(plotTable)
 
 
 
-
+## --------------------------------------------------
 boxplotwithNA = function(x, fac, ...) {
 	sel = apply(x,2,function(x) all(is.na(x)))	
         x[,sel] = min(x,na.rm=TRUE)
@@ -98,9 +116,11 @@ boxplotwithNA = function(x, fac, ...) {
         boxplot(xsp,...)
 }
 
+
+## --------------------------------------------------
 densityplot = function(xpos, xneg, zfac, ...) {
-dneg=density(xneg, na.rm=TRUE, adjust=6)
-dpos=density(xpos, na.rm=TRUE, adjust=3)
+dneg=density(xneg, na.rm=TRUE, adjust=4)
+dpos=density(xpos, na.rm=TRUE, adjust=4)
 ymax = max(dpos$y, dneg$y)*1.1
 xmax = max(dpos$x, dneg$x)
 xmin = min(dpos$x, dneg$x)
@@ -113,6 +133,7 @@ legend("top",legend =c("'pos' controls", "'neg' controls"), lty = 1, col=c("red"
 
 
 
+## --------------------------------------------------
 controlsplot = function(xpos, xneg, ppos, pneg,...) {
 ylim = range(c(xpos,xneg), na.rm=TRUE)
 if (prod(ylim)<0) ylim = sign(ylim)*1.25*abs(ylim) else ylim = c(0.85*ylim[1], 1.25*ylim[2])
