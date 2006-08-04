@@ -357,11 +357,11 @@ in the working directory.
 
 Below, we call the \Rfunction{summarizeReplicates} function to determine the 
 $z$-score values for each replicate, and then summarize 
-the replicated $z$-score values using the root 
-mean square. 
+the replicated $z$-score values by taking the average.
+
 %
 <<summarizeReplicates>>=
-x = summarizeReplicates(x, zscore="-", summary="rms") 
+x = summarizeReplicates(x, zscore="-", summary="mean") 
 @ 
 %
 The resulting single $z$-score value per probe is stored in the
@@ -380,7 +380,10 @@ Now that the data have been preprocessed and scored, we call again
 \Rfunction{writeReport} and use a web browser to view the resulting report:
 %
 <<writeReport3, eval=TRUE, results=hide>>=
-out=writeReport(x, force=TRUE, outdir="logRatio", plotPlateArgs=list(xrange=c(-3,3)), posControls=posControls, negControls=negControls)
+out=writeReport(x, force=TRUE, outdir="logRatio", 
+imageScreenArgs=list(zrange=c(-4,4)),
+plotPlateArgs=list(xrange=c(-3,3)), 
+posControls=posControls, negControls=negControls)
 @ 
 
 <<browse3, eval=FALSE>>=
