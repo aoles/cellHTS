@@ -36,7 +36,7 @@ ROC(x, positives="pos", negatives = "neg")
 \value{An S3 object of class \code{ROC}. There are methods
   \code{plot.ROC} and \code{lines.ROC}. }
 
-\author{W. Huber \email{huber@ebi.ac.uk}}
+\author{Ligia P. Bras \email{ligia@ebi.ac.uk}}
 
 \examples{
  datadir = system.file("KcViabSmall", package = "cellHTS")
