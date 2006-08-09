@@ -47,7 +47,7 @@ The second component of this list can be of any type. The idea is that it contai
   a list with elements
   \item{name}{copy of the input argument \code{name}}
   \item{xraw}{an array of dimension plateSize x number of plates x
-    number of replicates x number of channels, containg the imported
+    number of replicates x number of channels, containing the imported
     measurement data.}
   \item{pdim}{a numeric vector of length 2 containg the number of rows
     and columns in a plate. The product of these two numbers is the
