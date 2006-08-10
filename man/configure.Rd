@@ -45,7 +45,6 @@ Data from wells that are annotated as \emph{empty} are ignored and are set to NA
  \item{screenDesc}{object of class \code{character} containing what was read from input file \code{descripFile}.}
 Moreover, the processing status of the \code{cellHTS} object is updated in the slot \code{state} to \code{state["configured"]=TRUE}.
  \item{wellAnno}{object of class \code{factor} of length number of plates x number of wells per plate, with possible levels: \emph{empty}, \emph{other}, \emph{neg}, \emph{sample}, and \emph{pos}, indicative of the contents of the wells. Other levels may be employed for the positive and negative controls, besides \emph{pos} and \emph{neg}.}
- \item{finalWellAnno}{an array with dimension plateSize x number of plates x number of replicates x number of channels, giving the well annotation in each plate, replicate and channel corrected by the information of the input file \code{logFile}. Besides the well categories specified in the input file \code{confFile} (and given in the slot \item{wellAnno}), it may have a category called \emph{flagged} that corresponds to the wells that were flagged in the input file \code{logFile}.}
 
 There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annotate.cellHTS}.}
 

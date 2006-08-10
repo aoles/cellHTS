@@ -191,6 +191,24 @@ if(x$state["configured"]) {
 
  if (x$state["configured"]) {
 
+  xrawWellAnno = array(rep(x$wellAnno, times = prod(dim(x$xraw)[3:4])), dim=dim(x$xraw))
+
+  slog = x$screenLog
+  ## Process screenlog
+  if (!is.null(slog)) {
+    mtslog = match(slog$Filename, x$plateList$Filename)
+    if(any(is.na(mtslog)))
+      stop(paste("'Filename' column in the screen log file contains invalid entries\n",
+                 "(i.e. files that were not listed in the plateList file):\n",
+                 paste(slog$Filename[is.na(mtslog)], collapse=", "), "\n", sep=""))
+    ipl  = x$plateList$Plate[mtslog]
+    irep = x$plateList$Replicate[mtslog]
+    ich  = x$plateList$Channel[mtslog]
+    ipos = pos2i(slog$Well, x$pdim)
+    stopifnot(!any(is.na(ipl)), !any(is.na(irep)), !any(is.na(ich)))
+    xrawWellAnno[cbind(ipos, ipl, irep, ich)] = "flagged"
+  } 
+
 for(p in 1:nrPlate){
 
       nm = p
@@ -209,7 +227,7 @@ for(p in 1:nrPlate){
         res = QMbyPlate(datPlat, as.character(x$wellAnno[nrWell*(p-1)+(1:nrWell)]), x$pdim, 
           name=sprintf("Plate %d (%s)", p, whatDat),
           basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks,
-          finalWellAnno = x$finalWellAnno[,p,,, drop=FALSE], posControls, negControls)
+          finalWellAnno = xrawWellAnno[,p,,, drop=FALSE], posControls, negControls)
 
         url[wh, "status"] = res$url
         if(!qmHaveBeenAdded) {
@@ -291,7 +309,7 @@ for(p in 1:nrPlate){
 
     ## include also the final well annotation (after the screen log file)
     for (ch in 1:trueNrCh)
-      out[sprintf("finalWellAnno_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$finalWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+      out[sprintf("finalWellAnno_r%d_ch%d", 1:nrReplicate, ch)] = matrix(xrawWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
 
   if(timeCounter) {
       timeCounter=timeCounter+ nrChannel

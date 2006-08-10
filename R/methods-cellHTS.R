@@ -115,14 +115,9 @@ conf$Position=pos2i(conf$Well, x$pdim)
   for(p in seq(along=x$batch)) {
     wa = conf$Content[ conf$Batch==x$batch[p] ]
     wellAnno[(1:nrWpP)+nrWpP*(p-1)] = wa
-    x$xraw[ wa=="em
-pty", p,,] = NA
+    x$xraw[ wa=="empty", p,,] = NA
   }
   x$wellAnno=wellAnno
-  
-  ## create an additional slot called "finalWellAnno", with "pos", "neg", "empty", "other", "sample" and "flagged" 
-  ## (this is in order to take into account the wells that were flagged using the screen log file information)
-  finalWellAnno = array(rep(x$wellAnno, times = prod(dim(x$xraw)[3:4])), dim=dim(x$xraw))
 
   ## Process screenlog
   if (!is.null(slog)) {
@@ -139,11 +134,8 @@ Filename' column in the screen log file '", logFile, "' contains invalid entries
     ipos = pos2i(slog$Well, x$pdim)
     stopifnot(!any(is.na(ipl)), !any(is.na(irep)), !any(is.na(ich)))
     x$xraw[cbind(ipos, ipl, irep, ich)] = NA 
-    finalWellAnno[cbind(ipos, ipl, irep, ich)] = "flagged"
-
   } 
 
-  x$finalWellAnno = finalWellAnno 
   x$state["configured"] = TRUE
   return(x)
 }
