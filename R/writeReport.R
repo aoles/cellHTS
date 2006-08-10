@@ -190,24 +190,12 @@ if(x$state["configured"]) {
 
 
  if (x$state["configured"]) {
+  ## array that corrects the wellAnno information by taking into account the wells that were flagged in the screen log file, or even by the user manually in xraw. Besides the categories in x$wellAnno, it contains the category "flagged".
 
-  xrawWellAnno = array(rep(x$wellAnno, times = prod(dim(x$xraw)[3:4])), dim=dim(x$xraw))
-
-  slog = x$screenLog
-  ## Process screenlog
-  if (!is.null(slog)) {
-    mtslog = match(slog$Filename, x$plateList$Filename)
-    if(any(is.na(mtslog)))
-      stop(paste("'Filename' column in the screen log file contains invalid entries\n",
-                 "(i.e. files that were not listed in the plateList file):\n",
-                 paste(slog$Filename[is.na(mtslog)], collapse=", "), "\n", sep=""))
-    ipl  = x$plateList$Plate[mtslog]
-    irep = x$plateList$Replicate[mtslog]
-    ich  = x$plateList$Channel[mtslog]
-    ipos = pos2i(slog$Well, x$pdim)
-    stopifnot(!any(is.na(ipl)), !any(is.na(irep)), !any(is.na(ich)))
-    xrawWellAnno[cbind(ipos, ipl, irep, ich)] = "flagged"
-  } 
+ xrawWellAnno = array(rep(x$wellAnno, times = prod(dim(x$xraw)[3:4])), dim=dim(x$xraw))
+ ## see which wells are flagged, excluding "empty" wells
+ iflagged = as.logical(is.na(x$xraw)*(x$wellAnno!="empty"))
+ xrawWellAnno[iflagged]="flagged"
 
 for(p in 1:nrPlate){
 
