@@ -297,7 +297,7 @@ for(p in 1:nrPlate){
 
     ## include also the final well annotation (after the screen log file)
     for (ch in 1:trueNrCh)
-      out[sprintf("finalWellAnno_r%d_ch%d", 1:nrReplicate, ch)] = matrix(xrawWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
+      out[sprintf("xrawAnno_r%d_ch%d", 1:nrReplicate, ch)] = matrix(xrawWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
 
   if(timeCounter) {
       timeCounter=timeCounter+ nrChannel
@@ -354,7 +354,7 @@ for(p in 1:nrPlate){
 
 ## 01.06.2006 Export everything to topTable.txt
     ## consider only the wells with sample and controls, at least for one of the replicates
-#     toconsider = which(!apply(out[,grep("finalWellAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
+#     toconsider = which(!apply(out[,grep("xrawAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
 #     out = out[toconsider, ]
 #     toconsider = !is.na(out$score)
 #     out = out[toconsider,]

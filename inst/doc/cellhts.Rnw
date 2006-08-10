@@ -570,11 +570,11 @@ number of wells in the plate);
 \item \verb=normalized_r1_ch1= and \verb=normalized_r2_ch1= give the normalized 
 intensities for replicate 1 and replicate 2, respectively ('ch' refers to channel).
 This corresponds to the content of \Robject{x\$xnorm}; 
-\item \verb=finalWellAnno_r1_ch1= and \verb=finalWellAnno_r2_ch1= give the final well 
-annotation for replicate 1 and 2, respectively, which combines the information given 
-in the plate configuration file and the screen log file, so that the wells that were 
-flagged in the latter file appear with the annotation \emph{flagged}. This information 
-corresponds to the content of \Robject{x\$finalWellAnno};
+\item \verb=xrawAnno_r1_ch1= and \verb=xrawAnno_r2_ch1= give the final well 
+annotation for replicate 1 and 2, respectively. It combines the information given 
+in the plate configuration file with the values in \Robject{x\$xraw}, in order to have 
+into account the wells that have been flagged either by the screen log file, or manually by the user 
+during the analysis. These flagged wells appear with the annotation \emph{flagged}. 
 \item \verb=raw_r1_ch1= and \verb=raw_r2_ch1= contain the raw intensities for replicate 1 
 and replicate 2, respectively (content of \Robject{x\$xraw});
 \item \verb=median_ch1= corresponds to the median of raw measurements across replicates;
