@@ -1,6 +1,6 @@
 Package: cellHTS
-Version: 1.3.26
-Date: 10 August 2006
+Version: 1.3.27
+Date: 16 August 2006
 Title: Analysis of cell-based screens
 Author: Wolfgang Huber <huber@ebi.ac.uk>, Ligia Bras <ligia@ebi.ac.uk>, Michael Boutros <m.boutros@dkfz.de>
 Maintainer: Ligia Bras <ligia@ebi.ac.uk>
