@@ -35,8 +35,7 @@ getMatrix(y, channel=1, na.rm=FALSE)
  is identical to the product between the first two
  dimensions of \code{y} (wells*plates). If \code{na.rm=TRUE), only the
    rows with no missing entries in all the replicates (columns) are
-   given.
-   }
+   given.}
 
 \author{Ligia Brás \email{ligia@ebi.ac.uk}}
 
