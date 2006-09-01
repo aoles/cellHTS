@@ -33,7 +33,7 @@ getMatrix(y, channel=1, na.rm=FALSE)
   dimension of \code{y}).
   If \code{na.rm=FALSE} (the default), the number of rows of the output matrix
  is identical to the product between the first two
- dimensions of \code{y} (wells*plates). If \code{na.rm=TRUE), only the
+ dimensions of \code{y} (wells*plates). If \code{na.rm=TRUE}, only the
    rows with no missing entries in all the replicates (columns) are
    given.}
 

@@ -1,17 +1,18 @@
-export("readPlateData",
+export("ROC",
        "annotate",
        "configure",
-       "writeTab",
-       "write.tabdel",
        "getLibraryPlate",
-       "plotPlateLibrary",
-       "normalizePlates",
-       "normalizeChannels",
-       "oneRowPerId",
-       "summarizeReplicates",
-       "writeReport",
+       "getMatrix",
        "imageScreen",
-       "ROC")
+       "normalizeChannels",
+       "normalizePlates",
+       "oneRowPerId",
+       "plotPlateLibrary",
+       "readPlateData",
+       "summarizeReplicates",
+       "write.tabdel",
+       "writeReport",
+       "writeTab")
 
 ## The standard method for S3-style UseMethod dispatching might fail to locate methods defined
 ## in a package that is imported but not attached to the search path. To ensure that these methods
