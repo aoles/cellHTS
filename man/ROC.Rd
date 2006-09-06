@@ -11,18 +11,19 @@
   scored cellHTS object.
 }
 \usage{
-ROC(x, positives="pos", negatives = "neg")
-\method{plot}{ROC}(x, col="darkblue", type="l", \dots)
+ROC(x, positives, negatives)
+\method{plot}{ROC}(x, col="darkblue", type="l", main = "ROC curve", \dots)
 \method{lines}{ROC}(x, \dots)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been scored (see details).}
-  \item{positives}{a character giving the name(s) used to
-    annotate the positive controls in the cellHTS object.}
-  \item{negatives}{a character corresponding to the name(s) used to
-    annotate the negative controls in the cellHTS object.}
+  \item{positives}{a list or vector of regular expressions specifying the name of the positive controls. 
+   See the details for the argument \code{posControls} of \code{\link[cellhts]{writeReport}} function.}
+  \item{negatives}{a vector of regular expressions specifying the name of the negative controls. 
+   See the details for the argument \code{negControls} of \code{\link[cellhts]{writeReport}} function.}
   \item{col}{the graphical parameter for color; see \code{\link{par}} for details.}
   \item{type}{the graphical parameter giving the type of plot desired; see \code{\link{par}} for details.}
+  \item{main}{the graphical parameter giving the desired title of plot; see \code{\link{par}} for details.}
   \item{\dots}{other graphical parameters as in \code{\link{par}} may be also passed as arguments.}
 }
 \details{
@@ -31,7 +32,8 @@ ROC(x, positives="pos", negatives = "neg")
   Furthermore, \code{x} is expected to contain positive and negative
   controls annotated in the slot \code{wellAnno} with the values of
   the arguments \code{positives} and \code{negatives}, respectively.
-}
+  If the assay is a two-way experiment, \code{positives} should be a list with components \code{act} 
+  and \code{inh}, specifying the name of the activators, and inhibitors, respectively. In this case, the ROC cureve is constructed based on the absolute values of \code{x$score}.}
 
 \value{An S3 object of class \code{ROC}. There are methods
   \code{plot.ROC} and \code{lines.ROC}. }

@@ -3,7 +3,7 @@
 \title{Experiment-wide quality control plot of a cellHTS object}
 \description{Experiment-wide quality control plot of a scored cellHTS object.}
 \usage{
-imageScreen(x, ar=3/5, zrange)
+imageScreen(x, ar=3/5, zrange, map=FALSE, anno)
 }
 
 \arguments{
@@ -11,11 +11,17 @@ imageScreen(x, ar=3/5, zrange)
 \item{ar}{the desired aspect ration for the image plot (i.e. number of columns per number of rows)} 
 \item{zrange}{the range of values to be mapped into the color
       scale. If missing, zrange will be set to the range of \code{x$score}.}
-  }
+\item{map}{a logical value that determined whether an image map should be created using tooltips to indicate the annotation at each position. It only makes sense to set it to \code{TRUE} when the function is called from \code{\link[cellhts]{writeReport}}, so the default is \code{FALSE}}
+\item{anno}{optional input giving the annotation information for the mapping. It should be a vector of the same size as
+\code{x$score}. See details.}
+}
 
 \details{
 This function creates an image plot that gives an overview of the whole set of score values 
 from the cellHTS object \code{x}.
+When the annotation mapping is performed, by default, \code{anno} is set to: 
+1) the content of \code{x$geneAnno$GeneSymbol} (or \code{x$geneAnno$GeneID}, if the former is not available), if the cellHTS object \code{x} is annotated;
+2) the position within the plate, if \code{x} is not annotated yet.     
 }
 
 \author{Ligia Braz \email{ligia@ebi.ac.uk}}

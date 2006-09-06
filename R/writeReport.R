@@ -38,8 +38,11 @@ cat("<TR>", paste(sprintf("<TH BGCOLOR=\"%s\">%s</TH>", colors[(1:nc)%%2+1], col
       "</TR>\n", sep="", file=con) }
 
   for(i in 1:nr)
-    cat("<TR>", paste(sprintf("<TD BGCOLOR=\"%s\">%s</TD>", colors[2*(i%%2)+(1:nc)%%2+1], x[i,]), collapse=""),
+#     cat("<TR>", paste(sprintf("<TD BGCOLOR=\"%s\" align=center>%s</TD>", colors[2*(i%%2)+(1:nc)%%2+1], x[i,]), collapse=""),
+#         "</TR>\n", sep="", file=con)
+    cat("<TR>", paste(sprintf("<TD BGCOLOR=\"%s\">%s</TD>", colors[2*(i%%2)+(1)%%2+1], x[i,1]), collapse=""), paste(sprintf("<TD BGCOLOR=\"%s\" align=center>%s</TD>", colors[2*(i%%2)+(2:nc)%%2+1], x[i,-1]), collapse=""),
         "</TR>\n", sep="", file=con)
+
   cat("</TABLE>\n", file=con)
   if(center) cat("</CENTER>\n", file=con)
 }
@@ -56,8 +59,8 @@ writeHTMLtable4plots = function(x, con,
       "</TR>\n", sep="", file=con)
 
   for(i in 1:nr) {
-  	cat("<TR>",
-        paste(sprintf("<TD BGCOLOR=\"%s\">%s</TD>", colors[2*(i%%2)+(1:nc)%%2+1], x[i,]), collapse=""),
+    cat("<TR>", paste(paste("<TD BGCOLOR=\"", colors[2*(i%%2)+(1:nc)%%2+1],
+                            "\">", x[i,], "</TD>", sep=""), collapse=""),
         "</TR>\n", sep="", file=con)
          }
   cat("</TABLE><CENTER>\n", file=con)
@@ -85,11 +88,12 @@ writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE, plotPl
   nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
   timeCounter=0
   fz =!is.logical(plotPlateArgs)
+  fzs = ifelse("map" %in% names(imageScreenArgs), imageScreenArgs$map, FALSE)
 
 ## Rough estimation of the total computation time that the function will take
 # 1 = one time unit
 if (interactive()) {
-    totalTime= 2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) + 0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +(x$state["scored"])*nrChannel*14 + 0.2
+    totalTime= 2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) + 0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +(x$state["scored"])*nrChannel*14 + (x$state["scored"])*fzs*nrPlate*2
    require("prada")
    progress(title="cellHTS is busy", message = sprintf("\nCreating HTML pages for '%s'", x$name)) 
    on.exit(killProgress(), add=TRUE)
@@ -133,34 +137,64 @@ if(timeCounter) {
   } else { writeheader(paste("Experiment report for", x$name), 1, con)}
 
 
-
   ## controls annotation
-if(x$state["configured"]) {
-
+ twoWay=FALSE
+ if(x$state["configured"]) {
   if(timeCounter) {
    timeCounter=timeCounter+2
    updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
-  if (!missing(posControls)) {
-    ## check
-    if (!is(posControls, "vector") | length(posControls)!=nrChannel | mode(posControls)!="character") 
-      stop(sprintf("'posControls' should be a vector of regular expressions with length %d", nrChannel))
+    if (!missing(posControls)) {
+## checks
+      if(!is(posControls, "list")){
+        ## check
+        if (!is(posControls, "vector") | length(posControls)!=nrChannel | mode(posControls)!="character") 
+          stop(sprintf("'posControls' should be a vector of regular expressions with length %d",
+                       nrChannel))
 
-    #posControls = lapply(posControls, myTolower)
-  } else { 
-    posControls=as.vector(rep("^pos$", nrChannel))
-  }
+        ##posControls = lapply(posControls, myTolower)
+ 
+       ## see if there are different positive controls (e.g. with different strengths)
+        aux = unique(posControls)
+        aux = aux[! (aux  %in% c(NA, "") )]
+        if (length(aux)>1) 
+          aux = sapply(aux, function(h) unique(as.character(x$wellAnno[which(regexpr(h, as.character(x$wellAnno), perl=TRUE)>0)]))) 
+        else 
+          aux = unique(as.character(x$wellAnno[which(regexpr(aux, as.character(x$wellAnno), perl=TRUE)>0)]))
 
-  if (!missing(negControls)) {
-    ## check
-    if (!is(negControls, "vector") | length(negControls)!=nrChannel | mode(negControls)!="character") 
-      stop(sprintf("'negControls' should be a vector of regular expressions with length %d", nrChannel))
+          namePos = unique(unlist(aux)) 
+          namePos = sort(x$plateConf$Content[match(namePos, tolower(x$plateConf$Content))])
+    }else{
+        if (length(posControls)!=2 ||
+            !identical(sort(names(posControls)), c("act", "inh")) ||
+            any(sapply(posControls, length)!=nrChannel) ||
+            any(sapply(posControls, mode)!="character"))#* 
+          stop(cat(sprintf("'posControls' should be a list with 
+             two components: 'act' and 'inh'.\n These components 
+             should be vectors of regular expressions with length %d \n", nrChannel)))
+        twoWay=TRUE
+        namePos = NULL
+      }## else is list
 
-    #negControls = lapply(negControls, myTolower)
-  } else {
-    negControls=as.vector(rep("^neg$", nrChannel))
-  }
-}
+    }else{## if !missing
+## assumes the screen is a one-way assay
+      posControls=as.vector(rep("^pos$", nrChannel))
+      namePos = "pos"
+    }
+
+
+    if (!missing(negControls)) {
+      ## check
+      if (!is(negControls, "vector") | length(negControls)!=nrChannel | mode(negControls)!="character") 
+        stop(sprintf("'negControls' should be a vector of regular expressions with length %d", nrChannel))
+
+      ## negControls = lapply(negControls, myTolower)
+    } else {
+      negControls=as.vector(rep("^neg$", nrChannel))
+    }
+  }## if configured
+
+
 
   ## Define the bins for the histograms (channel-dependent)
   if(x$state["configured"]) {
@@ -176,10 +210,7 @@ if(x$state["configured"]) {
 # put as list also for the case ch=1 or for the case when brks have = length for each channel 
     }
 
-
-
   ## QC per plate & channel
-
 
   ## the overview table of the plate result files in the experiment,
   ##   plus the (possible) urls for each table cell
@@ -197,6 +228,18 @@ if(x$state["configured"]) {
  iflagged = as.logical(is.na(x$xraw)*(x$wellAnno!="empty"))
  xrawWellAnno[iflagged]="flagged"
 
+
+  ## need this for the image maps later
+  if(x$state["annotated"]){
+    if ("GeneSymbol" %in% names(x$geneAnno))
+       geneAnnotation <- x$geneAnno$GeneSymbol
+    else
+       geneAnnotation <- x$geneAnno$GeneID
+  }else{##else if annotated
+    geneAnnotation <- rep(paste("well", x$plateConf$Well), nrPlate)
+  }##else annotated
+
+
 for(p in 1:nrPlate){
 
       nm = p
@@ -212,41 +255,63 @@ for(p in 1:nrPlate){
           whatDat = "unnormalized"
         }
 
+        geneAnno <- geneAnnotation[nrWell*(p-1)+(1:nrWell)]
+
         res = QMbyPlate(datPlat, as.character(x$wellAnno[nrWell*(p-1)+(1:nrWell)]), x$pdim, 
           name=sprintf("Plate %d (%s)", p, whatDat),
           basePath=outdir, subPath=nm, plotPlateArgs=plotPlateArgs, brks = brks,
-          finalWellAnno = xrawWellAnno[,p,,, drop=FALSE], posControls, negControls)
+          finalWellAnno = xrawWellAnno[,p,,, drop=FALSE], posControls, negControls, 
+          isTwoWay=twoWay, geneAnno=geneAnno, namePos=namePos)
 
         url[wh, "status"] = res$url
+##        url[wh, "Filename_Standard"] = file.path("BCA", paste(gsub(".txt$", "",
+##             x$plateList[wh, "Filename_Standard"]), "png", sep="."))
         if(!qmHaveBeenAdded) {
-         ##resChan = res$qmsummary[[1]]
-         ##url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(resChan)))
-         ##for (j in names(resChan)) exptab[, j] = rep("", nrow(exptab))
-         ##qmHaveBeenAdded = TRUE
+          if(twoWay){
+            TableNames = c(paste("Replicate dynamic range", c("(Activators)", "(Inhibitors)"), sep=" "), paste("Average dynamic range", c("(Activators)", "(Inhibitors)"), sep=" "), "Spearman rank correlation")
+          }else{## if twoWay
 
-         url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=3))
-         TableNames = c("Replicate dynamic range", "Average dynamic range", "Spearman rank correlation")
-         for (j in TableNames) exptab[, j] = rep("", nrow(exptab))
+            if (length(namePos)==1 && namePos=="pos") 
+              TableNames = c("Replicate dynamic range", "Average dynamic range", "Spearman rank correlation")
+            else
+              TableNames = c(sprintf("Replicate dynamic range (%s)", namePos), 
+              sprintf("Average dynamic range (%s)", namePos), "Spearman rank correlation")
+          }## else twoWay
+          url = cbind(url,  matrix(as.character(NA), nrow=nrow(url), ncol=length(TableNames)))
+
+          for (j in TableNames) exptab[, j] = rep("", nrow(exptab))
           qmHaveBeenAdded = TRUE
-       }
+        }## if !qmHaveBeenAdded
         whh = split(wh, exptab$Channel[wh])
+ 
         for(ch in 1:length(res$qmsummary)) { # Channels
           resCh = res$qmsummary[[ch]]
           whCh = whh[[ch]]
-          exptab[whCh, "Replicate dynamic range"] = resCh[exptab$Replicate[whCh]]
-          exptab[whCh, "Average dynamic range"] = resCh[nrReplicate + 1]
-          exptab[whCh, "Spearman rank correlation"] = resCh[nrReplicate + 2]
-          ## for(j in names(resCh)[(nrReplicate+1):) exptab[whCh, j] =resCh[j]
-        } # channel
-      } ## if
+          selrep= exptab$Replicate[whCh]
+          if(twoWay){
+            for (jj in 1:length(TableNames))
+               exptab[whCh, TableNames[jj]] = resCh[unique((jj<3)*(selrep+nrReplicate*(jj-1))) + (jj>2)*(nrReplicate*2 + jj-2)] 
+                #"Replicate dynamic range (Activators)"
+                #"Replicate dynamic range (Inhibitors)"
+                #TableNames[3] "Average dynamic range (Activators)"
+                #TableNames[4] "Average dynamic range (Inhibitors)"
+                #TableNames[5] "Spearman rank correlation"
 
-    if(timeCounter) {
-      timeCounter=timeCounter+(nrReplicate*nrChannel)*(1+2*fz)
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+          }else{
 
-} ## for p plates
-} #if configured
+            for (jj in 1:(length(TableNames)-1))
+              exptab[whCh, TableNames[jj]] = resCh[unique((jj<(length(namePos)+1))*(selrep + (nrReplicate+1)*(jj-1))) + (jj>length(namePos))*(nrReplicate + 1)*(jj-length(namePos))]
+              exptab[whCh, TableNames[length(TableNames)]] = resCh[length(resCh)]
+          }## else twoWay
+        }## for channel
+      }## if length w
 
+      if(timeCounter) {
+        timeCounter=timeCounter+(nrReplicate*nrChannel)*(1+2*fz)
+        updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+
+    }## for p plates
+  }##if configured
 
 
   ## Report pages per plate result file 
@@ -272,8 +337,9 @@ for(p in 1:nrPlate){
   cat("</CENTER><BR><BR>", file=con)
 
 
+
   ## Per experiment QC
-  plotTable = QMexperiment(x, outdir, con, posControls, negControls)
+  plotTable = QMexperiment(x, outdir, con, posControls, negControls, isTwoWay=twoWay, namePos=namePos)
 
    if(timeCounter) {
       timeCounter=timeCounter+(5*nrReplicate*nrChannel)
@@ -361,26 +427,45 @@ for(p in 1:nrPlate){
     out = out[order(out$score, decreasing=TRUE), ]
     out$score = round(out$score, 2)
     write.table(out, file=file.path(outdir, "topTable.txt"), sep="\t", row.names=FALSE, col.names=TRUE, quote = FALSE)
- 
+
     if(timeCounter) {
       timeCounter=timeCounter+ nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill=!TRUE)
+    }
 
-    makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
-             fun = function() do.call("imageScreen", args=append(list(x=x), imageScreenArgs)), print=FALSE)
+##  
+    if ("map" %in% names(imageScreenArgs)) {
+      mapx = imageScreenArgs$map 
+      imageScreenArgs = imageScreenArgs[!names(imageScreenArgs) %in% "map"] 
+    } else {
+      mapx=TRUE  # make the mapping by default
+    }
 
-  if(timeCounter) {
-      timeCounter=timeCounter+ 4*nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+    res <- makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
+                    fun = function(map=mapx) return(do.call("imageScreen", args=append(list(x=x, map=map),imageScreenArgs))),
+                    print=FALSE, isImageScreen=TRUE)
+
+    if(timeCounter) {
+      timeCounter=timeCounter + 4*nrChannel
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+    }
 
     count = nrow(plotTable)
     plotTable = rbind(plotTable, rep("", length=prod(ncol(plotTable)* 2))) 
     plotTable[count + 1, 2] = "<H3 align=center>Screen-wide image plot of the scored values</H3>"
     plotTable[count + 2, 1] = sprintf("<CENTER><A HREF=\"topTable.txt\"><em>%s</em></A></CENTER><BR>\n", ttInfo)
-    plotTable[count + 2, 2] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", "imageScreen.pdf", "imageScreen.png") 
+
+    if (is.null(res)) {
+      plotTable[count + 2, 2] = sprintf("<CENTER><A HREF=\"%s\"><IMG SRC=\"%s\"/></A></CENTER><BR>\n", "imageScreen.pdf", "imageScreen.png")
+    }else{
+      res <- myImageMap(object=res$obj, tags=res$tag, "imageScreen.png")
+      plotTable[count + 2, 2] = paste("<BR><CENTER>", res, "</CENTER><BR><CENTER>",
+              "<A HREF=\"imageScreen.pdf\">enlarged version</A></CENTER>\n", sep="")
+    }
+
 
    if(timeCounter) {
-      timeCounter=timeCounter+ 2*nrChannel
+      timeCounter=timeCounter+ 2*nrChannel + nrPlate*(x$state["scored"])*fzs*2
       updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
 
   } ## if scored
