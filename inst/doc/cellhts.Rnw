@@ -720,7 +720,7 @@ matrix representation, implemented by the \Rclass{graph} object
 and columns of the matrix and there is an edge if the matrix element 
 is non-zero.
 
-One distraction is the GO term GO:0000067, which is annotated to some
+One distraction is the GO term GO:0000067, which is annotated to some 
 of the genes, but is obsolete.
 %
 <<cat1>>=

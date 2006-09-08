@@ -17,10 +17,10 @@ $biomart
 [1] "dicty"    "ensembl"  "snp"      "vega"     "uniprot"  "msd"      "wormbase"
 
 $version
-[1] "DICTYBASE (NORTHWESTERN)" "ENSEMBL 38 (SANGER)"     
-[3] "SNP 38 (SANGER)"          "VEGA 38 (SANGER)"        
-[5] "UNIPROT 4-5 (EBI)"        "MSD 4 (EBI)"             
-[7] "WORMBASE CURRENT (CSHL)" 
+[1] "DICTYBASE (NORTHWESTERN)"    "ENSEMBL 40 (SANGER)"        
+[3] "SNP 40 (SANGER)"             "VEGA 40 (SANGER)"           
+[5] "UNIPROT PROTOTYPE 4-5 (EBI)" "MSD PROTOTYPE 4 (EBI)"      
+[7] "WORMBASE CURRENT (CSHL)"    
 
 $host
 [1] "www.dictybase.org" "www.biomart.org"   "www.biomart.org"  
@@ -31,6 +31,9 @@ $path
 [1] ""                     "/biomart/martservice" "/biomart/martservice"
 [4] "/biomart/martservice" "/biomart/martservice" "/biomart/martservice"
 [7] "/biomart/martservice"
+
+$vschema
+[1] "dicty"   "default" "default" "default" "default" "default" "default"
 \end{Soutput}
 \end{Schunk}
 %
@@ -49,25 +52,31 @@ which we select the \textit{D. melanogaster} dataset.
 \end{Sinput}
 \begin{Soutput}
                       dataset    version
-1    rnorvegicus_gene_ensembl    RGSC3.4
-2    scerevisiae_gene_ensembl       SGD1
-3       celegans_gene_ensembl     CEL150
+1     gaculeatus_gene_ensembl           
+2      lafricana_gene_ensembl           
+3    scerevisiae_gene_ensembl       SGD1
 4  cintestinalis_gene_ensembl       JGI2
 5   ptroglodytes_gene_ensembl    CHIMP1A
-6      frubripes_gene_ensembl      FUGU4
-7       agambiae_gene_ensembl     AgamP3
+6      etelfairi_gene_ensembl           
+7     ocuniculus_gene_ensembl           
 8       hsapiens_gene_ensembl     NCBI36
 9        ggallus_gene_ensembl    WASHUC1
-10   xtropicalis_gene_ensembl     JGI4.1
-11        drerio_gene_ensembl     ZFISH5
-12 tnigroviridis_gene_ensembl TETRAODON7
-13      mmulatta_gene_ensembl   MMUL_0_1
-14    mdomestica_gene_ensembl    BROADO2
-15    amellifera_gene_ensembl    AMEL2.0
-16 dmelanogaster_gene_ensembl    BDGP4.2
-17     mmusculus_gene_ensembl    NCBIM35
-18       btaurus_gene_ensembl   Btau_2.0
-19   cfamiliaris_gene_ensembl    BROADD1
+10 tnigroviridis_gene_ensembl TETRAODON7
+11      mmulatta_gene_ensembl     MMUL_1
+12       btaurus_gene_ensembl   Btau_2.0
+13      aaegypti_gene_ensembl           
+14   rnorvegicus_gene_ensembl    RGSC3.4
+15     csavignyi_gene_ensembl           
+16      celegans_gene_ensembl     CEL150
+17     trubripes_gene_ensembl      FUGU4
+18 dnovemcinctus_gene_ensembl           
+19      agambiae_gene_ensembl     AgamP3
+20   xtropicalis_gene_ensembl     JGI4.1
+21        drerio_gene_ensembl     ZFISH6
+22    mdomestica_gene_ensembl    BROADO3
+23 dmelanogaster_gene_ensembl    BDGP4.3
+24     mmusculus_gene_ensembl    NCBIM36
+25   cfamiliaris_gene_ensembl    BROADD1
 \end{Soutput}
 \end{Schunk}
 %
@@ -96,7 +105,7 @@ query). We use the \Rfunction{getBM} function of the package
 \begin{Schunk}
 \begin{Sinput}
 > myGetBM = function(att) getBM(attributes = c("ensembl_gene_id", 
-+     att), filter = "gene_stable_id", values = unique(x$geneAnno$GeneID), 
++     att), filter = "ensembl_gene_id", values = unique(x$geneAnno$GeneID), 
 +     mart = mart)
 \end{Sinput}
 \end{Schunk}
@@ -125,8 +134,14 @@ obtain chromosomal locations:
 > unique(setdiff(x$geneAnno$GeneID, bm1$ensembl_gene_id))
 \end{Sinput}
 \begin{Soutput}
- [1] NA        "CG7245"  "CG6735"  "CG31314" "CG15509" "CG15388" "CG15389"
- [8] "CG11169" "CG18648" "CG13459" "CG15507"
+ [1] NA        "CG7245"  "CG32253" "CG6735"  "CG31314" "CG31085" "CG15509"
+ [8] "CG15388" "CG15389" "CG5061"  "CG5074"  "CG31722" "CG31756" "CG4110" 
+[15] "CG15280" "CG31766" "CG11169" "CG13596" "CG18510" "CG12557" "CG14493"
+[22] "CG5719"  "CG14499" "CG14501" "CG4383"  "CG13904" "CG1211"  "CG13289"
+[29] "CG13290" "CG7973"  "CG7867"  "CG6112"  "CG13444" "CG18648" "CG13459"
+[36] "CG5571"  "CG31350" "CG6989"  "CG18553" "CG32469" "CG11676" "CG12600"
+[43] "CG7552"  "CG12537" "CG14559" "CG15507" "CG15781" "CG15348" "CG15349"
+[50] "CG5652"  "CR33460" "CR33465" "CG30322" "CR33258"
 \end{Soutput}
 \end{Schunk}
 %
@@ -148,4 +163,6 @@ where necessary.
 > x$geneAnno = bdgpbiomart
 \end{Sinput}
 \end{Schunk}
+
+%% This is how the object is then saved in the data subdirectory of the package:
 

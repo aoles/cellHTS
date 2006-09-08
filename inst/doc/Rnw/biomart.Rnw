@@ -45,7 +45,7 @@ query). We use the \Rfunction{getBM} function of the package
 <<myGetBM>>=
 myGetBM = function(att)
   getBM(attributes=c("ensembl_gene_id", att), 
-        filter="gene_stable_id", 
+        filter="ensembl_gene_id", 
         values=unique(x$geneAnno$GeneID), mart=mart)
 @ 
 % 
