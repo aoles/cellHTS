@@ -284,6 +284,11 @@ each well annotation in the example data:
 table(x$plateConf$Content)
 @ 
 %
+% Another case is when different types of positive controls are used for the screening, that is 
+% "activator" and "inhibitor" compounds. The vignette "xxxx" accompanying this package 
+% explains how such screens can be handled using \Rpackage{cellHTS} package.
+
+%
 \subsubsection{Multiple plate configurations}
 \label{sec:multPlateConfs}
 Although it is good practice to use the same plate configuration for
@@ -344,10 +349,13 @@ z_{ki} &=& \pm \frac{x'_{ki}-\hat{\mu}}{\hat{\sigma}} \label{eq:defz} \\
 z_{k}  &=& \sqrt{\frac{1}{n_{\mbox{\scriptsize rep}_k}} \sum_{r=1}^{n_{\mbox{\scriptsize rep}_k}} z_{kr}^2} \label{eq:scoresSummary}.
 \end{eqnarray}
 
-Before summarizing the replicate, we standardize the values for each replicate experiment using Equation~\eqref{eq:defz}.  
+Before summarizing the replicate, we standardize the values for each 
+replicate experiment using Equation~\eqref{eq:defz}.  
 Here $\hat{\mu}$ and $\hat{\sigma}$ are estimators of location and
-scale of the distribution of $x'_{ki}$ taken across all plates and wells of a given replicate experiment. We use robust estimators,
-namely, median and median absolute deviation (MAD). Moreover, we only consider the wells containing ``sample'' for estimating $\hat{\mu}$ and $\hat{\sigma}$.
+scale of the distribution of $x'_{ki}$ taken across all plates and 
+wells of a given replicate experiment. We use robust estimators,
+namely, median and median absolute deviation (MAD). Moreover, we only consider the wells 
+containing ``sample'' for estimating $\hat{\mu}$ and $\hat{\sigma}$.
 As the values
 $x'_{ki}$ were obtained using plate median
 normalization~\eqref{eq:normalizePlateMedian}, it holds that
@@ -412,6 +420,7 @@ You might want to start by taking the source code of
 
 %------------------------------------------------------------
 \section{Annotation}
+\label{sec:annotation}
 %------------------------------------------------------------
 \input{cellhts-geneID} 
 
@@ -436,6 +445,12 @@ x = annotate(x, geneIDFile)
 cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6)
 @ 
 %
+An optional column named \textit{GeneSymbol} can be included in the 
+\emph{annotation file}, and its content will be displayed by the tooltips 
+added to the plate plots and screen-wide 
+plot, in the HTML quality report (see Section~\ref{sec:report}).
+
+
 %---------------------------------------------------------------
 \subsection{Adding additional annotation from public databases}
 %---------------------------------------------------------------
@@ -528,13 +543,47 @@ and use a web browser to view the resulting report
 browseURL(out)
 @ 
 % 
-Now, the report contains a quality report for each plate, and also for
-the whole screening assays. The experiment-wide report presents the
-$Z'$-factor determined for each experiment (replicate) using the
-positive and negative controls~\cite{Oldenburg1999}, the boxplots with
-raw and normalized intensities for the different plates, and the
+The report contains a quality report for each plate, and also for
+the whole screening assays. 
+The per-plate HTML reports display the
+scatterplot between duplicated plate measurements, the 
+histogram of the normalized signal intensities for each replicate, 
+and plate plots representing, in a false color scale, the normalized values of 
+each replicate, and the standard deviation between replicate measurements 
+at each plate position.
+It also reportes the Spearman rank correlation coefficient between duplicates, and 
+the dynamic range, calculated as the 
+ratio between the geometric means of the positive and negative
+controls. 
+If different positive controls were specified at the configuration step 
+and when calling \Rfunction{writeReport}, 
+the dynamic range is calculated separately for the distinct positive controls, since 
+different positive controls might have different potencies.
+
+The experiment-wide HTML report presents, for each replicate, the
+the boxplots with raw and normalized intensities for the different plates, 
+and two plots for the controls: one showing the signal 
+from positive and negative controls at each plate, 
+and another plot displaying the distribution of the signal 
+from positive and negative controls, obtained from kernel density estimates. 
+The latter plot further gives the $Z'$-factor determined for each experiment 
+(replicate) using the negative controls and each different type 
+of positive controls~\cite{Oldenburg1999}, as a measure to quantify
+the distance between their distributions.
+The experiment-wide report also shows a 
 screen-wide plot with the $z$-scores in every well position of each
-plate. The latter image plot can also be produced separately using the
+plate. This plot, as well as the plate plots of the per-plate reports
+contain tooltips (information popup boxes) 
+dispaying the annotation information at each position within the plates.
+If the \Robject{cellHTS} object has not been annotated yet, 
+the annotation information shown by the tooltips is simply the well identifiers.
+For an annotated \Robject{cellHTS} object, if an optional column 
+called \textit{GeneSymbol} was included in the 
+\emph{annotation file} (see Section~\ref{sec:annotation}), and therefore 
+is present in \Robject{x\$geneAnno}), its content is used for the tooltips. 
+Otherwise, the content of \Robject{x\$geneAnno\$GeneID} is considered. 
+
+The screen-wide image plot can also be produced separately using the
 function \Rfunction{imageScreen} given in the \Rpackage{cellHTS}
 package. This might be useful if we want to select the best display
 for our data, namely, the aspect ratio for the plot and/or the range
