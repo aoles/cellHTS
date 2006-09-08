@@ -44,7 +44,7 @@ This techical report is a supplement of the main vignette
 to the annotated hit list} that is given as part of the \Rpackage{cellHTS} 
 package. It accompanies the paper \textit{Analysis
 of cell-based RNAi screens} by Michael Boutros, L\'igia Br\'as and
-Wolfgang Huber. 
+Wolfgang Huber~\cite{Boutros2006}. 
 
 The report demonstrates how the 
 \Rpackage{cellHTS} package can be applied to the documentation and analysis of 
@@ -171,12 +171,21 @@ cellHTS:::tableOutput(confFile, "plate configuration", selRows=1:4)
 cellHTS:::tableOutput(logFile, "screen log", selRows=1:2)
 @ 
 
-In this data set, instead of using the default names \emph{pos} and \emph{neg} for 
-positive and negative controls, respectively, we use the name of the gene targeted by 
+In this data set, instead of using the default names \emph{pos} 
+and \emph{neg} for 
+positive and negative controls, respectively, 
+we use the name of the gene targeted by 
 the probes in the control wells: 
 \emph{geneA}, \emph{geneB}, \emph{geneC} and \emph{geneD}. 
-This is a more straighforward approach, since not all of these four controls behave as controls 
-for both reporters $R_1$ and $R_2$.
+This is a more straighforward approach, 
+since not all of these four controls behave as controls 
+for both reporters $R_1$ and $R_2$. Moreover, the two positive 
+controls have different strengths: \emph{geneC} is expected to generate 
+a weaker effect than \emph{geneD}. 
+Thus, it is useful to define these controls separately at the configuration 
+step, in order to calculate the quality measures 
+(dynamic range and $Z'$-factors) specific for each of them in the HTML 
+quality reports.
 
 %Note that this allows to have the same configuration file for both reporters.
 Below, we look at the frequency of each well annotation in the example data:
@@ -189,7 +198,6 @@ table(x$plateConf$Content)
 %------------------------------------------------------------
 \section{Data preprocessing and summarization of replicates}
 %------------------------------------------------------------ 
-
 
 We can take a first look at the data by constructing the HTML quality reports 
 using the \Rfunction{writeReport} function. 
@@ -216,12 +224,19 @@ posControls[2]="(?i)^geneC$|^geneD$"
 @ 
 %
 In the constitutive channel $R_1$, there is one negative control, 
-named \emph{geneA}, and no positive controls. In the pathway-specific reporter $R_2$ there are two different negative controls (\emph{geneA} and \emph{geneB}), and two diffferent positive controls (\emph{geneC} and \emph{geneD}).
-Each of the arguments \Robject{posControls} and \Robject{negControls} should be defined as a vector of regular expressions with the same length as the number of channels in \Robject{x\$xraw}.
-These arguments will be passed to the \Rfunction{regexpr} function for pattern matching within 
+named \emph{geneA}, and no positive controls. In the pathway-specific 
+reporter $R_2$ there are two different negative controls (\emph{geneA} 
+and \emph{geneB}), and two diffferent positive controls (\emph{geneC} 
+and \emph{geneD}).
+Each of the arguments \Robject{posControls} and \Robject{negControls} 
+should be defined as a vector of regular expressions with the same 
+length as the number of channels in \Robject{x\$xraw}.
+These arguments will be passed to the \Rfunction{regexpr} 
+function for pattern matching within 
 the well annotation given in \Robject{x\$wellAnno}.
 
-Finally, we construct the quality report pages for the raw data in a directory called 
+Finally, we construct the quality report pages for the raw 
+data in a directory called 
 \Robject{raw}, in the working directory:
 %
 <<writeReport1Show, eval=FALSE>>=

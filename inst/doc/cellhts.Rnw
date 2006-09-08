@@ -43,7 +43,7 @@ pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 This is a technical report that demonstrates the use of the
 \Rpackage{cellHTS} package. It accompanies the paper \textit{Analysis
 of cell-based RNAi screens} by Michael Boutros, L\'igia Br\'as and
-Wolfgang Huber. This report explains all the steps necessary to run a
+Wolfgang Huber~\cite{Boutros2006}. This report explains all the steps necessary to run a
 complete analysis of a cell-based high-throughput screen (HTS), from
 raw intensity readings to an annotated hit list.
 
