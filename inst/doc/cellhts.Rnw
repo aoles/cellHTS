@@ -720,19 +720,40 @@ matrix representation, implemented by the \Rclass{graph} object
 and columns of the matrix and there is an edge if the matrix element 
 is non-zero.
 
-One distraction is the GO term GO:0000067, which is annotated to some 
-of the genes, but is obsolete.
+%One distraction is GO terms GO:0000067,  which is annotated to some of the genes, but is obsolete.
+
+% <<find obsolete GO ids, echo=FALSE, eval=FALSE>>=
+% names(x$score) = x$geneAnno$GeneID
+% sel = !is.na(x$score) & (!is.na(x$geneAnno$go))
+% goids = strsplit(x$geneAnno$go[sel], ", ")
+% genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
+% ux = unique(unlist(goids, use.names=FALSE))
+% s1 = ux %in% ls(GOMFANCESTOR)
+% s2 = ux %in% ls(GOBPANCESTOR)
+% s3 = ux %in% ls(GOCCANCESTOR)
+% s4 = is.na(ux)
+% obsolete = sort(ux[which(!(s1|s2|s3|s4))])
+% @ 
+
+<<obsolete GO ids>>=
+obsolete = c("GO:0005489", "GO:0005659", "GO:0005660")
+@ 
+
+Some distractions are the GO terms 
+\Robject{\Sexpr{paste(obsolete, collapse=", ")}}, 
+which are annotated to some of the genes, but are obsolete.
 %
 <<cat1>>=
 names(x$score) = x$geneAnno$GeneID
 sel = !is.na(x$score) & (!is.na(x$geneAnno$go))
 goids = strsplit(x$geneAnno$go[sel], ", ")
-goids = lapply(goids, function(x) x[x!="GO:0000067"])
+goids = lapply(goids, function(x) x[!(x %in% obsolete)])
 genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
 cache(categs <- cateGOry(genes, unlist(goids, use.names=FALSE)))
 @ 
 % 
-We will select only those categories that contain at least 3 and no more than 1000 genes.
+We will select only those categories that contain at least 3 and 
+no more than 1000 genes.
 <<cat2>>=
 remGO = which(regexpr("^GO:", nodes(categs)) > 0)
 nrMem = listLen(edges(categs)[remGO])
