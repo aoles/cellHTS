@@ -5,7 +5,7 @@
   Reads a collection of plate reader data files into a data.frame.
   The names of the files, plus additional information
   (plate number, repeat number) is expected in a tab-delimited table specified
-  by the argument 'x'.  
+  by the argument \code{x}.  
 }
 \usage{
 readPlateData(filename, path=dirname(filename), name, importFun, verbose=TRUE, plateType)
@@ -74,7 +74,7 @@ format used in the screen, and it is automatically determined from the plate res
 \references{..}
 
 \examples{
- datadir = system.file("KcViabSmall", package = "cellHTS")
- x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
+    datadir = system.file("KcViabSmall", package = "cellHTS")
+    x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
 }
 \keyword{manip}

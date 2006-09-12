@@ -12,12 +12,12 @@ Dataframe with 21888 rows and 11 columns
 \description{
 See the vignette, Section \emph{Using biomaRt to annotate the target
 genes online} for details. The annotations were obtained on
-12 March 2006.
+8 September 2006.
 }
 \source{
 BioMart webinterface to Ensembl 37.
 }
 \examples{
-data(bdgpbiomart)
+    data(bdgpbiomart)
 }
 \keyword{datasets}

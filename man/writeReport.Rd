@@ -4,14 +4,14 @@
   documenting the contents of a  cellHTS object}
 \description{
   Creates a directory with HTML pages of linked tables and plots
-  documenting the contents of a  cellHTS object.}
+  documenting the contents of a \code{cellHTS} object.}
 \usage{
 writeReport(x, outdir=file.path(getwd(), x$name),
   force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=NULL, posControls, negControls)
 }
 
 \arguments{
-  \item{x}{a cell HTS object.}
+  \item{x}{a \code{cellHTS} object.}
   \item{outdir}{a character of length 1 with the name of a directory where
     to write the report HTML file and images. If the directory does not
     exist, it is created. If it exists and is not empty, then the
@@ -47,7 +47,7 @@ writeReport(x, outdir=file.path(getwd(), x$name),
    \code{map}, logical value indicating whether tooltips with the annotation should be added to the plot,
    \code{anno}, gene annotation for the image map.
 
-  \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case 'x' contains multi-channel data that has been normalized by combining the values from two or more channels.
+  \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]} or to \code{dim(x$xnorm)[4]}, in case \code{x} contains multi-channel data that has been normalized by combining the values from two or more channels).
   By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default "neg" will be considered as the name used to annotated the negative controls. 
   The content of \code{posControls} and \code{negControls} will be
   passed to \code{\link[base:regexpr]{regexpr}} for pattern matching
@@ -61,7 +61,7 @@ writeReport(x, outdir=file.path(getwd(), x$name),
 
 In case of a two-way assay, where two types of "positive" controls are used in the screen ("activators" and "inhibitors"), \code{posControls} should be defined as a list with two components (called \code{act} and \code{inh}), each of which should be vectors of regular expressions of the same length as the current number of reporters (as explained above).  
 
-By default, tooltips doing the mapping between the probe annotation and the plate wells are added to the plate plots and to the overall screen plot. If the cellHTS object \code{x} is annotated, the probe annotation used the information contained whether in \code{x$geneAnno$GeneSymbol}, or \code{x$geneAnno$GeneID}, if the former is missing). Otherwise, the mapping simply uses the well identifiers.
+By default, tooltips doing the mapping between the probe annotation and the plate wells are added to the plate plots and to the overall screen plot. If the cellHTS object \code{x} is annotated, the probe annotation used the information contained whether in \code{x$geneAnno$GeneSymbol}, or \code{x$geneAnno$GeneID}, if the former is missing. Otherwise, the mapping simply uses the well identifiers.
 }
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},
@@ -77,24 +77,24 @@ By default, tooltips doing the mapping between the probe annotation and the plat
 \author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 
 \examples{
- datadir = system.file("KcViabSmall", package = "cellHTS")
- x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
- confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
- logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
- descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
- x = configure(x, confFile, logFile, descripFile)
-## pCtrls = c("pos") 
-## nCtrls = c("neg") 
-   ## or for safety reasons (not a problem for the current well annotation, however) 
-   # pCtrls = c("^pos$") 
-   # nCtrls = c("^neg$")
-## writeReport(x, posControls=pCtrls, negControls=nCtrls)
- writeReport(x)
- x = normalizePlates(x, normalizationMethod="median",zscore="-")
- x = summarizeReplicates(x, summary="min")
- writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs=list(zrange=c(-4,4)))
-## to turn of the tooltips in the overall screen image plot:
- # writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs=list(zrange=c(-4,4), map=FALSE))
+    datadir <- system.file("KcViabSmall", package = "cellHTS")
+    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
+    confFile <- system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
+    logFile  <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
+    descripFile  <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
+    x <- configure(x, confFile, logFile, descripFile)
+    ## pCtrls <- c("pos") 
+    ## nCtrls <- c("neg") 
+    ## or for safety reasons (not a problem for the current well annotation, however) 
+    ## pCtrls <- c("^pos$") 
+    ## nCtrls <- c("^neg$")
+    ## writeReport(x, posControls=pCtrls, negControls=nCtrls)
+    writeReport(x)
+    x <- normalizePlates(x, normalizationMethod="median",zscore="-")
+    x <- summarizeReplicates(x, summary="min")
+    writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs=list(zrange=c(-4,4)))
+    ## to turn of the tooltips in the overall screen image plot:
+    ## writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs = list(zrange=c(-4,4), map=FALSE))
 }
 
 \keyword{manip}

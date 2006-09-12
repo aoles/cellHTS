@@ -3,7 +3,7 @@
 \alias{annotate.cellHTS}
 \title{Annotates the gene IDs of a given cellHTS object}
 \description{
-  Annotate the gene IDs of a given cellHTS object.  
+  Annotate the gene IDs of a given \code{cellHTS} object.  
 }
 \usage{
 annotate(x, \dots)
@@ -23,10 +23,10 @@ annotate(x, \dots)
 }
 
 \value{An S3 object of class \code{cellHTS}, which extends the argument \code{x} by the following element:
-  \item{geneAnno}{a data.frame containing what was read from input file \code{geneIDFile}. 
+  \item{geneAnno}{a \code{\link{data.frame}} containing what was read from input file \code{geneIDFile}. 
   The number of rows is equal to the product between the number of wells in each plate and the number of plates.}
 
-Moreover, the processing status of the \code{cellHTS} object is updated in the slot \code{state} to \code{state["annotated"]= TRUE}.
+Moreover, the processing status of the \code{cellHTS} object is updated in the slot \code{state} to \code{x$state["annotated"]= TRUE}.
 There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annotate.cellHTS}.}
 
 \author{Wolfgang Huber \email{huber@ebi.ac.uk}, Ligia Braz \email{ligia@ebi.ac.uk}}
@@ -34,13 +34,13 @@ There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annot
 \references{..}
 
 \examples{
- datadir = system.file("KcViabSmall", package = "cellHTS")
- x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
- confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
- logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
- descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
- x = configure(x, confFile, logFile, descripFile)
- geneIDFile = system.file("KcViabSmall", "GeneIDs_Dm_HFAsubset_1.0.txt", package="cellHTS")
- x = annotate(x, geneIDFile)
+    datadir = system.file("KcViabSmall", package = "cellHTS")
+    x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
+    confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
+    logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
+    descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
+    x = configure(x, confFile, logFile, descripFile)
+    geneIDFile = system.file("KcViabSmall", "GeneIDs_Dm_HFAsubset_1.0.txt", package="cellHTS")
+    x = annotate(x, geneIDFile)
 }
 \keyword{manip}

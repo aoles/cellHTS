@@ -8,7 +8,7 @@
   The function \code{ROC} construct an object of S3 class \code{ROC},
   which represents a receiver-operator-characteristic curve,
   from the data of the annotated positive and negative controls in a
-  scored cellHTS object.
+  scored \code{cellHTS} object.
 }
 \usage{
 ROC(x, positives, negatives)
@@ -16,7 +16,7 @@ ROC(x, positives, negatives)
 \method{lines}{ROC}(x, \dots)
 }
 \arguments{
-  \item{x}{a cellHTS object that has already been scored (see details).}
+  \item{x}{a \code{cellHTS} object that has already been scored (see details).}
   \item{positives}{a list or vector of regular expressions specifying the name of the positive controls. 
    See the details for the argument \code{posControls} of \code{\link[cellhts]{writeReport}} function.}
   \item{negatives}{a vector of regular expressions specifying the name of the negative controls. 
@@ -41,16 +41,16 @@ ROC(x, positives, negatives)
 \author{Ligia P. Bras \email{ligia@ebi.ac.uk}}
 
 \examples{
- datadir = system.file("KcViabSmall", package = "cellHTS")
- x = readPlateData("Platelist.txt", "KcViabilitySmall", path=datadir)
- confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
- logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
- descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
- x = configure(x, confFile, logFile, descripFile)
- x = normalizePlates(x, normalizationMethod="median",zscore="-")
- x = summarizeReplicates(x)
- y = ROC(x)
- plot(y)
- lines(y)
+    datadir = system.file("KcViabSmall", package = "cellHTS")
+    x = readPlateData("Platelist.txt", "KcViabilitySmall", path=datadir)
+    confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
+    logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
+    descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
+    x = configure(x, confFile, logFile, descripFile)
+    x = normalizePlates(x, normalizationMethod="median",zscore="-")
+    x = summarizeReplicates(x)
+    y = ROC(x)
+    plot(y)
+    lines(y)
 }
 \keyword{univar}
