@@ -280,8 +280,8 @@ ctoff = apply(x$xnorm[,,,2], 3, quantile, probs=0.05, na.rm=TRUE)
 <<FvsRcorrected, fig=TRUE, results=hide, echo=FALSE, include=FALSE, width=6, height=3>>=
 par(mfrow=c(1,2))
 par(mai=c(0.9,0.9,0.1,0.1))
-R = matrix(x$xnorm[,,,1], nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
-F= matrix(x$xnorm[,,,2], nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
+R = getMatrix(x$xnorm, channel=1, na.rm=FALSE)
+F = getMatrix(x$xnorm, channel=2, na.rm=FALSE)
 
 # Use the controls of R2 channel:
 posC = which(regexpr(posControls[2], as.character(x$wellAnno), perl=TRUE)>0)
