@@ -4,7 +4,7 @@
 \concept{normalization}
 \title{Normalization of dual-channel data and data transformation}
 \description{
-  Normalizes and/or transforms dual-channel data \code{xraw} of a given 'cellHTS' object by applying the function defined in \code{fun}. The default is to take the ratio between the second and first channels (\eq{\frac{R_2}{R_1}{R2/R1}).
+  Normalizes and/or transforms dual-channel data \code{xraw} of a given \code{cellHTS} object by applying the function defined in \code{fun}. The default is to take the ratio between the second and first channels (\eqn{\frac{r_2}{r_1}}{r2/r1}).
   Correction of plate-to-plate variations may also be performed.
 }
 \usage{
