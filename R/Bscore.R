@@ -10,23 +10,23 @@
 ## 
 ## added by LPB (July 2006)
 ## if we don't want to remove plate effects, use adjustPlateMedian=FALSE
-## if log=TRUE, the model is fitted on log2 scale, but the output results (normalized values, overall effect, residuals and rowcol.effects) are given in the original scale.
+## if model.log=TRUE, the model is fitted on log2 scale, but the output results (normalized values, overall effect, residuals and rowcol.effects) are given in the original scale.
 
-Bscore <- function(x, adjustPlateMedian=TRUE, log=FALSE, scale=TRUE, zscore, save.model=FALSE) {
+Bscore <- function(x, what="xraw", adjustPlateMedian=TRUE, model.log=FALSE, scale=TRUE, save.model=FALSE) {
 
  ## Check the status of the 'cellHTS' object
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
 
-xn <- array(as.numeric(NA), dim=dim(x$xraw))
-xdat <- x$xraw
+  xn <- array(as.numeric(NA), dim=dim(x[[what]]))
+  xdat <- x[[what]]
 
 if (save.model) {
 #row.effects = array(as.numeric(NA), dim=c(x$pdim["nrow"],dim(x$xraw)[2:4]))
 #col.effects = array(as.numeric(NA), dim=c(x$pdim["ncol"],dim(x$xraw)[2:4]))
-residuals = array(as.numeric(NA), dim=dim(x$xraw))
-rowcol.effects = array(as.numeric(NA), dim=dim(x$xraw))
-if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(x$xraw)[2:4]))
+residuals = array(as.numeric(NA), dim=dim(xn))
+rowcol.effects = array(as.numeric(NA), dim=dim(xn))
+if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(xn)[2:4]))
 }
 
 
@@ -38,31 +38,30 @@ if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(x$xr
     for(r in 1:(dim(xdat)[3]))
       for(ch in 1:(dim(xdat)[4])) {
 #       y must be a numeric matrix with "plate rows" in rows and "plate columns" in columns:
-        if (log) y <- ysamp <- log2(xdat[, p, r, ch]) else y <- ysamp <- xdat[, p, r, ch]
+        if (model.log) y <- ysamp <- log2(xdat[, p, r, ch]) else y <- ysamp <- xdat[, p, r, ch]
         if(!all(is.na(y))) {
         ysamp[!samples]=NA
         ysamp = matrix(ysamp,
             ncol=x$pdim["ncol"], nrow=x$pdim["nrow"], byrow=TRUE)
         y = matrix(y,
             ncol=x$pdim["ncol"], nrow=x$pdim["nrow"], byrow=TRUE)
-        m = medpolish(ysamp, eps = 1e-5, maxiter = 100, trace.iter=!TRUE, na.rm = TRUE)
+        m = medpolish(ysamp, eps = 1e-5, maxiter = 200, trace.iter=!TRUE, na.rm = TRUE)
 
 ## apply the model to all the plate wells and obtain the residuals rijp
 ## don't remove the estimated overall term if adjustPlateMedian=FALSE
 ## replace NA by zero:
-isNArow = is.na(m$row)
-isNAcol = is.na(m$col)
-isNA = outer(isNArow, isNAcol, "*")
-m$row[isNArow]=0
-m$col[isNAcol]=0
-rowcol = outer(m$row, m$col, "+")
+  isNArow = is.na(m$row)
+  isNAcol = is.na(m$col)
+  isNA = outer(isNArow, isNAcol, "*")
+  m$row[isNArow]=0
+  m$col[isNAcol]=0
+  rowcol = outer(m$row, m$col, "+")
 
 
-if (adjustPlateMedian) res = y - (m$overall + rowcol) else res = y - rowcol
+  if (adjustPlateMedian) res = y - (m$overall + rowcol) else res = y - rowcol
 
 # if the effect is NA in both column and row elements, restore the NA value:
-if (sum(isNA)) 
-  rowcol[as.logical(isNA)] = NA
+  if (sum(isNA)) rowcol[as.logical(isNA)] = NA
 
     #res is a matrix plate row * plate column
     if (scale) 
@@ -75,7 +74,7 @@ if (sum(isNA))
        #row.effects[,p,r,ch] = m$row
        #residuals[,p,r,ch] = m$residuals
 
-      if (log) {
+      if (model.log) {
       ## put back to original scale
         m$residuals = 2^m$residuals
         m$overall = 2^m$overall
@@ -91,6 +90,7 @@ if (sum(isNA))
 } } }
 
 x$xnorm = xn
+
 if (save.model) {
 #x$col.effects = col.effects
 #x$row.effects = row.effects
@@ -99,10 +99,6 @@ x$rowcol.effects = rowcol.effects
 if (adjustPlateMedian) 
   x$overall.effects = overall.effects
 }
-
-## calculates the z-score for each replicate separately
-if(!missing(zscore)) 
-   x$xnorm = calcZscores(x, sign=zscore)
 
 x$state["normalized"] = TRUE
 return(x)

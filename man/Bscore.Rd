@@ -10,20 +10,21 @@
   Optionally, a transformation to \emph{z}-scores can be performed.
 }
 \usage{
-Bscore(x, adjustPlateMedian = TRUE, log = FALSE, scale = TRUE, zscore, save.model = FALSE)
+Bscore(x, what="xraw", adjustPlateMedian = TRUE, model.log = FALSE, scale = TRUE, save.model = FALSE)
 }
 \arguments{
-  \item{x}{a \code{cellHTS} object that has already been configured (see details).}
+  \item{x}{a \code{cellHTS} object that has already been configured. See details.}
+  \item{what}{a character indicating the slot of \code{x} to consider: \code{"xraw"} (default) or \code{"xnorm"}.}
   \item{adjustPlateMedian}{a logical value indicating whether the estimated average of each plate should also be substracted to the raw intensity values.}
-  \item{log}{a logical value. If \code{TRUE}, the per-plate models will be applied after \code{\link{log2}} transformation. However, the outputs of this function will be given in the original scale.}
+  \item{model.log}{a logical value. If \code{TRUE}, the per-plate models will be applied after \code{\link{log2}} transformation. However, the outputs of this function will be given in the original scale.}
   \item{scale}{a logical value indicating if the per-plate model residuals should be further scaled by their variance. See details.}
-  \item{zscore}{indicates if the data should be centered and scaled after normalization. If missing (default), the data will not be centered and scaled. Otherwise, the value of this argument should be a character string, either "+" or "-", which will be used to set the sign for the calculated \emph{z}-scores (see details).}
   \item{save.model}{a logical value specifying whether the per-plate models should be saved, and given as output. See details.}
 }
 
 \details{
-
 The normalization is performed in a per-plate fashion using the B score method. 
+This function can be called direclty, or indirectly, using \code{\link[cellHTS:normalizePlates]{normalizePlates}} or 
+\code{\link[cellHTS:normalizeChannels]{normalizeChannels}}. 
 In the B score method, the residual \eqn{r_{ijp}} of the measurement for row \emph{i} and column \emph{j} on the \emph{p}-th plate is obtained by fitting a \link[stats:medpolish]{two-way median polish}, in order to account for both row and column effects within the plate:
 
 \deqn{r_{ijp} = y_{ijp} - \hat{y}_{ijp} = y_{ijp} - \left(\hat{\mu}_p + \hat{R}_{ip} + \hat{C}_{jp}\rigth)}{%
@@ -44,18 +45,7 @@ Bscore_{ijp} = r_{ijp}/MAD_p
 If \code{adjustPlateMedian} is set to \code{FALSE}, the estimated overall plate average 
 (\eqn{\hat{\mu}_p}{mu_p}) is not removed from the intensity values \eqn{y_{ijp}}'s.
 
-If \code{log=TRUE}, the model is fitted on \code{\link{log2}} scale, but the output results (normalized values, overall effect, residuals and rowcol.effects) are given in the original scale.
-
-If \code{zscore} is not missing, a robust \emph{z}-score for each individual
-normalized measurement will be determined for each plate and each well by
-subtracting the overall \code{\link{median}} and dividing by the overall
-\code{\link{mad}}. These are taken by considering
-the distribution of intensities (over all plates) in the wells whose
-content is annotated as \code{sample}.  The allowed values for
-\code{zscore} ("+" or "-") are used to set the sign of the calculated \emph{z}-scores.
-For example, with a \code{zscore="-"} a strong decrease in the signal will be represented by a positive \emph{z}-score, whereas setting \code{zscore="+"}, 
-such a phenotype will be represented by a negative \emph{z}-score.  
-This option can be set to calculate the results to the commonly used convention.
+If \code{model.log=TRUE}, the model is fitted on \code{\link{log2}} scale, but the output results (normalized values, overall effect, residuals and rowcol.effects) are given in the original scale.
 
 If \code{save.model=TRUE}, the models residuals, row and column offsets and overall offsets are stored in the slots \code{residuals}, \code{rowcol.effects} and \code{overall.effects} of the \code{cellHTS} object \code{x}.
 }
@@ -77,7 +67,9 @@ in the slot \code{state} to \code{x$state["normalized"]=TRUE}.
 
 \seealso{
   \code{\link[stats:medpolish]{medpolish}},
-  \code{\link[cellHTS:plotSpatialEffects]{plotSpatialEffects}}
+  \code{\link[cellHTS:plotSpatialEffects]{plotSpatialEffects}},
+  \code{\link[cellHTS:normalizePlates]{normalizePlates}},
+  \code{\link[cellHTS:normalizeChannels]{normalizeChannels}}
 }
 
 \references{
@@ -94,7 +86,10 @@ Malo, N., Hanley, J.A., Cerquozzi, S., Pelletier, J. and Nadon, R. (2006) Statis
     logFile  <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
     descripFile  <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
     x <- configure(x, confFile, logFile, descripFile)
-    x <- Bscore(x, adjustPlateMedian = TRUE, scale = TRUE, save.model = TRUE)
+    x <- Bscore(x, save.model = TRUE)
+    ## identical result, but calling Bscore function from "normalizePlates"
+    xopt <- normalizePlates(x, normalizationMethod="Bscore", BscoreArgs = list(save.model = TRUE))
+    all(x$xnorm==xopt$xnorm, na.rm=TRUE)
     x <- summarizeReplicates(x, zscore="-", summary="mean")
 }
 \keyword{manip}

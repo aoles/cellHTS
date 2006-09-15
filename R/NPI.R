@@ -42,5 +42,6 @@ NPI = function(x, posControls, negControls){
         xn[, p, r, ch] = (mean(x$xraw[pos, p, r, ch], na.rm=TRUE) - x$xraw[, p, r, ch]) / (mean(x$xraw[pos, p, r, ch], na.rm=TRUE) - mean(x$xraw[neg, p, r, ch], na.rm=TRUE))
   }}
 
-  return(xn)
+  x$xnorm = xn
+  return(x)
 }

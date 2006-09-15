@@ -29,4 +29,6 @@ xn = array(as.numeric(NA), dim=dim(x$xraw))
 	for(r in 1:(dim(x$xraw)[3]))
         xn[, p, r, ch] = 100 * x$xraw[, p, r, ch] / mean(x$xraw[pos, p, r, ch], na.rm=TRUE)
   } }
-  return(xn) }
+  x$xnorm = xn
+  return(x)
+}

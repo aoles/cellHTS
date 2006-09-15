@@ -14,5 +14,6 @@ scaleByPlateMean = function(x, what="xraw", isInLogScale=FALSE){
       for(ch in 1:(dim(x[[what]])[4]))
         if(isInLogScale) xn[, p, r, ch] = x[[what]][, p, r, ch] - mean(x[[what]][samples, p, r, ch], na.rm=TRUE) else xn[, p, r, ch] = x[[what]][, p, r, ch] / mean(x[[what]][samples, p, r, ch], na.rm=TRUE)
   }
-  return(xn)
+  x$xnorm = xn
+  return(x)
 }

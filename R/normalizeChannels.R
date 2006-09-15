@@ -1,4 +1,4 @@
-normalizeChannels = function(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlates, zscore){
+normalizeChannels = function(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlates, zscore, BscoreArgs){
 
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
@@ -18,17 +18,29 @@ normalizeChannels = function(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlat
 ## log2 transformes the result of 'fun'
   if (log) xn = log2(xn)
 
-if (!missing(adjustPlates)) {
-x$xnorm = xn
- ## Apply the chosen plate-wise normalization function
- xn = switch(adjustPlates,
-    mean = scaleByPlateMean(x, what="xnorm", isInLogScale=log),
-    median = scaleByPlateMedian(x, what="xnorm", isInLogScale=log),
-    shorth = scaleByPlateShorth(x, what="xnorm", isInLogScale=log),
-    stop(sprintf("Invalid value '%s' for argument 'adjustPlates'", adjustPlates)))
-}
+  x$xnorm = xn
 
-## calculates the z-score for each replicate separately
+if (!missing(adjustPlates)) {
+     if (adjustPlates=="Bscore") {
+        if(missing(BscoreArgs)) {
+          BscoreArgs=NULL
+        }else{
+       ## for safety
+          if(log) BscoreArgs$model.log=FALSE
+          BscoreArgs = BscoreArgs[names(BscoreArgs) %in% c("adjustPlateMedian", "model.log", "scale", "save.model")]
+        }
+     }
+
+     ## Apply the chosen plate-wise normalization function
+     x = switch(adjustPlates,
+       mean = scaleByPlateMean(x, what="xnorm", isInLogScale=log),
+       median = scaleByPlateMedian(x, what="xnorm", isInLogScale=log),
+       shorth = scaleByPlateShorth(x, what="xnorm", isInLogScale=log),
+       Bscore = do.call("Bscore", args = append(list(x=x, what="xnorm"), BscoreArgs)),
+       stop(sprintf("Invalid value '%s' for argument 'adjustPlates'", adjustPlates)))
+  }
+
+  ## calculates the z-score for each replicate separately
   if(!missing(zscore)) {
   samps = (x$wellAnno=="sample")
   sg = switch(zscore,
@@ -37,10 +49,9 @@ x$xnorm = xn
     stop(sprintf("Invalid value '%s' for argument 'zscore'", zscore)))
 
     for(r in 1:(dim(xn)[3]))
-     xn[, , r, 1] = sg * (xn[, , r, 1] - median(xn[,, r, 1][samps], na.rm=TRUE)) / mad(xn[,, r, 1][samps], na.rm=TRUE)
-  }
+     x$xnorm[, , r, 1] = sg * (x$xnorm[, , r, 1] - median(x$xnorm[,, r, 1][samps], na.rm=TRUE)) / mad(x$xnorm[,, r, 1][samps], na.rm=TRUE)
+   }
 
-  x$xnorm = xn
   x$state["normalized"] = TRUE
   return(x)
 }

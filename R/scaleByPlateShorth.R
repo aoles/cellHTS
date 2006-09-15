@@ -16,5 +16,6 @@ scaleByPlateShorth = function(x, what="xraw", isInLogScale=FALSE){
         if (isInLogScale & what=="xnorm") xn[, p, r, ch] = x[[what]][, p, r, ch] - shorth(x[[what]][samples, p, r, ch], na.rm=TRUE, tie.action="min") else xn[, p, r, ch] = x[[what]][, p, r, ch] / shorth(x[[what]][samples, p, r, ch], na.rm=TRUE, tie.action="min")
 
   }
-  return(xn)
+  x$xnorm = xn 
+  return(x)
 }

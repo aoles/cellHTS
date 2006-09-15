@@ -8,7 +8,7 @@
   Correction of plate-to-plate variations may also be performed.
 }
 \usage{
-normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zscore)
+normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zscore, BscoreArgs)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been configured. See details.}
@@ -19,12 +19,13 @@ normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zsc
   \item{log}{a logical value indicating whether the result obtained after applying 
     \code{fun} should be \code{\link{log2}} transformed. The default is \code{log = FALSE}, 
     and the data is not \code{log2} transformed.}
-  \item{adjustPlates}{character string indicating the correction factor to apply to adjust for plate-to-plate varations, after applying \code{fun} and eventually log transforming the values (see details). If \code{adjustPlates} is missing (the default), no plate-wise correction will be performed.}
+  \item{adjustPlates}{character string indicating the correction method to apply to adjust for plate-to-plate variations (and  eventually well-to-well variations), after applying \code{fun} and eventually log transforming the values (see details). If \code{adjustPlates} is missing (the default), no plate-wise correction will be performed.}
   \item{zscore}{indicates if the \emph{z}-scores should be determined after
     normalization and transformation. If missing (default),
     the data will not be scored. Otherwise, it should be a character
     string, either "+" or "-", specifying the sign to use for the calculated 
     \emph{z}-scores. See details.}
+  \item{BscoreArgs}{a list with parameters for the function that performs B score normalization. See details.} 
 }
 
 \details{
@@ -37,6 +38,7 @@ If \code{log = TRUE}, the data obtained after applying \code{fun} is \code{log2}
 The default is \code{log = FALSE}.
 
 If \code{adjustPlates} is not missing, the obtained values will be further corrected for plate effects by considering the chosen per-plate factor. If \code{adjustPlates="mean"}, this factor will be the plate mean, if \code{adjustPlates="median"}, the plate median, whereas if \code{adjustPlates="shorth"}, the midpoint of the shorth (see \code{\link[genefilter:shorth]{shorth}}) of the distribution of values. In either case, the median, mean or midpoint of the shorth is determined for the distribution of values in the wells annotated as \code{sample} in \code{x$wellAnno}, for a given replicated plate. If the data have not been log transformed (\code{log=FALSE}), each measurement is divided by the per-plate plate factor, while if the data values are in \code{log2} scale (\code{log=TRUE}), the per-plate factor will be subtracted from each measurement. By default, \code{adjustPlates} is missing.
+Alternatively, the data can be corrected for both plate and spatial effects using the \link[cellHTS:Bscore]{B score method}, by setting \code{adjustPlates="Bscore"}.
 
 If \code{zscore} is not missing, a robust \emph{z}-score for each
 individual measurement will be determined for each plate and each well
@@ -48,16 +50,33 @@ The allowed values for \code{zscore} ("+" or "-") are used to set the sign of
 the calculated \emph{z}-scores. For example, with a \code{zscore="-"} a strong decrease 
 in the signal will be represented by a positive \emph{z}-score, whereas setting \code{zscore="+"}, 
 such a phenotype will be represented by a negative \emph{z}-score.  
-This option can be set to calculate the results to the commonly used convention.}
+This option can be set to calculate the results to the commonly used convention.
 
-\value{An object of class \code{cellHTS}, which is a copy of the
+  The following elements are recognized for \code{BscoreArgs} and
+   passed on to \code{\link[cellhts:Bscore]{Bscore}}:
+   \code{adjustPlateMedian}, a logical value indicating whether the estimated average of each plate should also be substracted to the raw intensity values,
+   \code{model.log}, a logical value. If \code{TRUE}, the per-plate models will be applied after \code{\link{log2}} transformation. However, the outputs of \code{Bscore} function will be given in the original scale,
+   \code{scale}, a logical value indicating if the per-plate model residuals should be further scaled by their variance,
+   \code{save.model}, a logical value specifying whether the per-plate models should be saved, and given as output.
+}
+
+\value{
+An object of class \code{cellHTS}, which is a copy of the
 argument \code{x}, plus an additional slot \code{xnorm} containing the
 normalized data. This is an array of the same dimensions as \code{xraw},
 except in the dimension corresponding to the number of channels, since
 the two-channel intensities have been combined into one intensity value.
 
 Moreover, the processing status of the \code{cellHTS} object is updated
-in the slot \code{state} to \code{x$state["normalized"]=TRUE}.  }
+in the slot \code{state} to \code{x$state["normalized"]=TRUE}.  
+
+Furthermore, if \code{adjustPlates="Bscore"}, and \code{save.model=TRUE} was 
+given in \code{BscoreArgs}, the slots \code{residuals}, \code{rowcol.effects}, 
+and \code{overall.effects} (only if \code{adjustPlateMedian} was also set to \code{TRUE} 
+in \code{BscoreArgs}) are added to \code{x}. The latter slots are arrays with the same 
+dimension as \code{x$xraw}, except the 
+\code{overall.effects}, which have dimensions \code{1 x nr Plates x nr Replicates x nr Channels}.
+}
 
 \author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 

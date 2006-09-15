@@ -32,7 +32,9 @@ The maximum and the minimum values are calculated using all the values in
 
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},
-  \code{\link[cellhts:Bscore]{Bscore}}
+  \code{\link[cellhts:Bscore]{Bscore}},
+  \code{\link[cellhts:normalizePlates]{normalizePlates}},
+  \code{\link[cellhts:normalizeChannels]{normalizeChannels}}
 }
 
 \examples{
@@ -42,8 +44,8 @@ The maximum and the minimum values are calculated using all the values in
     logFile  <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
     descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
     x = configure(x, confFile, logFile, descripFile)
-    x = Bscore(x, adjustPlateMedian = TRUE, scale = TRUE, save.model = TRUE)
-    x = summarizeReplicates(x, zscore="-", summary="mean")
+    x = normalizePlates(x, normalizationMethod="Bscore", BscoreArgs=list(save.model = TRUE))
+    ##x = summarizeReplicates(x, zscore="-", summary="mean")
     ## see plate plots with the row and column estimated offsets for plates 1 and 3:
     plotSpatialEffects(x, plateRange=c(1,3))
 }
