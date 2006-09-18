@@ -172,8 +172,11 @@ if (map) {
     imap <- imap[as.vector(t(Spacers)),]
     #empty <- regexpr("NA: score=NA", imap[,5])>0
     isEmpty <- which(plate>nrPlates)
-    imap <- imap[-isEmpty,]
+    if (length(isEmpty)!=0) {
+      imap <- imap[-isEmpty,]
+      plate <- plate[-isEmpty]
+    }
  #   return(myImageMap(imap[,1:4], list(TITLE=imap[,5], href=paste(plate[-isEmpty], "index.html", sep="/")), "imageScreen.png"))
-    return(list(obj=imap[,1:4], tag=list(TITLE=imap[,5], href=paste(plate[-isEmpty], "index.html", sep="/"))))
+    return(list(obj=imap[,1:4], tag=list(TITLE=imap[,5], href=paste(plate, "index.html", sep="/"))))
   }
 }

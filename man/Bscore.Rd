@@ -27,7 +27,7 @@ This function can be called direclty, or indirectly, using \code{\link[cellHTS:n
 \code{\link[cellHTS:normalizeChannels]{normalizeChannels}}. 
 In the B score method, the residual \eqn{r_{ijp}} of the measurement for row \emph{i} and column \emph{j} on the \emph{p}-th plate is obtained by fitting a \link[stats:medpolish]{two-way median polish}, in order to account for both row and column effects within the plate:
 
-\deqn{r_{ijp} = y_{ijp} - \hat{y}_{ijp} = y_{ijp} - \left(\hat{\mu}_p + \hat{R}_{ip} + \hat{C}_{jp}\rigth)}{%
+\deqn{r_{ijp} = y_{ijp} - \hat{y}_{ijp} = y_{ijp} - (\hat{\mu}_p + \hat{R}_{ip} + \hat{C}_{jp})}{%
 r_{ijp} = y_{ijp} - yest_{ijp} = y_{ijp} - (mu_p + R_{ip} + C_{jp})}
 
 \eqn{y_{ijp}} is the measurement value in row \emph{i} and column \emph{j} of plate \emph{p} (taken from \code{x$xraw}), and 

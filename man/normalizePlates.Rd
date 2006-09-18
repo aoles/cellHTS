@@ -15,7 +15,7 @@ normalizePlates(x, normalizationMethod="median", transform, zscore, posControls,
   \item{x}{a \code{cellHTS} object that has already been configured. See details.}
   \item{normalizationMethod}{a character specifying the normalization method 
   to use for performing the per-plate normalization. Allowed values are \code{"median"} (default), \code{"mean"},
-  \code{"shorth"}, \code{"POC"}, \code{"NPI"} and \code{"Bscore"}. See details.}
+  \code{"shorth"}, \code{"POC"}, \code{"NPI"}, \code{"negatives"} and \code{"Bscore"}. See details.}
   \item{transform}{a function that takes a numeric vector and returns a numeric vector of the same length; for example, the logarithm function \code{\link{log}}.}
   \item{zscore}{indicates if the data should be centered and scaled after normalization and transformation. If missing (default), the data will not be centered and scaled. Otherwise, the value of this argument should be a character string, either "+" or "-", which will be used to set the sign for the calculated \emph{z}-scores. See details.}
   \item{posControls}{a vector of regular expressions giving the name of the positive control(s). See details.}
@@ -24,20 +24,17 @@ normalizePlates(x, normalizationMethod="median", transform, zscore, posControls,
 }
 
 \details{
-The normalization is performed in a per-plate fashion.
+The normalization is performed in a per-plate fashion. 
   \itemize{
-    \item If \code{normalizationMethod="median"}, plates effects are corrected by dividing each measurement 
-          by the median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate and replicate.
-    \item If \code{normalizationMethod="mean"}, the average in the \code{sample} wells is consider instead.
-    \item If \code{normalizationMethod="shorth"}, for each plate and replicate, the midpoint of the shorth 
-          (see \code{\link[genefilter:shorth]{shorth}}) of the distribution of values in the wells annotated 
+    \item If \code{normalizationMethod="median"} (median scaling), plates effects are corrected by dividing each measurement           by the median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate and replicate.
+    \item If \code{normalizationMethod="mean"} (mean scaling), the average in the \code{sample} wells is consider instead.
+    \item If \code{normalizationMethod="shorth"} (scaling by the midpoint of the shorth), for each plate and replicate, the midpoint of the \code{\link[genefilter:shorth]{shorth}} of the distribution of values in the wells annotated 
            as \code{sample} is calculated. Then, every measurement is divided by this value.
-    \item If \code{normalizationMethod="POC"}, for each plate and replicate, each measurement is divided 
-          by the average of the measurements on the plate positive controls.
-    \item If \code{normalizationMethod="NPI"}, each measurement is subtracted from the average of the 
-          intensities on the plate positive controls, and this result is divided by the difference between 
+    \item If \code{normalizationMethod="POC"} (percent of control), for each plate and replicate, each measurement is divided by the average of the measurements on the plate positive controls, and multiplied by 100.
+    \item If \code{normalizationMethod="negatives"} (scaling by the negative controls), for each plate and replicate, each measurement is divided by the median of the measurements on the plate negative controls.
+    \item If \code{normalizationMethod="NPI"} (normalized percent inhibition), each measurement is subtracted from the average of the intensities on the plate positive controls, and this result is divided by the difference between 
           the means of the measurements on the positive and the negative controls.
-    \item If \code{normalizationMethod="Bscore"}, for each plate and replicate, the \link[cellHTS:Bscore]{B score method} is applied to remove plate effects and row and column biases.
+    \item If \code{normalizationMethod="Bscore"} (B score), for each plate and replicate, the \link[cellHTS:Bscore]{B score method} is applied to remove plate effects and row and column biases.
 } 
 
 If \code{transform} is not missing, the chosen data transformation is applied. 
@@ -54,12 +51,10 @@ For example, with a \code{zscore="-"} a strong decrease in the signal will be re
 such a phenotype will be represented by a negative \emph{z}-score.  
 This option can be set to calculate the results to the commonly used convention.
 
-  The arguments \code{posControls} and \code{negControls} are required for applying the normalization methods based on the control measurements (that is, when \code{normalizationMethod="POC"} or \code{normalizationMethod="NPI"}). 
-  \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case 'x' contains multi-channel data that has been normalized by combining the values from two or more channels.
+  The arguments \code{posControls} and \code{negControls} are required for applying the normalization methods based on the control measurements (that is, when \code{normalizationMethod="POC"}, or \code{normalizationMethod="NPI"}, or \code{normalizationMethod="negatives"}). 
+  \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case \code{x} contains multi-channel data that has been normalized by combining the values from two or more channels.
   By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default "neg" will be considered as the name used to annotated the negative controls. 
-  The content of \code{posControls} and \code{negControls} will be passed to \code{\link[base:regexpr]{regexpr}} for pattern matching within the well annotation given in \code{x$wellAnno} (see examples). 
-  The arguments \code{posControls} and \code{negControls} are particularly useful in multi-channel data since the controls might be reporter-specific, or after normalizing multi-channel data.
-
+  The content of \code{posControls} and \code{negControls} will be passed to \code{\link[base:regexpr]{regexpr}} for pattern matching within the well annotation given in \code{x$wellAnno} (see examples for \code{\link[cellHTS:normalizeChannels]{normalizeChannels}}). 
 
   The following elements are recognized for \code{BscoreArgs} and
    passed on to \code{\link[cellhts:Bscore]{Bscore}}:

@@ -109,7 +109,7 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
       if(length(actCtrls[[ch]])>0 && length(negCtrls[[ch]])>0) {
         if (allPositives) 
           drAct = apply(x[,,,ch, drop=FALSE], 3, function(v)
-            mean(log(v[negCtrls[[ch]]]), na.rm=TRUE) - mean(log(v[actCtrls[[ch]]]), na.rm=TRUE))
+            mean(log(v[actCtrls[[ch]]]), na.rm=TRUE) - mean(log(v[negCtrls[[ch]]]), na.rm=TRUE))
          else 
           drAct = apply(x[,,,ch, drop=FALSE], 3, function(v)
             mean(v[actCtrls[[ch]]], na.rm=TRUE)- mean(v[negCtrls[[ch]]], na.rm=TRUE))
@@ -160,7 +160,7 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
            mean(log(v[negCtrls[[ch]]]), na.rm=TRUE) - mean(log(v[inhCtrls[[ch]]]), na.rm=TRUE))
          else 
           drInh = apply(x[,,,ch, drop=FALSE], 3, function(v)
-           mean(v[inhCtrls[[ch]]], na.rm=TRUE)- mean(v[negCtrls[[ch]]], na.rm=TRUE))
+           mean(v[negCtrls[[ch]]], na.rm=TRUE)- mean(v[inhCtrls[[ch]]], na.rm=TRUE))
 
         drInh[is.na(drInh)] = as.numeric(NA)
 
@@ -229,7 +229,7 @@ if (pname=="pos" & length(posCtrls[[ch]])==1) pn="" else pn = sprintf("'%s'",pna
     currentPos = posCtrls[[ch]][[pname]]
     if (allPositives) 
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
-        mean(log(v[negCtrls[[ch]]]), na.rm=TRUE) - mean(log(v[currentPos]), na.rm=TRUE))
+        mean(log(v[currentPos]), na.rm=TRUE) - mean(log(v[negCtrls[[ch]]]), na.rm=TRUE))
     else  
       dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
         mean(v[currentPos], na.rm=TRUE)- mean(v[negCtrls[[ch]]], na.rm=TRUE))
@@ -444,7 +444,7 @@ for (pname in namePos) {
     if(nrRep==2) {
       makePlot(file.path(basePath, subPath), con=con,
                name=sprintf("scp_Channel%d", ch), w=plsiz, h=plsiz, fun = function() {
-                 par(mai=c(0.9,0.9,0.01,0.01))
+                 par(mai=c(0.9,0.9,0.2,0.2))
                  ylim=c(min(x[,,,ch], na.rm=TRUE), max(x[,,,ch], na.rm=TRUE))
                  plot(x[,,whHasData[[ch]][1],ch], x[,,whHasData[[ch]][2],ch], pch=16, cex=0.5,
                       ylim=ylim, xlab="replicate 1", ylab="replicate 2", col=wellTypeColor[mtt[[ch]]])
@@ -473,7 +473,7 @@ for (pname in namePos) {
       if (r %in% whHasData[[ch]]){
         makePlot(file.path(basePath, subPath), con=con,
                  name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz/2*maxRep, fun = function() {
-                   par(mai=c(1,0.25,0.01,0.01))
+                   par(mai=c(1,0.25,0.01,0.1))
                    hist(x[,,r,ch], xlab ="intensity", breaks=brks[[ch]],
                         col = gray(0.95), yaxt = "n", main="")
                    rug(x[,,r,ch])
@@ -578,7 +578,7 @@ for (pname in namePos) {
                                col=plotPlateArgs$xcol, char=char,
                                xrange=plotPlateArgs$xrange[[ch]])
                    }, print=FALSE, isPlatePlot=TRUE)
-          img <- myImageMap(object=pp$coord, tags=list(TITLE=paste(geneAnno, ": score=",
+          img <- myImageMap(object=pp$coord, tags=list(TITLE=paste(geneAnno, ": value=",
                             signif(x[,,r,ch],3), sep=""), HREF=rep(sprintf("pp_Channel%d_%d.pdf", ch, r),
                                        length(geneAnno))), sprintf("pp_Channel%d_%d.png", ch, r))
           plotTable[count+1,ch+1] =  paste("<CENTER>", img, "</CENTER><BR>\n", sep="")

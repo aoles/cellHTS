@@ -8,7 +8,7 @@
   Correction of plate-to-plate variations may also be performed.
 }
 \usage{
-normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zscore, BscoreArgs)
+normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zscore, posControls, negControls, BscoreArgs)
 }
 \arguments{
   \item{x}{a cellHTS object that has already been configured. See details.}
@@ -19,12 +19,14 @@ normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zsc
   \item{log}{a logical value indicating whether the result obtained after applying 
     \code{fun} should be \code{\link{log2}} transformed. The default is \code{log = FALSE}, 
     and the data is not \code{log2} transformed.}
-  \item{adjustPlates}{character string indicating the correction method to apply to adjust for plate-to-plate variations (and  eventually well-to-well variations), after applying \code{fun} and eventually log transforming the values (see details). If \code{adjustPlates} is missing (the default), no plate-wise correction will be performed.}
+  \item{adjustPlates}{character string indicating the correction method to apply to adjust for plate-to-plate variations (and  eventually well-to-well variations), after applying \code{fun} and eventually log transforming the values. Allowed values are \code{"median"}, \code{"mean"}, \code{"shorth"}, \code{"POC"}, \code{"NPI"}, \code{"negatives"} and \code{"Bscore"}. If \code{adjustPlates} is missing (the default), no plate-wise correction will be performed. See details.}
   \item{zscore}{indicates if the \emph{z}-scores should be determined after
     normalization and transformation. If missing (default),
     the data will not be scored. Otherwise, it should be a character
     string, either "+" or "-", specifying the sign to use for the calculated 
     \emph{z}-scores. See details.}
+  \item{posControls}{a vector of regular expressions giving the name of the positive control(s). See details.}
+  \item{negControls}{a vector of regular expressions giving the name of the negative control(s). See details.}
   \item{BscoreArgs}{a list with parameters for the function that performs B score normalization. See details.} 
 }
 
@@ -37,8 +39,23 @@ the ratio between the second and the first channels, but other options can be de
 If \code{log = TRUE}, the data obtained after applying \code{fun} is \code{log2} transformed. 
 The default is \code{log = FALSE}.
 
-If \code{adjustPlates} is not missing, the obtained values will be further corrected for plate effects by considering the chosen per-plate factor. If \code{adjustPlates="mean"}, this factor will be the plate mean, if \code{adjustPlates="median"}, the plate median, whereas if \code{adjustPlates="shorth"}, the midpoint of the shorth (see \code{\link[genefilter:shorth]{shorth}}) of the distribution of values. In either case, the median, mean or midpoint of the shorth is determined for the distribution of values in the wells annotated as \code{sample} in \code{x$wellAnno}, for a given replicated plate. If the data have not been log transformed (\code{log=FALSE}), each measurement is divided by the per-plate plate factor, while if the data values are in \code{log2} scale (\code{log=TRUE}), the per-plate factor will be subtracted from each measurement. By default, \code{adjustPlates} is missing.
-Alternatively, the data can be corrected for both plate and spatial effects using the \link[cellHTS:Bscore]{B score method}, by setting \code{adjustPlates="Bscore"}.
+If \code{adjustPlates} is not missing, the obtained values will be further corrected for plate effects by considering the chosen normalization method. The available options are:
+\itemize{
+    \item If \code{adjustPlates="median"} (median scaling), plates effects are corrected by dividing each measurement 
+          by the median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate and replicate.
+         If the data values are in \code{log2} scale (\code{log=TRUE}), the per-plate factor is subtracted from each measurement, instead.
+    \item If \code{adjustPlates="mean"} (mean scaling), the average in the \code{sample} wells is consider instead. If the data values are in \code{log2} scale (\code{log=TRUE}), the per-plate factor is subtracted from each measurement, instead.
+    \item If \code{adjustPlates="shorth"} (scaling by the midpoint of the shorth), for each plate and replicate, the midpoint of the \code{\link[genefilter:shorth]{shorth}} of the distribution of values in the wells annotated 
+           as \code{sample} is calculated. Then, every measurement is divided by this value (if \code{log=FALSE}) or subtracted by it (if \code{log=TRUE}, meaning that data have been log transformed). 
+    \item If \code{adjustPlates="POC"} (percent of control), for each plate and replicate, each measurement is divided by the average of the measurements on the plate positive controls, and multipliplied by 100.
+    \item If \code{adjustPlates="negatives"}, for each plate and replicate, each measurement is divided 
+          by the median of the measurements on the plate negative controls. If the data values are in \code{log2} scale (\code{log=TRUE}), the per-plate factor is subtracted from each measurement, instead.
+    \item If \code{adjustPlates="NPI"} (normalized percent inhibition), each measurement is subtracted from the average of the intensities on the plate positive controls, and this result is divided by the difference between 
+          the means of the measurements on the positive and the negative controls.
+    \item If \code{adjustPlates="Bscore"} (Bscore), for each plate and replicate, the \link[cellHTS:Bscore]{B score method} is applied to remove plate effects and row and column biases.
+} 
+
+By default, \code{adjustPlates} is missing.
 
 If \code{zscore} is not missing, a robust \emph{z}-score for each
 individual measurement will be determined for each plate and each well
@@ -51,6 +68,12 @@ the calculated \emph{z}-scores. For example, with a \code{zscore="-"} a strong d
 in the signal will be represented by a positive \emph{z}-score, whereas setting \code{zscore="+"}, 
 such a phenotype will be represented by a negative \emph{z}-score.  
 This option can be set to calculate the results to the commonly used convention.
+
+
+  The arguments \code{posControls} and/or \code{negControls} are required for applying the normalization methods based on the control measurements (that is, when \code{adjustPlates="POC"}, or \code{adjustPlates="NPI"} or \code{adjustPlates="negatives"}). \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the final number of reporters, which in this case is always one. 
+  By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default "neg" will be considered as the name used to annotated the negative controls. 
+  The content of \code{posControls} and \code{negControls} will be passed to \code{\link[base:regexpr]{regexpr}} for pattern matching within the well annotation given in \code{x$wellAnno} (see examples). 
+  The arguments \code{posControls} and \code{negControls} are particularly useful in multi-channel data since the controls might be reporter-specific, or after normalizing multi-channel data.
 
   The following elements are recognized for \code{BscoreArgs} and
    passed on to \code{\link[cellhts:Bscore]{Bscore}}:
@@ -79,8 +102,6 @@ dimension as \code{x$xraw}, except the
 }
 
 \author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
-
-\references{..}
 
 \examples{
     datadir = system.file("DualChannelScreen", package = "cellHTS")

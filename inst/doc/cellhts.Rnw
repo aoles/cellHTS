@@ -284,10 +284,10 @@ each well annotation in the example data:
 table(x$plateConf$Content)
 @ 
 %
-% Another case is when different types of positive controls are used for the screening, that is 
-% "activator" and "inhibitor" compounds. The vignette "xxxx" accompanying this package 
-% explains how such screens can be handled using \Rpackage{cellHTS} package.
-
+Another case is when different types of positive controls are used for the screening, that is 
+\emph{activator} and \emph{inhibitor} compounds. The vignette \textit{Analysis of two-way cell-based assays} 
+accompanying this package
+explains how such screens can be handled using \Rpackage{cellHTS} package.
 %
 \subsubsection{Multiple plate configurations}
 \label{sec:multPlateConfs}

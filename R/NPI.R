@@ -1,8 +1,10 @@
-NPI = function(x, posControls, negControls){
+NPI = function(x, posControls, negControls, what="xraw"){
 ## Normalized Percent Inhibition: for each plate, subtracts each measurement from the mean of the positive controls, and divides the result by the difference between the mean of positive and negative controls (plate dynamic range), in an antagonist assay.
 
+## 'what' can be "xraw" or "xnorm"
+
  ## Check consistency for posControls and negControls (if provided)
- nrChannel = dim(x$xraw)[4]
+   nrChannel = dim(x[[what]])[4]
 
 
   if (!missing(posControls)) {
@@ -23,23 +25,23 @@ NPI = function(x, posControls, negControls){
   }
 
 
-  xn = array(as.numeric(NA), dim=dim(x$xraw))
+  xn = array(as.numeric(NA), dim=dim(x[[what]]))
 
-  nrWpP = dim(x$xraw)[1]
-  for(p in 1:(dim(x$xraw)[2])) {
+  nrWpP = dim(x[[what]])[1]
+  for(p in 1:(dim(x[[what]])[2])) {
     wellAnno = as.character(x$wellAnno[(1:nrWpP)+nrWpP*(p-1)])
 
-      for(ch in 1:(dim(x$xraw)[4])) {
-  pos = FALSE
-  neg = FALSE
+      for(ch in 1:nrChannel) {
+        pos = FALSE
+        neg = FALSE
         if (!(posControls[ch] %in% c(NA, ""))) {
 	pos = regexpr(posControls[ch], wellAnno, perl=TRUE)>0 }
         if (!(negControls[ch] %in% c(NA, ""))) {
 	neg = regexpr(negControls[ch], wellAnno, perl=TRUE)>0 }
 	if (sum(pos)==0 | sum(neg)==0) stop(sprintf("No positive or/and negative controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch))
 
-    for(r in 1:(dim(x$xraw)[3]))
-        xn[, p, r, ch] = (mean(x$xraw[pos, p, r, ch], na.rm=TRUE) - x$xraw[, p, r, ch]) / (mean(x$xraw[pos, p, r, ch], na.rm=TRUE) - mean(x$xraw[neg, p, r, ch], na.rm=TRUE))
+    for(r in 1:(dim(x[[what]])[3]))
+        xn[, p, r, ch] = (mean(x[[what]][pos, p, r, ch], na.rm=TRUE) - x[[what]][, p, r, ch]) / (mean(x[[what]][pos, p, r, ch], na.rm=TRUE) - mean(x[[what]][neg, p, r, ch], na.rm=TRUE))
   }}
 
   x$xnorm = xn

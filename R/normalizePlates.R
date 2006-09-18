@@ -15,6 +15,7 @@ normalizePlates = function(x, normalizationMethod="median", transform, zscore, p
       median = scaleByPlateMedian(x),
       shorth = scaleByPlateShorth(x),
       POC = POC(x, posControls),
+      negatives = scaleByPlateNegatives(x, negControls),
       NPI = NPI(x, posControls, negControls),
       Bscore = do.call("Bscore", args=append(list(x=x),BscoreArgs)),
         stop(sprintf("Invalid value '%s' for argument 'normalizationMethod'", normalizationMethod)))

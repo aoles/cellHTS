@@ -1,5 +1,5 @@
 ## output dataframe
-dataframeOutput = function(x, header, caption, label, gotable=FALSE) {
+dataframeOutput = function(x, header, caption, label, gotable=FALSE, prename="cellhts") {
 
   head = c("\\begin{table}[tp]", "\\begin{center}")
   tail = c(sprintf("\\caption{%s}", caption),
@@ -15,12 +15,12 @@ if (!gotable) out = paste("\\begin{tabular}{", paste(rep("r", ncol(x)), collapse
     out = c(out, paste(paste(x[i,], collapse="&"), "\\\\", sep=""))
   out = c(out, "\\end{tabular}")
 
-  writeLines(c(head, out, tail), con=sprintf("cellhts-%s.tex", label))
-  writeLines(out, con=sprintf("cellhts-%s.txt", label))
+  writeLines(c(head, out, tail), con=sprintf("%s-%s.tex", prename, label))
+  writeLines(out, con=sprintf("%s-%s.txt", prename, label))
 }
 
 ## output a file
-tableOutput = function(fn, nm, header=TRUE, dropColumns, selRows=1:5) {
+tableOutput = function(fn, nm, header=TRUE, dropColumns, selRows=1:5, preName="cellhts") {
   r = read.table(fn, sep="\t", header=header,  na.string="", as.is=TRUE)
   x = r[c(selRows, 1), ]
   if(!missing(dropColumns))
@@ -33,6 +33,6 @@ tableOutput = function(fn, nm, header=TRUE, dropColumns, selRows=1:5) {
   dataframeOutput(x, header=header,
     caption=sprintf("Selected lines from the example %s file \\texttt{%s}.", 
       nm, gsub("_", "\\\\_", basename(fn))),
-    label = gsub(" ", "", nm))
+    label = gsub(" ", "", nm), prename=preName)
 
 }

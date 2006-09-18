@@ -110,7 +110,7 @@ The set of available result files and the information about them (which plate,
 which replicate, which channel) is given in the \emph{plate list file}. 
 The first few lines of the plate list file for this data set are shown in 
 Table~\ref{tab:platelist}.
-\input{cellhts-platelist}
+\input{twoChannels-platelist}
 
 Using the function \Rfunction{readPlateData}, we can read the plate list file and 
 all the intensity files, thereby assembling the data into a single R
@@ -139,14 +139,14 @@ x
 %% it would have been nice to use the "xtable" package but it insists on 
 %%   adding row numbers, which we don't like.
 <<plateFileTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(file.path(dataPath, "Platelist.txt"), "plate list")
+cellHTS:::tableOutput(file.path(dataPath, "Platelist.txt"), "plate list", preName="twoChannels")
 @ 
 
 %------------------------------------------------------------
 \subsection{Annotating the plate results}
 %------------------------------------------------------------
-\input{cellhts-plateconfiguration} 
-\input{cellhts-screenlog} 
+\input{twoChannels-plateconfiguration} 
+\input{twoChannels-screenlog} 
 
 Next, we annotate the measured data with information on the controls, 
 and flag invalid measurements using the information given in the \emph{plate
@@ -167,8 +167,8 @@ x = configure(x, confFile, logFile, descripFile)
 %%
 %% Create the table for plateConf and screenLog
 <<plateConfscreenLogTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(confFile, "plate configuration", selRows=1:4)
-cellHTS:::tableOutput(logFile, "screen log", selRows=1:2)
+cellHTS:::tableOutput(confFile, "plate configuration", selRows=1:4, preName="twoChannels")
+cellHTS:::tableOutput(logFile, "screen log", selRows=1:2, preName="twoChannels")
 @ 
 
 In this data set, instead of using the default names \emph{pos} 

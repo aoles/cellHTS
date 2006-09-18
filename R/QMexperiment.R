@@ -50,7 +50,7 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
     for (r in 1:(dim(x$xraw)[3])) {
       makePlot(path, con=con, name=sprintf("boxplot_%d_%d", r, ch), w=5*(nrbxp-hasLessCh),
                h=5, fun = function() {
-                 par(mfrow=c(1, (nrbxp-hasLessCh)), mai=c(1, 1,, 0.01, 0.01))
+                 par(mfrow=c(1, (nrbxp-hasLessCh)), mai=c(1, 1, 0.01, 0.02))
                  if (!hasLessCh) {
                    ## to deal with cases where nrPlate=1
                    if (nrPlate==1)
@@ -97,7 +97,7 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
 
           makePlot(path, con=con,
                    name=sprintf("Controls_%d_%d", r, ch), w=5*nrbxp, h=5, fun = function() {
-                     par(mfrow=c(1, nrbxp), mai=c(par("mai")[1:2], 0.01, 0.01))
+                     par(mfrow=c(1, nrbxp), mai=c(par("mai")[1:2], 0.01, 0.02))
                      nrWell = prod(x$pdim)
                      plt = rep(1:nrPlate,each=nrWell)
                      #ppos = plt[unlist(posCtrls[[ch]])]
@@ -178,6 +178,7 @@ boxplotwithNA <- function(x, fac, ...) {
   lowerLim <- min(bp$stats[1,], na.rm=TRUE)-border
   upperLim <- max(bp$stats[5,], na.rm=TRUE)+border
   boxplot(xsp, ..., ylim=c(lowerLim, upperLim), border=bc)
+  if(ncol(x)==1) axis(1, 1)
 }
 
 

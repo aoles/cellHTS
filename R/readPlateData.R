@@ -53,7 +53,9 @@ Let = c()
 Num = c()
 ## check the plate format
 for (fi in f) {
-well = importFun(fi)[[1]]$well
+        well = importFun(fi)[[1]]$well
+      ## for safety
+        well = as.character(well)
       ##  check if the plate format is correct
         let = substr(well, 1, 1)
         num = substr(well, 2, 3)

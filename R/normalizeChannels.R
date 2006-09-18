@@ -1,4 +1,4 @@
-normalizeChannels = function(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlates, zscore, BscoreArgs){
+normalizeChannels = function(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlates, zscore, posControls, negControls, BscoreArgs){
 
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
@@ -36,6 +36,9 @@ if (!missing(adjustPlates)) {
        mean = scaleByPlateMean(x, what="xnorm", isInLogScale=log),
        median = scaleByPlateMedian(x, what="xnorm", isInLogScale=log),
        shorth = scaleByPlateShorth(x, what="xnorm", isInLogScale=log),
+       negatives = scaleByPlateNegatives(x, negControls, what="xnorm", isInLogScale=log),
+       POC = POC(x, posControls, what="xnorm"),
+       NPI = NPI(x, posControls, negControls, what="xnorm"),
        Bscore = do.call("Bscore", args = append(list(x=x, what="xnorm"), BscoreArgs)),
        stop(sprintf("Invalid value '%s' for argument 'adjustPlates'", adjustPlates)))
   }
