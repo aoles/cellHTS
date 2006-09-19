@@ -42,23 +42,23 @@ pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 This technical report is a supplement of the main vignette 
 \textit{End-to-end analysis of cell-based screens: from raw intensity readings
 to the annotated hit list} that is given as part of the \Rpackage{cellHTS} 
-package. It accompanies the paper \textit{Analysis
+package, and that accompanies the paper \textit{Analysis
 of cell-based RNAi screens} by Michael Boutros, L\'igia Br\'as and
 Wolfgang Huber~\cite{Boutros2006}. 
 
 The report explains how the 
 \Rpackage{cellHTS} package can be used to document and analyse two-way assays.
 We call \emph{two-way assays} to the assays where we can have two types of effectors: 
-\emph{activators} and \emph{inhibitors}. In such cases, both type of effectors are used as positive controls, and these need to be considering indivually by the \Rpackage{cellHTS} package.
+\emph{activators} and \emph{inhibitors}. In such cases, both type of effectors are used as positive controls, and they need to be considering indivually by the \Rpackage{cellHTS} package.
 
 This text has been produced as a reproducible
 document~\cite{Gentleman2004RepRes}, containing the actual computer
 instructions, given in the language R, to produce all results, including the figures and 
-tables that are shown here. To reproduce the computations shown here, 
-you will need an installation
-of R (version 2.3 or greater) together with a recent version of the package
-\Rpackage{cellHTS} and of some other add-on packages. Then, we can simply take the file
-\textit{twoWayAssays.Rnw} in the \textit{doc} directory of the package,
+tables that are depicted here. To reproduce the computations shown here, 
+you will need an installation of R (version 2.3 or greater) 
+together with a recent version of the package
+\Rpackage{cellHTS} and of some other add-on packages. Then, you can simply take the file
+\textit{twoWay.Rnw} in the \textit{doc} directory of the package,
 open it in a text editor, run it using the R command
 \Rfunction{Sweave}, and modify it according to your needs.
 
@@ -90,8 +90,8 @@ and a luminescence-reporter was used in the assay.
 %------------------------------------------------------------
 
 The set of available result files and the information about them (which plate,
-which replicate, which channel) is given in the \emph{plate list file}. 
-The first few lines of the plate list file for this data set are shown in 
+which replicate) is given in the \emph{plate list file}. 
+The first line of the plate list file for this data set is shown in 
 Table~\ref{tab:platelist}.
 \input{twoWay-platelist}
 
@@ -108,16 +108,17 @@ package.
 
 The function \Rfunction{readPlateData} of \Rpackage{cellHTS} package reads the plate list file, 
 and the intensity files, assembling the data into a single R object.
-In this example, the raw intensity files correspond to csv files, in which the first part consists of data from the acquisition instrument, while the relevant data values are in the $12 \times 8$ 
-matrix in the end of the file. So, we need to give as argument to  
-\Rfunction{readPlateData}, a function suitable to import such data format. 
+In this example, the raw intensity files correspond to csv files, in which the first part 
+consists of data from the acquisition instrument, while the relevant data values are in the $12 \times 8$ 
+matrix at the end of the file. So, we need to give as argument to  
+\Rfunction{readPlateData}, a function suitable to import such data file format. 
 This function, which we named \Rfunction{importData}, is given in the same directory as the data files, in a R file with the same name, and needs to be sourced:
 %
 <<source import function>>=
 source(file.path(dataPath, "importData.R"))
 @ 
 %
-Finally, we call \Rfunction{readPlateData}
+Finally, we call \Rfunction{readPlateData}:
 <<readPlateData, results=hide>>=
 x <- readPlateData("Platelist.txt", importFun=importData, name=experimentName, path=dataPath)
 @ 
@@ -140,10 +141,13 @@ cellHTS:::tableOutput(file.path(dataPath, "Platelist.txt"), selRows=1,
 \input{twoWay-plateconfiguration} 
 \input{twoWay-geneID} 
 
-The \emph{plate configuration file} gives the information about the content of the plate wells, which is used by the software to annotate the measured data. The first lines of this file are shown in 
+The \emph{plate configuration file} gives the information about the 
+content of the plate wells, which is used by the software to annotate the 
+measured data. The first lines of this file are shown in 
 Table~\ref{tab:plateconfiguration}.
-For this sample data, there is no availabe \emph{screen log file}, meaning that there are no flagged measurements.
-Another file necessary in this \emph{configuration step} of the \Robject{cellHTS} object is the 
+For the sample data, there is no \emph{screen log file}, meaning that no measurements
+were marked to be flagged during the assay.
+Another file necessary for the configuration step of the \Robject{cellHTS} object is the 
 \emph{screen description file}, which gives a general description of the screen.
 %
 <<configure the data>>=
@@ -154,11 +158,16 @@ x <- configure(x, confFile=confFile, descripFile = descripFile)
 %
 In this data set, instead of using the default names \emph{pos} and \emph{neg} for 
 positive and negative controls, respectively, we have used the names of the target genes.
-Thus, the well annotation in this sample plate looks like this:
+Thus, the well annotation in this sample plate looks like this~\footnote{Note that when 
+reading the plate configuration file, the \Rfunction{configure} function 
+puts the content of the column \emph{Content} 
+in lowercase. However, the orignal content of this column 
+(and the complete plate configuration file) is stored in \Robject{x\$plateConf}, 
+so if you prefer, you can use the command \Robject{table(x\$plateConf\$Content)} 
+instead of \Robject{table(x\$wellAnno)}.}:
 %
 <<well annottaion>>=
 table(x$wellAnno)
-table(x$plateConf$Content)
 @ 
 Here, \emph{AATK}, \emph{ATTK} and \emph{MAP2K6} are positive controls, whereas
 \emph{GFP} and \emph{mock} (mock transfection) correspond to negative controls. 
@@ -193,20 +202,22 @@ cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6, preName="twoWay")
 
 We can take a first look at the data by constructing the HTML quality reports 
 using the \Rfunction{writeReport} function. 
-For that, we must define the positive and negative controls needed when calling the 
-function \Rfunction{writeReport}.
+For that, we must define the positive and negative controls needed when calling 
+this function.\\
+
 For a 2-way assay, the argument \Robject{posControls} of 
-\Rfunction{writeReport} should be defined as a list of two components: 
+\Rfunction{writeReport} should be defined as a list with two components: 
 \emph{act} and \emph{inh}, which should be defined as vectors of regular 
 expressions with the same length as the number of channels (in this case, length one).
 These arguments will be passed to the \Rfunction{regexpr} function 
-for pattern matching within the well annotation given in \Robject{x\$wellAnno}.
+for pattern matching within the well annotation given in \Robject{x\$wellAnno}.\\
 
-In the example presented here, among the positive controls, we have 
-\emph{AATK} and \emph{ATTK} as activators, and \emph{MAP2K6} as inhibitor.
-As negative controls, there is \emph{GFP} and the mock transfection 
+In the example presented here, in the positive controls, we have 
+\emph{AATK} and \emph{ATTK} as activator effectors, and \emph{MAP2K6} as 
+an inhibitor effector.
+The negative controls are \emph{GFP} and the mock transfection 
 (indicated as \emph{mock} in the plate configuration file).
-Thus, the negative and positive controls should be given as follows:
+Thus, we define the negative and positive controls as follows:
 %
 <<define controls>>=
 negCtr <- "(?i)^GFP$|^mock$"
@@ -216,11 +227,15 @@ posCtr <- list(act = "(?i)^AATK$|^ATTK$", inh = "(?i)^MAP2K6$")
 Finally, we construct the quality report pages for the raw data in a directory called \Robject{2Wraw}, in the working directory:
 %
 <<writeReport1Show, eval=FALSE>>=
-out = writeReport(x, outdir="2Wraw",posControls=posCtr, negControls=negCtr, plotPlateArgs=list())
+out <- writeReport(x, outdir="2Wraw",
+     posControls=posCtr, negControls=negCtr, 
+     plotPlateArgs=list(xrange=c(300, 4000)))
 @ 
 %
 <<writeReport1Do, echo=FALSE, results=hide>>=
-out = writeReport(x, force=TRUE, outdir="2Wraw", posControls=posCtr, negControls=negCtr, plotPlateArgs=list(xrange=c(300, 4000)))
+out <- writeReport(x, force=TRUE, outdir="2Wraw", 
+   posControls=posCtr, negControls=negCtr, 
+   plotPlateArgs=list(xrange=c(300, 4000)))
 @ 
 %
 After this function has finished, we can view the index page of
@@ -230,33 +245,22 @@ the report:
 browseURL(out)
 @ 
 %
-As can be seen in the HTML reports, the dynamic range for each replicate (and their average) was 
-calculated separately for the activators and inhibitors.
+As can be seen in the HTML reports, the dynamic range for each replicate (and the respective average) 
+was calculated separately for the activators and inhibitors.\\
+
 Next, we normalize the data using a simple approach.
-For each plate and replicate, the intensity values at the negative control wells are taken 
-as a correction factor, and then the obtained values are $\log_2$ transformed.
+For each replicate, the plate intensity values at the negative control wells are taken 
+as a correction factor, so that each plate measurement is divided by it. 
+Then, the obtained values are $\log_2$ transformed.
 %
 <<normalization>>=
-x <- normalizePlates(x, normalizationMethod ="negatives", negControls = negCtr, transform=log2)
+x <- normalizePlates(x, normalizationMethod ="negatives", 
+   negControls = negCtr, transform=log2)
 @ 
 %
 The normalized intensities are stored in the slot
 \Robject{x\$xnorm}, in an array of the same size as
 \Robject{x\$xraw}.
-
-We can call again \Rfunction{writeReport} for the normalized data. 
-<<report2Show, eval=FALSE>>=
-out <- writeReport(x, outdir="2Wnormalized", posControls=posCtr, negControls=negCtr, 
-   plotPlateArgs=list(xrange=c(-1,1)))
-@
-<<report2Do, results=hide, echo=FALSE>>=
-out <- writeReport(x, outdir="2Wnormalized", posControls=posCtr, negControls=negCtr, 
-   plotPlateArgs=list(xrange=c(-1,1)), force=TRUE)
-@
-%
-The quality reports have been created in the folder \Robject{2Wnormalized} 
-in the working directory. Now the report shows also the plots for the control wells, 
-distinguishing the two types of positive controls (activators and inhibitors).
 
 Below, we call the function \Rfunction{summarizeReplicates} to determine the 
 $z$-score values for each replicate, and then summarize 
@@ -270,7 +274,7 @@ The resulting single $z$-score value per probe is stored in the
 slot \Robject{x\$score}. Figure~\ref{twoWay-boxplotzscore} shows the boxplots of 
 the $z$-scores for the different types of probes.
 %
-<<boxplotzscore, fig=TRUE, include=FALSE, width=5, height=5.5>>=
+<<boxplotzscore, fig=TRUE, include=FALSE, width=7, height=6>>=
 ylim <- quantile(x$score, c(0.001, 0.999), na.rm=TRUE)
 boxplot(x$score ~ x$wellAnno, col="lightblue", main="scores", outline=FALSE, ylim=ylim, xaxt="n")
 lab <- unique(x$plateConf$Content)
@@ -278,23 +282,31 @@ lab <- lab[match(levels(x$wellAnno), tolower(lab))]
 axis(1, at=c(1:nlevels(x$wellAnno)), labels=lab)
 @ 
 %
-\myincfig{twoWay-boxplotzscore}{0.75\textwidth}{Boxplots of $z$-scores 
+\myincfig{twoWay-boxplotzscore}{0.8\textwidth}{Boxplots of $z$-scores 
 for the different types of probes.}
 %
 Now that the data have been preprocessed and scored, we call again 
 \Rfunction{writeReport} and use a web browser to view the resulting report:
 %
-<<writeReport3, eval=TRUE, results=hide>>=
-out <- writeReport(x, force=TRUE, outdir="2Wnormalized", imageScreenArgs=list(zrange=c(-2,3)),
-   plotPlateArgs=list(xrange=c(-1,1)), posControls=posCtr, negControls=negCtr)
-@ 
 
-<<browse3, eval=FALSE>>=
+<<report2Show, eval=FALSE, results=hide>>=
+out <- writeReport(x, outdir="2Wnormalized", posControls=posCtr, negControls=negCtr, 
+   plotPlateArgs=list(xrange=c(-1,1)), imageScreenArgs=list(zrange=c(-2,3)))
+@
+<<report2Do, results=hide, echo=FALSE, results=hide>>=
+out <- writeReport(x, outdir="2Wnormalized", posControls=posCtr, negControls=negCtr, 
+   plotPlateArgs=list(xrange=c(-1,1)), imageScreenArgs=list(zrange=c(-2,3)), force=TRUE)
+@
+<<browse2, eval=FALSE>>=
 browseURL(out)
 @ 
-% 
 %
-Finally, we will save the data set to a file. 
+The quality reports have been created in the folder \Robject{2Wnormalized} 
+in the working directory. Now the report shows also controls-related plots, 
+distinguishing the two types of positive controls (activators and inhibitors).
+Furthermore, the report shows the image plot with the final scored values 
+for the whole data set.
+Finally, we save the data set to a file. 
 %
 <<savex>>=
 save(x, file=paste(experimentName, ".rda", sep=""))
