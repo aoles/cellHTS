@@ -10,7 +10,10 @@ Dataframe with 21888 rows and 11 columns
 \code{flybase_name}, \code{go_id}, \code{go_description}.
 }
 \description{
-See the vignette, Section \emph{Using biomaRt to annotate the target
+See the complete vignette \emph{End-to-end analysis of 
+cell-based screens: from raw intensity readings 
+to the annotated hit list}, 
+Section \emph{Using biomaRt to annotate the target
 genes online} for details. The annotations were obtained on
 8 September 2006.
 }

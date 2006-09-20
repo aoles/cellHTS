@@ -1,5 +1,6 @@
 all:	pdf clean
 
+
 pdf:	twoChannels.tex cellhts.tex twoWay.tex
 	pdflatex cellhts
 	bibtex cellhts
@@ -17,6 +18,6 @@ pdf:	twoChannels.tex cellhts.tex twoWay.tex
 clean:
 	rm -f *.out *.bbl *.log *.aux *.blg *.brf *.toc *.tex
 	rm -f *.dvi *.ps cellhts-* twoChannels-* twoWay-* tmp_*
-	rm -rf raw KcViab logRatio 2Wraw 2Wnormalized KcViab.rda  DualChannelScreen.rda TwoWayAssays.rda
+	rm -rf raw logRatio 2Wraw 2Wnormalized KcViab.rda  DualChannelScreen.rda TwoWayAssay.rda
 
 

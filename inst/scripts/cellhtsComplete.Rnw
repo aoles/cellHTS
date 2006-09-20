@@ -32,22 +32,22 @@ pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 \begin{document}
 
 %------------------------------------------------------------
-\title{Short version of the vignette \emph{End-to-end analysis of cell-based screens: from raw intensity readings
-  to the annotated hit list}}
+\title{End-to-end analysis of cell-based screens: from raw intensity readings
+  to the annotated hit list}
 %------------------------------------------------------------
 \author{Michael Boutros, L\'igia Br\'as and Wolfgang Huber}
 \maketitle
 \tableofcontents
 
 \section{Introduction}
-This is a short version of the technical report \emph{End-to-end analysis 
-of cell-based screens: from raw intensity readings
-  to the annotated hit list}, focusing on the essential steps 
-necessary to run an analysis of
-a cell-based high-throughput screen (HTS), from
-raw intensity readings to an annotated hit list. 
+This is a technical report that demonstrates the use of the
+\Rpackage{cellHTS} package. It accompanies the paper \textit{Analysis
+of cell-based RNAi screens} by Michael Boutros, L\'igia Br\'as and
+Wolfgang Huber~\cite{Boutros2006}. This report explains all the steps necessary to run a
+complete analysis of a cell-based high-throughput screen (HTS), from
+raw intensity readings to an annotated hit list.
 
-This report has been produced as a reproducible
+This text has been produced as a reproducible
 document~\cite{Gentleman2004RepRes}. It contains the actual computer
 instructions for the method it describes, and these in turn produce
 all results, including the figures and tables that are shown here. The
@@ -58,19 +58,9 @@ of R (version 2.3 or greater) together with a recent version of the package
 
 To reproduce the computations shown here, you do not need to type them
 or copy-paste them from the PDF file; rather, you can take the file
-\textit{cellhts.Rnw} in the \textit{doc} directory of the package,
+\textit{cellhtsComplete.Rnw} in the \textit{scripts} directory of the package,
 open it in a text editor, run it using the R command
 \Rfunction{Sweave}, and modify it to your needs.
-
-For a more complete analysis,  please refer to the complete vignette, which should be manually produced from the
-file \textit{cellhtsComplete.Rnw} that can be found in the \textit{scripts} 
-directory of the package. The complete vignette accompanies
-the paper \textit{Analysis
-of cell-based RNAi screens} by Michael Boutros, L\'igia Br\'as and
-Wolfgang Huber~\cite{Boutros2006}, and includes sections exemplifying how 
-to add more annotation from public databases, how to perform an 
-analysis for Gene Ontology categories, and compares 
-the obtained results with previously reported ones.\\
 
 First, we load the package.
 %
@@ -79,6 +69,13 @@ library("cellHTS")
 @ 
 %
 <<setup2, echo=FALSE, results=hide>>=
+## working path:
+workPath <- getwd()
+
+## check if bib file exists
+if (!("cellhts.bib" %in% dir()) )
+  system(sprintf("cp %s/cellhts.bib .", system.file("doc", package="cellHTS")))
+
 ## for debugging:
 options(error=recover)
 ## for software development, when we do not want to install 
@@ -179,17 +176,12 @@ by spreadsheet programs.
 To create a report, use the function \Rfunction{writeReport}. It will
 create a directory of the name given by \Robject{x\$name} in the
 working directory. Alternatively, the argument \Robject{outdir} can be
-specified to direct the output to another 
-directory~\footnote{To reduce the ammount of time this vignette 
-takes to be created, 
-the given code for generating the quality reports will not be
-evaluated when calling \Rfunction{Sweave}. You can easily change this 
-by editing the \emph{cellhts.Rnw} file.}
+specified to direct the output to another directory. 
 %
 <<writeReport1Show, eval=FALSE>>=
 out = writeReport(x)
 @ 
-<<writeReport1Do, eval=FALSE, echo=FALSE, results=hide>>=
+<<writeReport1Do, echo=FALSE, results=hide>>=
 out = writeReport(x, force=TRUE)
 @ 
 %
@@ -197,7 +189,7 @@ It can take a while to run this function, since it writes a large number
 of graphics files. After this function has finished, the index page of
 the report will be in the file indicated by the variable \Robject{out}, 
 %
-<<printout, eval=FALSE>>=
+<<printout>>=
 out
 @ 
 %
@@ -398,14 +390,14 @@ x = summarizeReplicates(x, zscore="-", summary="mean")
 The resulting single $z$-score value per probe will be stored in the
 slot \Robject{x\$score}.
 Boxplots of the $z$-scores for the different types of probes are shown
-in Figure~\ref{cellhts-boxplotzscore}.
+in Figure~\ref{cellhtsComplete-boxplotzscore}.
 %
 <<boxplotzscore, fig=TRUE, include=FALSE, width=4.5, height=5.5>>=
 ylim = quantile(x$score, c(0.001, 0.999), na.rm=TRUE)
 boxplot(x$score ~ x$wellAnno, col="lightblue", outline=FALSE, ylim=ylim)
 @ 
 %
-\myincfig{cellhts-boxplotzscore}{0.5\textwidth}{Boxplots of $z$-scores 
+\myincfig{cellhtsComplete-boxplotzscore}{0.5\textwidth}{Boxplots of $z$-scores 
 for the different types of probes.}
 %
 
@@ -466,10 +458,72 @@ added to the plate plots and screen-wide
 plot, in the HTML quality report (see Section~\ref{sec:report}).
 
 
+%---------------------------------------------------------------
+\subsection{Adding additional annotation from public databases}
+%---------------------------------------------------------------
+For the analysis of the RNAi screening results, we usually want to
+consider gene annotation information such as Gene Ontology,
+chromosomal location, gene function summaries, homology.  The package
+\Rpackage{biomaRt} can be used to obtain such annotation from public
+databases~\cite{biomaRt2005}. However, there are also numerous
+alternative methods to annotate a list of gene identifiers with public
+annotation -- pick your favourite one.
 
+This section demonstrates how to do it with the package
+\Rpackage{biomaRt}.  It is optional, you can move on to 
+Section \ref{sec:report} if you do not have the \Rpackage{biomaRt}
+package or do not want to use it. If you do skip this section, then
+for the purpose of this vignette, please load a cached version of the
+gene annotation:
 
+<<bdgpbiomart1, eval=TRUE>>=
+data("bdgpbiomart")
+x$geneAnno = bdgpbiomart
+@ 
 
+%--------------------------- 
+\subsubsection{Installation}
+\label{sec:install}
+%--------------------------- 
+The installation of the \Rpackage{biomaRt} package can be a little bit
+tricky, since it relies on the two packages \Rpackage{RCurl} and
+\Rpackage{XML}, which in turn rely on the presence of the system
+libraries \textit{libcurl} and \textit{libxml2} on your computer. If
+you are installing the precompiled R packages (for example, this is
+what most people do on Windows), then you need to make sure that the
+system libraries on your computer are version-compatible with those on the
+computer where the R packages were compiled, and that they are
+found. If you are installing the R packages from source, then you need
+to make sure that the library header files are available and that the
+headers as well as the actual library is found by the compiler and
+linker. Please refer to the \textit{Writing R Extensions} manual and
+to the FAQ lists on www.r-project.org.
 
+%------------------------------------------------------------------
+\subsubsection{Using biomaRt to annotate the target genes online}
+%------------------------------------------------------------------
+In the remainder of this section, we
+will demonstrate how to obtain the dataframe \Robject{bdgpbiomart} by
+querying the online webservice \textit{BioMart} and through it the
+Ensembl genome annotation database~\cite{Ensembl2006}.
+%
+<<get path for Rnw files, echo=FALSE, results=hide>>=
+rnwPath <- system.file("doc/Rnw", package="cellHTS")
+setwd(rnwPath)
+system(sprintf("cp biomart.tex %s", workPath))
+setwd(workPath)
+@ 
+%
+<<runBiomart, echo=FALSE, eval=FALSE>>=
+setwd(rnwPath)
+Sweave("biomart.Rnw")
+setwd(workPath)
+stop()
+@ 
+%
+%\input{Rnw/biomart.tex}
+\input{biomart.tex}
+%
 %------------------------------------------------------------
 \section{Report}
 \label{sec:report}
@@ -491,7 +545,7 @@ The dataset can be loaded again for subsequent analysis, or passed
 on to others. To produce a comprehensive report, we can call the
 function \Rfunction{writeReport} again,
 %
-<<writeReport2, eval=FALSE, results=hide>>=
+<<writeReport2, results=hide>>=
 out = writeReport(x, force=TRUE, 
   plotPlateArgs   = list(xrange=c(0.5, 1.5)),
   imageScreenArgs = list(zrange=c( -2, 6.5), ar=1)) 
@@ -652,10 +706,198 @@ screen results for biologically relevant patterns, we demonstrate an
 application of category analysis.
 
 
+
+%------------------------------------------------------------
+\section{Category analysis}
+%------------------------------------------------------------
+We would like to see whether there are Gene Ontology
+categories~\cite{GO} overrepresented among the probes with a high
+score. For this we use the category analysis from Robert Gentleman's
+\Rpackage{Category} package~\cite{GentlemanCategories}. Similar
+analyses could be done for other categorizations, for example
+chromosome location, pathway membership, or categorical phenotypes
+from other studies.
+
+%
+<<category, results=hide>>=
+library("Category")
+@ 
+%
+Now we can create the category matrix. Conceptually, this a matrix 
+with one column for each probe and one row for each category. 
+The matrix element \Robject{[i,j]} is \Robject{1} if probe 
+\Robject{j} belongs to the \Robject{j}-th category, and \Robject{0} 
+if not. In practice, this matrix would be rather large (and perhaps 
+exhaust the memory of your computer), hence we use a type of sparse 
+matrix representation, implemented by the \Rclass{graph} object 
+\Robject{categs}. This bipartite graph's nodes correspond to the rows 
+and columns of the matrix and there is an edge if the matrix element 
+is non-zero.
+
+%One distraction is GO terms GO:0000067,  which is annotated to some of the genes, but is obsolete.
+
+% <<find obsolete GO ids, echo=FALSE, eval=FALSE>>=
+% names(x$score) = x$geneAnno$GeneID
+% sel = !is.na(x$score) & (!is.na(x$geneAnno$go))
+% goids = strsplit(x$geneAnno$go[sel], ", ")
+% genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
+% ux = unique(unlist(goids, use.names=FALSE))
+% s1 = ux %in% ls(GOMFANCESTOR)
+% s2 = ux %in% ls(GOBPANCESTOR)
+% s3 = ux %in% ls(GOCCANCESTOR)
+% s4 = is.na(ux)
+% obsolete = sort(ux[which(!(s1|s2|s3|s4))])
+% @ 
+
+<<obsolete GO ids>>=
+obsolete = c("GO:0005489", "GO:0005659", "GO:0005660")
+@ 
+
+Some distractions are the GO terms 
+\Robject{\Sexpr{paste(obsolete, collapse=", ")}}, 
+which are annotated to some of the genes, but are obsolete.
+%
+<<cat1>>=
+names(x$score) = x$geneAnno$GeneID
+sel = !is.na(x$score) & (!is.na(x$geneAnno$go))
+goids = strsplit(x$geneAnno$go[sel], ", ")
+goids = lapply(goids, function(x) x[!(x %in% obsolete)])
+genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
+cache(categs <- cateGOry(genes, unlist(goids, use.names=FALSE)))
+@ 
+% 
+We will select only those categories that contain at least 3 and 
+no more than 1000 genes.
+<<cat2>>=
+remGO = which(regexpr("^GO:", nodes(categs)) > 0)
+nrMem = listLen(edges(categs)[remGO])
+remGO = remGO[nrMem>1000 | nrMem <3]
+categs = subGraph(nodes(categs)[-remGO], categs)
+@ 
+%
+As the statistic for the category analysis we use the $z$-score. After
+selecting the subset of genes that actually have GO annotation,
+%
+<<cat3>>=
+stats = x$score[ sel & (names(x$score) %in% nodes(categs)) ]
+@
+%
+we are ready to call the category summary functions:
+%
+<<cat6>>=
+acMean  = applyByCategory(stats, categs)
+acTtest = applyByCategory(stats, categs, FUN=function(v) t.test(v, stats)$p.value)
+acNum   = applyByCategory(stats, categs, FUN=length)
+isEnriched = (acTtest<=1e-3) & (acMean>0.5)
+@ 
+%
+A volcano plot of the $-\log_{10}$ of the $p$-value \Robject{acTtest} versus
+the per category mean $z$-score \Robject{acMean} is shown in
+Figure~\ref{cellhtsComplete-volcano}. For a given category, the $p$-value is calculated from the 
+$t$-test against the null hypothesis that there is no difference between the mean
+$z$-score of all probes and the mean $z$-score of the probes in that category. 
+To select the enriched categories (\Robject{isEnriched}), we considered a significance
+level of $0.1\%$ for the $t$-test, and a per category mean $z$-score greater
+than $0.5$. This led to the \Sexpr{sum(isEnriched)} categories marked in red in
+Figure~\ref{cellhtsComplete-volcano} are listed in Table~\ref{tab:enrichedGoCateg}.
+
+ 
+%
+\input{cellhts-enrichedGoCateg} 
+%
+\myincfig{cellhtsComplete-volcano}{0.5\textwidth}{Volcano plot of the $t$-test
+  $p$-values and the mean $z$-values of the category analysis for Gene
+  Ontology categories. The top categories are shown in red.}
+%
+<<volcano, fig=TRUE, echo=FALSE, results=hide, include=FALSE, width=3.2, height=3.2>>=
+par(mai=c(0.9,0.9,0.1,0.1))
+px = cbind(acMean, -log10(acTtest))
+plot(px, main='', xlab=expression(z[mean]), 
+     ylab=expression(-log[10]~p), pch=".", col="black")
+points(px[isEnriched, ], pch=16, col="red", cex=0.7)
+stopifnot(identical(names(acMean), names(acTtest)),  
+          identical(names(acMean), names(acNum))) 
+@ 
+%
+<<enrichedGoCateg, echo=FALSE, results=hide>>=
+enrichedGOCateg = names(which(isEnriched))
+
+res = data.frame(
+   "$n$" = acNum[isEnriched], 
+    "$z_{\\mbox{\\scriptsize mean}}$" = signif(acMean[isEnriched],2), 
+    "$p$" = signif(acTtest[isEnriched],2),
+    "GOID" = I(enrichedGOCateg),
+    "Ontology" = I(sapply(enrichedGOCateg, function(x) Ontology(get(x, GOTERM)))),
+    "description" = I(sapply(enrichedGOCateg, function(x) Term(get(x, GOTERM)))),
+    check.names=FALSE)
+
+mt = match(res$Ontology, c("CC", "BP", "MF"))
+stopifnot(!any(is.na(mt)))
+res = res[order(mt, res$"$p$"), ]
+
+cellHTS:::dataframeOutput(res, header=TRUE, 
+  caption=sprintf("Top %d Gene Ontology categories with respect to $z$-score.", nrow(res)),
+  label="enrichedGoCateg", gotable=TRUE)
+@ 
+%
+
+%------------------------------------------------------------
+\section{Comparison with the results previously reported}
+%------------------------------------------------------------
+
+In this section we compare the current results obtained using \Rpackage{cellHTS} 
+package, with the ones previously reported in Boutros 
+\textit{et al.}~\cite{Boutros2004}. The file ``Analysis2003.txt'' in the 
+same directory as the input data files, i.\,e.\, in \Robject{\Sexpr{experimentName}} 
+directory of the \Rpackage{cellHTS} package.
+First, We will load this file:
+%
+<<load file with previous analysis>>=
+data2003 = read.table(file.path(dataPath, "Analysis2003.txt"), header=TRUE, 
+as.is=TRUE, sep="\t")
+@ 
+% 
+The file contains the columns \Robject{\Sexpr{paste(names(data2003), collapse=", ")}}.
+The scored values in the \Robject{Scores} column will be compared with the ones 
+obtained in our analysis. For that, I will start by adding to \Robject{data2003}, a 
+column with the corresponding $z$-score values calculated using the \Rpackage{cellHTS} 
+package. 
+% 
+<<add the current scored values>>=
+i = data2003$Position + 384*(data2003$Plate-1)
+data2003$ourScore = x$score[i]
+@ 
+%
+%
+\myincfig{cellhtsComplete-scoresComparison}{\textwidth}{Scored 
+values obtained in the paper of Boutros \textit{et al.} against the scored 
+values calculated herein. Each panel corresponds to one 384-well plate. 
+Axis labels are not pretty - they overlap with neighboring panels due to space constraints.}
+%
+<<scoresComparison,echo=FALSE,results=hide,fig=TRUE,include=FALSE,width=5,width=5>>=
+require("geneplotter")
+par(mfrow=c(7,9), mai=c(0,0,0,0))
+for(i in 1:max(data2003$Plate)) {
+   sel = (data2003$Plate==i)
+   plot(data2003$ourScore[sel], data2003$Score[sel], pch=19, cex=0.6)
+  }
+@ 
+%
+Figure~\ref{cellhtsComplete-scoresComparison} shows the scatterplot between Boutros 
+\textit{et al.}'s scores and our scores in each of the 384-well plates.
+The results between the two analyses are very similar, except for two minor 
+details: use of robust estimators of location and spread (median and MAD 
+instead of mean and standard deviation), and estimation of MAD over 
+the whole experiment instead of plate-by-plate.
+In fact, Figure~\ref{cellhtsComplete-scoresComparison} evidenciates how the scored values
+exactly agree up to an offset (mean versus median) and scale 
+(standard deviation versus MAD).
+%
+
 %------------------------------------------------------------
 \section{Appendix: Data transformation}
 %------------------------------------------------------------
-\myincfig{cellhts-transfplots}{0.95\textwidth}{Comparison between untransformed 
+\myincfig{cellhtsComplete-transfplots}{0.95\textwidth}{Comparison between untransformed 
 (left) and logarithmically (base 2) transformed (right), normalized data. 
 Upper: histogram of intensity values of replicate 1. 
 Middle: scatterplots of standard deviation versus mean of the two replicates. 
@@ -671,7 +913,7 @@ visualizations work better if (to sufficient approximation)
 \item the variance is homogeneous along the dynamic range~\cite{Huber2002ismb}.
 \end{itemize}
 
-Figure~\ref{cellhts-transfplots} compares these properties for
+Figure~\ref{cellhtsComplete-transfplots} compares these properties for
 untransformed and log-transformed normalized data, showing that the difference is small. 
 Intuitively, this can be explained by the fact that for
 small $x$,

@@ -40,8 +40,7 @@ getMatrix(y, channel=1, na.rm=FALSE)
 \author{Ligia Brás \email{ligia@ebi.ac.uk}}
 
 \examples{
-    datadir <- system.file("KcViabSmall", package = "cellHTS")
-    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    y <- getMatrix(x$xraw)
+    data(KcViabSmall)
+    y <- getMatrix(KcViabSmall$xraw)
 }
 \keyword{manip}

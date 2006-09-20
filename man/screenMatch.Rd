@@ -26,28 +26,14 @@ A list with two components:
 \author{Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \examples{
-    ## Just for examplification purposes, we consider the complete genome-wide screen "KcViab" 
-    ## and its first 3 plates ("KcViab"): 
-    fname <- c("KcViab", "KcViabSmall")
-    screens <- vector("list", length=2)
-    for (i in 1:length(fname)){
-      datadir <- system.file(fname[i], package = "cellHTS")
-      screens[[i]] <- readPlateData("Platelist.txt", fname[i], path=datadir)
-      confFile <- system.file(fname[i], "Plateconf.txt", package="cellHTS")
-      logFile  <- system.file(fname[i], "Screenlog.txt", package="cellHTS")
-      descripFile  <- system.file(fname[i], "Description.txt", package="cellHTS")
-      screens[[i]] <- configure(screens[[i]], confFile, logFile, descripFile)
-      if (i==2){
-        geneIDFile <- system.file(fname[i], "GeneIDs_Dm_HFAsubset_1.0.txt", package="cellHTS")
-      }else{
-        geneIDFile <- system.file(fname[i], "GeneIDs_Dm_HFA_1.1.txt", package="cellHTS")
-      } 
-      screens[[i]] <- annotate(screens[[i]], geneIDFile)
-     }
-
+    ## Just for exemplification purposes, we consider the complete genome-wide screen "KcViab" 
+    ## and its first 3 plates ("KcViabSmall"): 
+    data(KcViab)
+    data(KcViabSmall)
+    screens <- list(KcViab, KcViabSmall)
     out <- screenMatch(screens)
     out$p.overlap
     sapply(out$isInBoth, sum)
     sapply(1:2, function(z) table(screens[[z]]$geneAnno$Plate[out$isInBoth[[z]]]))
 }
-\keyword{manip}
+\keyword{manip}screens <- list(x)

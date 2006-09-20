@@ -52,16 +52,9 @@ square root of the mean squared value of the replicates (root mean square) is ta
 
 \author{W. Huber \email{huber@ebi.ac.uk}, Ligia Braz \email{ligia@ebi.ac.uk}}
 
-\references{..}
-
 \examples{
-    datadir <- system.file("KcViabSmall", package = "cellHTS")
-    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    confFile <- system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile  <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x <- configure(x, confFile, logFile, descripFile)
-    x <- normalizePlates(x, normalizationMethod="median")
+    data(KcViabSmall)
+    x <- normalizePlates(KcViabSmall, normalizationMethod="median")
     x <- summarizeReplicates(x, zscore="-", summary="min")
 }
 \keyword{manip}

@@ -80,16 +80,11 @@ Malo, N., Hanley, J.A., Cerquozzi, S., Pelletier, J. and Nadon, R. (2006) Statis
 }
 
 \examples{
-    datadir <- system.file("KcViabSmall", package = "cellHTS")
-    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    confFile <- system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile  <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile  <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x <- configure(x, confFile, logFile, descripFile)
+    data(KcViabSmall)
+    x <- KcViabSmall
     x <- Bscore(x, save.model = TRUE)
     ## identical result, but calling Bscore function from "normalizePlates"
     xopt <- normalizePlates(x, normalizationMethod="Bscore", BscoreArgs = list(save.model = TRUE))
     all(x$xnorm==xopt$xnorm, na.rm=TRUE)
-    x <- summarizeReplicates(x, zscore="-", summary="mean")
 }
 \keyword{manip}

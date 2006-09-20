@@ -41,16 +41,13 @@ ROC(x, positives, negatives)
 \author{Ligia P. Bras \email{ligia@ebi.ac.uk}}
 
 \examples{
-    datadir = system.file("KcViabSmall", package = "cellHTS")
-    x = readPlateData("Platelist.txt", "KcViabilitySmall", path=datadir)
-    confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x = configure(x, confFile, logFile, descripFile)
-    x = normalizePlates(x, normalizationMethod="median",zscore="-")
-    x = summarizeReplicates(x)
-    y = ROC(x)
+    data(KcViabSmall)
+    \dontrun{
+    x <- normalizePlates(KcViabSmall, normalizationMethod="median", zscore="-")
+    x <- summarizeReplicates(x)
+    y <- ROC(x)
     plot(y)
     lines(y)
+    }
 }
 \keyword{univar}

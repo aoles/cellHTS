@@ -29,14 +29,10 @@ When the annotation mapping is performed, by default, \code{anno} is set to:
 \author{Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \examples{
-    datadir = system.file("KcViabSmall", package = "cellHTS")
-    x = readPlateData("Platelist.txt", "KcViabilitySmall", path=datadir)
-    confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x = configure(x, confFile, logFile, descripFile)
-    x = normalizePlates(x, normalizationMethod="median",zscore="-")
-    x = summarizeReplicates(x) 
+    data(KcViabSmall) 
+    x <- KcViabSmall   
+    x <- normalizePlates(x, normalizationMethod="median", zscore="-")
+    x <- summarizeReplicates(x) 
     imageScreen(x, zrange=c(-5,5))
 }
 

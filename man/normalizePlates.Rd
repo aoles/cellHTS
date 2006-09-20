@@ -80,13 +80,10 @@ Furthermore, if \code{normalizationMethod="Bscore"}, and \code{save.model=TRUE} 
 
 
 \examples{
-    datadir = system.file("KcViabSmall", package = "cellHTS")
-    x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x = configure(x, confFile, logFile, descripFile)
-    x1 = normalizePlates(x, normalizationMethod="median", zscore="-")
-    x2 = normalizePlates(x, normalizationMethod="Bscore", zscore="-")
+    data(KcViabSmall)
+    x1 = normalizePlates(KcViabSmall, normalizationMethod="median", zscore="-")
+    \dontrun{
+    x2 = normalizePlates(KcViabSmall, normalizationMethod="Bscore", zscore="-")
+    }
 }
 \keyword{manip}

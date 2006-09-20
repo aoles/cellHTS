@@ -53,11 +53,13 @@ There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annot
 \references{..}
 
 \examples{
-    datadir = system.file("KcViabSmall", package = "cellHTS")
-    x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    confFile = system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile  = system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile  = system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x = configure(x, confFile, logFile, descripFile)
+\dontrun{
+    datadir <- system.file("KcViabSmall", package = "cellHTS")
+    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
+    confFile <- system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
+    logFile <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
+    descripFile <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
+    x <- configure(x, confFile, logFile, descripFile)
+}
 }
 \keyword{manip}

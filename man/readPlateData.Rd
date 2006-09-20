@@ -73,12 +73,10 @@ format used in the screen, and it is automatically determined from the plate res
     the object.}
 }
 
-\author{W. Huber \email{huber@ebi.ac.uk}}
-
-\references{..}
+\author{W. Huber \email{huber@ebi.ac.uk}, Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \examples{
-    datadir = system.file("KcViabSmall", package = "cellHTS")
-    x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
+    datadir <- system.file("KcViabSmall", package = "cellHTS")
+    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
 }
 \keyword{manip}

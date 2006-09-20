@@ -104,12 +104,13 @@ dimension as \code{x$xraw}, except the
 \author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 
 \examples{
-    datadir = system.file("DualChannelScreen", package = "cellHTS")
-    x = readPlateData("Platelist.txt", "TwoColorData", path=datadir)
-    confFile = system.file("DualChannelScreen", "Plateconf.txt", package="cellHTS")
-    logFile  = system.file("DualChannelScreen", "Screenlog.txt", package="cellHTS")
-    descripFile  = system.file("DualChannelScreen", "Description.txt", package="cellHTS")
-    x = configure(x, confFile, logFile, descripFile)
+ \dontrun{
+    datadir <- system.file("DualChannelScreen", package = "cellHTS")
+    x <- readPlateData("Platelist.txt", "TwoColorData", path=datadir)
+    confFile <- system.file("DualChannelScreen", "Plateconf.txt", package="cellHTS")
+    logFile  <- system.file("DualChannelScreen", "Screenlog.txt", package="cellHTS")
+    descripFile <- system.file("DualChannelScreen", "Description.txt", package="cellHTS")
+    x <- configure(x, confFile, logFile, descripFile)
     table(x$wellAnno)
 
     ## Define the controls for the different channels:
@@ -126,17 +127,18 @@ dimension as \code{x$xraw}, except the
     ## channel 2 - geneC and geneD
     posControls[2]="(?i)^geneC$|^geneD$"
 
-   ##writeReport(x, posControls=posControls, negControls=negControls)
-   x = normalizeChannels(x, fun=function(x,y) y/x, log=TRUE, adjustPlates="median")
-
-   ## Define the controls for the normalized intensities (only one channel):
-   negControls = vector("character", length=dim(x$xnorm)[4])
-   ## For the single channel, the negative controls are geneA and geneB 
-   negControls[1]= "(?i)^geneA$|^geneB$" 
-   posControls = vector("character", length=dim(x$xnorm)[4])
-   ## For the single channel, the negative controls are geneC and geneD 
-   posControls[1]="(?i)^geneC$|^geneD$"
-   #writeReport(x, force=TRUE, plotPlateArgs=list(xrange=c(-3,3)), posControls=posControls, negControls=negControls)
+    writeReport(x, posControls=posControls, negControls=negControls)
+    x = normalizeChannels(x, fun=function(x,y) y/x, log=TRUE, adjustPlates="median")
+    ## Define the controls for the normalized intensities (only one channel):
+    negControls = vector("character", length=dim(x$xnorm)[4])
+    ## For the single channel, the negative controls are geneA and geneB 
+    negControls[1]= "(?i)^geneA$|^geneB$" 
+    posControls = vector("character", length=dim(x$xnorm)[4])
+    ## For the single channel, the negative controls are geneC and geneD 
+    posControls[1]="(?i)^geneC$|^geneD$"
+    writeReport(x, force=TRUE, plotPlateArgs=list(xrange=c(-3,3)), 
+         posControls=posControls, negControls=negControls)
+ }
 }
 
 \keyword{manip}

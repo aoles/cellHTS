@@ -26,8 +26,7 @@ This function is a wrapper for function \code{\link{write.table}} to write the d
 \author{Wolfgang Huber \email{huber@ebi.ac.uk}, Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \examples{
-    datadir = system.file("KcViabSmall", package = "cellHTS")
-    x = readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    writeTab(x, file=tempfile())
+    data(KcViabSmall)     
+    writeTab(KcViabSmall, file=tempfile())
 }
 \keyword{manip}

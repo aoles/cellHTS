@@ -77,23 +77,21 @@ By default, tooltips doing the mapping between the probe annotation and the plat
 \author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 
 \examples{
-    datadir <- system.file("KcViabSmall", package = "cellHTS")
-    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    confFile <- system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile  <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile  <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x <- configure(x, confFile, logFile, descripFile)
+    data(KcViabSmall)
     ## pCtrls <- c("pos") 
     ## nCtrls <- c("neg") 
     ## or for safety reasons (not a problem for the current well annotation, however) 
     ## pCtrls <- c("^pos$") 
     ## nCtrls <- c("^neg$")
-    ## writeReport(x, posControls=pCtrls, negControls=nCtrls)
-    writeReport(x)
-    x <- normalizePlates(x, normalizationMethod="median",zscore="-")
+    ## writeReport(KcViabSmall, posControls=pCtrls, negControls=nCtrls)
+    ## same as 
+    ## writeReport(KcViabSmall)
+    \dontrun{
+    x <- normalizePlates(KcViabSmall, normalizationMethod="median",zscore="-")
     x <- summarizeReplicates(x, summary="min")
     writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs=list(zrange=c(-4,4)))
-    ## to turn of the tooltips in the overall screen image plot:
+    }
+    ## to turn off the tooltips in the overall screen image plot:
     ## writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs = list(zrange=c(-4,4), map=FALSE))
 }
 

@@ -39,14 +39,8 @@ The following elements are recognized for \code{plotPlateArgs} and
 \author{Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \examples{
-    datadir <- system.file("KcViabSmall", package = "cellHTS")
-    x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    confFile <- system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x <- configure(x, confFile, logFile, descripFile)
-    x <- getLibraryPlate(x) 
+    data(KcViabSmall)
+    x <- getLibraryPlate(KcViabSmall) 
     plotPlateLibrary(x, whichPlate=2, plotSd=TRUE)
-
 }
 \keyword{manip}
