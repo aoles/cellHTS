@@ -180,7 +180,7 @@ To create a report, use the function \Rfunction{writeReport}. It will
 create a directory of the name given by \Robject{x\$name} in the
 working directory. Alternatively, the argument \Robject{outdir} can be
 specified to direct the output to another 
-directory~\footnote{To reduce the ammount of time this vignette 
+directory~\footnote{To reduce the amount of time this vignette 
 takes to be created, 
 the given code for generating the quality reports will not be
 evaluated when calling \Rfunction{Sweave}. You can easily change this 
