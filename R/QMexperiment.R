@@ -58,7 +58,7 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
                    else
                      xbp = x$xraw[,,r,ch]
                    boxplotwithNA(xbp, col(xbp), col="pink", outline=FALSE, main="", xlab="plate",
-                                 ylab="raw intensity")
+                                 ylab="raw intensity", batch=x$batch)
                  }
                  if(x$state["normalized"]) {
                    ## to deal with cases where nrPlate=1
@@ -67,7 +67,7 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
                    else
                      xbp = x$xnorm[,,r,ch]
                    boxplotwithNA(xbp, col(xbp), col="lightblue", outline=FALSE, main="", xlab="plate",
-                                 ylab="normalized intensity")
+                                 ylab="normalized intensity", batch=x$batch)
                  }
                }, print=FALSE)
 
@@ -122,7 +122,7 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
                      yvals$neg = xneg
                      yvals$inh=xinh
                      yvals$act=xact
-                     controlsplot(xvals, yvals, main="")
+                     controlsplot(xvals, yvals, main="", batch=x$batch)
 
                      ## density function needs at least 2 points
                      ## dealing with the case where we have a single positive or negative
@@ -168,7 +168,7 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
 
 
 ## --------------------------------------------------
-boxplotwithNA <- function(x, fac, ...) {
+boxplotwithNA <- function(x, fac, batch,...) {
   sel = apply(x,2,function(x) all(is.na(x)))
   bc <- rep(1, ncol(x))
   bc[sel] <- NA
@@ -179,6 +179,13 @@ boxplotwithNA <- function(x, fac, ...) {
   upperLim <- max(bp$stats[5,], na.rm=TRUE)+border
   boxplot(xsp, ..., ylim=c(lowerLim, upperLim), border=bc)
   if(ncol(x)==1) axis(1, 1)
+
+  bdiff = diff(batch)
+  if(sum(bdiff)>0) {
+    ind = 1:length(batch)
+    abline(v=ind[as.logical(bdiff)]+0.5, lty=2, col="darkgrey")
+  } 
+
 }
 
 
@@ -218,7 +225,7 @@ densityplot <- function(values, zfacs, ...) {
 
 
 ## --------------------------------------------------
-controlsplot <- function(xvals, yvals, ...) {
+controlsplot <- function(xvals, yvals, batch, ...) {
   ylim <- range(unlist(yvals), na.rm=TRUE)
 #   if (prod(ylim)<0) {
 #     ylim <- sign(ylim)*1.25*abs(ylim)
@@ -262,6 +269,12 @@ controlsplot <- function(xvals, yvals, ...) {
     by=ifelse((mp-1)%/%10, 5, 1) 
   axis(1, at = c(1, seq(0,mp,by=by)[-1]), labels = TRUE)
 
+  batch=batch[unique(unlist(xvals))] 
+  bdiff=diff(batch)
+  if(sum(bdiff)>0) {
+    ind = unique(unlist(xvals))
+    abline(v=ind[as.logical(bdiff)]+0.5, lty=2, col="darkgrey")
+  } 
   return(list(xvals, yvals))
 }
 

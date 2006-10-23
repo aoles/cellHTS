@@ -176,6 +176,7 @@ if (map) {
       imap <- imap[-isEmpty,]
       plate <- plate[-isEmpty]
     }
+   imap[,1:4] <- as.integer(imap[,1:4])
  #   return(myImageMap(imap[,1:4], list(TITLE=imap[,5], href=paste(plate[-isEmpty], "index.html", sep="/")), "imageScreen.png"))
     return(list(obj=imap[,1:4], tag=list(TITLE=imap[,5], href=paste(plate, "index.html", sep="/"))))
   }
