@@ -4,7 +4,8 @@
 \concept{normalization}
 \title{Plate-wise data normalization, and data transformation}
 \description{
-  Per-plate normalization of the data \code{xraw} of a cellHTS object.
+  Normalization of the data \code{xraw} in a cellHTS object.
+  This is done separately for each plate, replicate and channel.
   Optionally, a data transformation such as \code{log}, and a
   transformation to \emph{z}-scores can be performed.
 }
