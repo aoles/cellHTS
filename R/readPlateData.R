@@ -1,12 +1,10 @@
 ## (C) Michael Boutros and Wolfgang Huber, Nov 2005
 readPlateData = function(filename, path=dirname(filename), name, importFun, verbose=TRUE, plateType)
 {
-
   file = basename(filename)
   dfiles = dir(path)
 
-
-if(!missing(plateType)) warning("The argument 'plateType' is deprecated!")
+  if(!missing(plateType)) warning("The argument 'plateType' is deprecated!")
 
   if(!(is.character(path)&&length(path)==1))
     stop("'path' must be character of length 1")
@@ -16,37 +14,32 @@ if(!missing(plateType)) warning("The argument 'plateType' is deprecated!")
   checkColumns(pd, file, mandatory=c("Filename", "Plate", "Replicate"),
                numeric=c("Plate", "Replicate", "Channel", "Batch"))
 
-## consistency check for "importFun"
-if (!missing(importFun)) {
- if (!is(importFun, "function")) stop("'importFun' should be a function to use to read the raw data files")
-} else {
-# default function (compatible with the file format of the plate reader)
-# input: 
-# output: data.frame with "txt", "well" and "val"
-importFun = function(f) {
-    txt = readLines(f)
-    sp  = strsplit(txt, "\t")
-    well     = sapply(sp, "[", 2)
-    val     = sapply(sp, "[", 3)
-out = list(data.frame(well=I(well), val=as.numeric(val)),
-	txt = I(txt))
-#data.frame(txt=I(txt), well=I(well), val=as.numeric(val))
-return(out)
-}
-}
+  ## consistency check for "importFun"
+  if (!missing(importFun)) {
+    if (!is(importFun, "function")) stop("'importFun' should be a function to use to read the raw data files")
+  } else {
+    ## default function (compatible with the file format of the plate reader)
+    importFun = function(f) {
+      txt = readLines(f)
+      sp  = strsplit(txt, "\t")
+      well     = sapply(sp, "[", 2)
+      val     = sapply(sp, "[", 3)
+      out = list(data.frame(well=I(well), val=as.numeric(val)),
+        txt = I(txt))
+      return(out)
+    }
+  }
 
-## check if the data files are in the given directory
-   a = unlist(sapply(pd$Filename, function(z) grep(z, dfiles, ignore.case=TRUE)))
-   if (length(a)==0) stop(sprintf("None of the files were found in the given 'path': %s", path))
+  ## check if the data files are in the given directory
+  a = unlist(sapply(pd$Filename, function(z) grep(z, dfiles, ignore.case=TRUE)))
+  if (length(a)==0) stop(sprintf("None of the files were found in the given 'path': %s", path))
+  
+  f = file.path(path, dfiles[a])
 
-
-
-f = file.path(path, dfiles[a])
-
-## check if 'imporFun' gives the output in the desired form
-aux = importFun(f[1])
-if (which(unlist(lapply(aux, is, "data.frame"))) != 1 | !all(c("val", "well") %in% names(aux[[1]])) | length(aux)!=2)
-	stop("The output of 'importFun' must be a list with 2 components; the first component should be a 'data.frame' with slots 'well' and 'val'.")
+  ## check if 'imporFun' gives the output in the desired form
+  aux = importFun(f[1])
+  if (which(unlist(lapply(aux, is, "data.frame"))) != 1 | !all(c("val", "well") %in% names(aux[[1]])) | length(aux)!=2)
+    stop("The output of 'importFun' must be a list with 2 components; the first component should be a 'data.frame' with slots 'well' and 'val'.")
 
 
 Let = c()
