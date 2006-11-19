@@ -9,7 +9,7 @@ myImageMap <- function(object, tags, imgname) {
                  nrow(object),").", sep=""))
 
   mapname <- paste("map", gsub(" |/|#", "_", imgname), sep="_")
-  out <- paste("<IMG SRC=\"", imgname, "\" USEMAP=\#", mapname, " BORDER=2>", 
+  out <- paste("<IMG SRC=\"", imgname, "\" USEMAP=#", mapname, " BORDER=2>", 
                          "<MAP NAME=\"", mapname, "\">", sep="")
   for(i in 1:nrow(object)) {
     out = paste(out, "<AREA SHAPE=\"rect\" COORDS=\"", paste(object[i,], collapse=","),

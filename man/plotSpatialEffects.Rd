@@ -39,7 +39,7 @@ The maximum and the minimum values are calculated using all the values in
 
 \examples{
     data(KcViabSmall)
-    x = normalizePlates(KcViabSmall, normalizationMethod="Bscore", BscoreArgs=list(save.model = TRUE))
+    x = normalizePlates(KcViabSmall, normalizationMethod="Bscore", save.model = TRUE)
     ## see plate plots with the row and column estimated offsets for plates 1 and 3:
     plotSpatialEffects(x, plateRange=c(1,3))
 }

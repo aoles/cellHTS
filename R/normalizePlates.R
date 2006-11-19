@@ -5,19 +5,15 @@ normalizePlates = function(x, normalizationMethod="median", transform, zscore, p
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
 
   ## Apply the chosen plate-wise normalization function
-  if (normalizationMethod=="Bscore") {
-    x = x[!(names(x) %in% c("xnorm", "residuals", "rowcol.effects", "overall.effects"))]
-    x = append(x, Bscore(x$xraw, ...))
-  } else {
-    x$xnorm = switch(normalizationMethod,
-      mean = scaleByPlateMean(x$xraw),
-      median = scaleByPlateMedian(x$xraw),
-      shorth = scaleByPlateShorth(x$xraw),
-      negatives = scaleByPlateNegatives(x$xraw, negControls),
-      POC = POC(x$xraw, posControls),
-      NPI = NPI(x$xraw, posControls, negControls),
-      stop(sprintf("Invalid value '%s' for argument 'normalizationMethod'", normalizationMethod)))
-  }
+  x = switch(normalizationMethod,
+    mean      = scaleByPlateMean(x),
+    median    = scaleByPlateMedian(x),
+    shorth    = scaleByPlateShorth(x),
+    negatives = scaleByPlateNegatives(x, negControls),
+    POC       = POC(x, posControls),
+    NPI       = NPI(x, posControls, negControls),
+    Bscore    = Bscore(x, ...),
+    stop(sprintf("Invalid value '%s' for argument 'normalizationMethod'", normalizationMethod)))
   
   ## See if the data should be further transformed
   if(!missing(transform)) {

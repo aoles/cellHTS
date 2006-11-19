@@ -84,7 +84,7 @@ Malo, N., Hanley, J.A., Cerquozzi, S., Pelletier, J. and Nadon, R. (2006) Statis
     x <- KcViabSmall
     x <- Bscore(x, save.model = TRUE)
     ## identical result, but calling Bscore function from "normalizePlates"
-    xopt <- normalizePlates(x, normalizationMethod="Bscore", BscoreArgs = list(save.model = TRUE))
+    xopt <- normalizePlates(x, normalizationMethod="Bscore", save.model = TRUE)
     all(x$xnorm==xopt$xnorm, na.rm=TRUE)
 }
 \keyword{manip}
