@@ -65,13 +65,10 @@ data. This is an array of the same dimensions as \code{xraw}.
 Moreover, the processing status of the \code{cellHTS} object is updated
 in the slot \code{state} to \code{x$state["normalized"]=TRUE}.
 
-Furthermore, if \code{normalizationMethod="Bscore"}, and
-\code{save.model=TRUE} was given, the slots
-\code{residuals}, \code{rowcol.effects}, and \code{overall.effects}
-(only if \code{adjustPlateMedian} was also set to \code{TRUE}) are added to \code{x}. The latter slots are arrays
-with the same dimension as \code{x$xraw}, except the
-\code{overall.effects}, which have dimensions \code{1 x nr Plates x nr
-Replicates x nr Channels}.  }
+Additional outputs may be given if
+\code{adjustPlates="Bscore"}. Please refer to the help page of
+the \code{\link[cellHTS:Bscore]{Bscore}} function.
+}
 
 \author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
 
