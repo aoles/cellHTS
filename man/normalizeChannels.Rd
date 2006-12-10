@@ -14,7 +14,7 @@ normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zsc
   \item{fun}{a function defined by the user to relate the signal in the
     two channels \code{r1} and \code{r2}. \code{fun} takes two
     numeric vectors and returns a numeric vector of the same length. The
-    default is to take the ration between the second and first channels.}
+    default is to take the ratio between the second and first channels.}
   \item{log}{a logical value indicating whether the result obtained after applying 
     \code{fun} should be \code{\link{log2}} transformed. The default is \code{log = FALSE}, 
     and the data is not \code{log2} transformed.}
