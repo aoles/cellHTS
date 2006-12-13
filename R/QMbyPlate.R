@@ -487,11 +487,7 @@ for (pname in namePos) {
   } ## for channel
 
 
-  if(is.logical(plotPlateArgs)) {
-    stopifnot(!plotPlateArgs)
-  } else {
-    if(!is.list(plotPlateArgs))
-      stop("'plotPlateArgs' must be a list.")
+  if(is.list(plotPlateArgs)) {
     if(!all(names(plotPlateArgs) %in% c("sdcol", "sdrange", "xcol", "xrange")))
       stop("Only elements 'sdcol', 'sdrange', 'xcolx', and 'xrange' are allowed for 'plotPlateArgs'")
 
@@ -501,7 +497,7 @@ for (pname in namePos) {
     if(is.null(plotPlateArgs$sdcol))
       plotPlateArgs$sdcol = brewer.pal(9, "YlOrRd")
     if(is.null(plotPlateArgs$xcol))
-      plotPlateArgs$xcol=rev(brewer.pal(9, "RdBu"))
+      plotPlateArgs$xcol = rev(brewer.pal(9, "RdBu"))
 
     ## set this argument as a list with the same length as the number of channels
     if(is.null(plotPlateArgs$xrange)) { 
@@ -519,9 +515,7 @@ for (pname in namePos) {
           plotPlateArgs$sdrange=list(plotPlateArgs$sdrange)
           length(plotPlateArgs$sdrange)=nrChannel } }
 
-
     oldcount = count
-
 
     for (ch in 1:nrChannel) {
       char <- character(dim(x)[1])
@@ -609,10 +603,9 @@ for (pname in namePos) {
 ##        plotTable[count + 1, ch+1] = sprintf("<CENTER>%d replicate(s): plate plot omitted</CENTER>\n",
 ##                          nrRep)
 ##      }
+
     } # channel
-  } # plot plates
-
-
+  } # if(is.list(plotPlateArgs))
 
   ## include also a "channel 2 vs channel 1" plot if the number of channels is 2
   if (nrChannel==2) {	

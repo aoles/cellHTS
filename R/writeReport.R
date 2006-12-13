@@ -67,39 +67,45 @@ writeHTMLtable4plots = function(x, con,
 }
 
 ##----------------------------------------------------------------------------
-## internal function: to deal with the behaviour of "tolower", when it is called for NULL or NA.
-# myTolower = function(z) {
-#   if (!is.null(z)) 
-#     if (!all(is.na(z))) z=tolower(z) else z=NULL 
-#   return(z)
-# }
-
-
-##----------------------------------------------------------------------------
-writeReport = function(x, outdir=file.path(getwd(), x$name), force=FALSE, plotPlateArgs = FALSE, imageScreenArgs = NULL, posControls, negControls) {
+writeReport = function(x,
+  outdir=file.path(getwd(), x$name),
+  force=FALSE,
+  plotPlateArgs=FALSE,
+  imageScreenArgs=NULL,
+  progressReport = interactive(),
+  posControls,
+  negControls) {
 
   if(!inherits(x, "cellHTS"))
     stop("'x' must be a 'cellHTS' object")
-
 
   nrWell    = dim(x$xraw)[1]
   nrPlate   = dim(x$xraw)[2]
   nrReplicate = dim(x$xraw)[3]
   nrChannel = ifelse(x$state["normalized"], dim(x$xnorm)[4], dim(x$xraw)[4])
-  timeCounter=0
-  fz =!is.logical(plotPlateArgs)
-  fzs = ifelse("map" %in% names(imageScreenArgs), imageScreenArgs$map, FALSE)
 
-## Rough estimation of the total computation time that the function will take
-# 1 = one time unit
-if (interactive()) {
-    totalTime= 2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) + 0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +(x$state["scored"])*nrChannel*14 + (x$state["scored"])*fzs*nrPlate*2
+  if(is.logical(plotPlateArgs)) {
+    if(plotPlateArgs)
+      plotPlateArgs=list()
+  } else {
+    if(!is.list(plotPlateArgs))
+      stop("'plotPlateArgs' must either be logical or a list.")
+  }
+  
+  ## Rough estimation of the total computation time that the function will take
+  ## 1 = one time unit
+  if (progressReport) {
+    fz  = is.list(plotPlateArgs)
+    fzs = ifelse("map" %in% names(imageScreenArgs), imageScreenArgs$map, FALSE)
+    totalTime= (2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) +
+      0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +
+        (x$state["scored"])*nrChannel*14 + (x$state["scored"])*fzs*nrPlate*2)
    require("prada")
    progress(title="cellHTS is busy", message = sprintf("\nCreating HTML pages for '%s'", x$name)) 
    on.exit(killProgress(), add=TRUE)
    timeCounter=1
    updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
-}
+  }
 
   ## See if output directory exists. If not, create. If yes, check if it is empty,
   ## and if not, depending on parameter 'force', throw an error or clean it up.
@@ -126,10 +132,10 @@ if (interactive()) {
   dir.create(file.path(outdir, "in"))
   nm = file.path("in", "Description.txt")
 
-if(timeCounter) {
-   timeCounter=timeCounter+2
-   updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
-
+  if(progressReport) {
+    timeCounter=timeCounter+2
+    updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+  }
 
   if(x$state["configured"]) {
   writeLines(x$screenDesc, file.path(outdir, nm))
@@ -140,75 +146,71 @@ if(timeCounter) {
   ## controls annotation
  twoWay=FALSE
  if(x$state["configured"]) {
-  if(timeCounter) {
-   timeCounter=timeCounter+2
-   updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+  if(progressReport) {
+    timeCounter=timeCounter+2
+    updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+  }
 
-    if (!missing(posControls)) {
-## checks
-      if(!is(posControls, "list")){
-        ## check
-        if (!is(posControls, "vector") | length(posControls)!=nrChannel | mode(posControls)!="character") 
-          stop(sprintf("'posControls' should be a vector of regular expressions with length %d",
-                       nrChannel))
-
-        ##posControls = lapply(posControls, myTolower)
- 
-       ## see if there are different positive controls (e.g. with different strengths)
-        aux = unique(posControls)
-        aux = aux[! (aux  %in% c(NA, "") )]
-        if (length(aux)>1) 
-          aux = sapply(aux, function(h) unique(as.character(x$wellAnno[which(regexpr(h, as.character(x$wellAnno), perl=TRUE)>0)]))) 
-        else 
-          aux = unique(as.character(x$wellAnno[which(regexpr(aux, as.character(x$wellAnno), perl=TRUE)>0)]))
-
-          namePos = unique(unlist(aux)) 
-          namePos = sort(x$plateConf$Content[match(namePos, tolower(x$plateConf$Content))])
-    }else{
-        if (length(posControls)!=2 ||
-            !identical(sort(names(posControls)), c("act", "inh")) ||
-            any(sapply(posControls, length)!=nrChannel) ||
-            any(sapply(posControls, mode)!="character"))#* 
-          stop(cat(sprintf("'posControls' should be a list with 
+  if (!missing(posControls)) {
+    ## checks
+    if(!is(posControls, "list")){
+      ## check
+      if (!is(posControls, "vector") | length(posControls)!=nrChannel | mode(posControls)!="character") 
+        stop(sprintf("'posControls' should be a vector of regular expressions with length %d",
+                     nrChannel))
+      
+      ## see if there are different positive controls (e.g. with different strengths)
+      aux = unique(posControls)
+      aux = aux[! (aux  %in% c(NA, "") )]
+      if (length(aux)>1) 
+        aux = sapply(aux, function(h) unique(as.character(x$wellAnno[which(regexpr(h, as.character(x$wellAnno), perl=TRUE)>0)]))) 
+      else 
+        aux = unique(as.character(x$wellAnno[which(regexpr(aux, as.character(x$wellAnno), perl=TRUE)>0)]))
+      
+      namePos = unique(unlist(aux)) 
+      namePos = sort(x$plateConf$Content[match(namePos, tolower(x$plateConf$Content))])
+    } else {
+      if (length(posControls)!=2 ||
+          !identical(sort(names(posControls)), c("act", "inh")) ||
+          any(sapply(posControls, length)!=nrChannel) ||
+          any(sapply(posControls, mode)!="character"))#* 
+        stop(cat(sprintf("'posControls' should be a list with 
              two components: 'act' and 'inh'.\n These components 
              should be vectors of regular expressions with length %d \n", nrChannel)))
-        twoWay=TRUE
-        namePos = NULL
-      }## else is list
+      twoWay=TRUE
+      namePos = NULL
+    }## else is list
 
-    }else{## if !missing
-## assumes the screen is a one-way assay
-      posControls=as.vector(rep("^pos$", nrChannel))
-      namePos = "pos"
-    }
-
-
-    if (!missing(negControls)) {
-      ## check
-      if (!is(negControls, "vector") | length(negControls)!=nrChannel | mode(negControls)!="character") 
-        stop(sprintf("'negControls' should be a vector of regular expressions with length %d", nrChannel))
-
-      ## negControls = lapply(negControls, myTolower)
-    } else {
-      negControls=as.vector(rep("^neg$", nrChannel))
-    }
-  }## if configured
-
-
+  }else{## if !missing
+    ## assumes the screen is a one-way assay
+    posControls=as.vector(rep("^pos$", nrChannel))
+    namePos = "pos"
+  }
+  
+  if (!missing(negControls)) {
+    ## check
+    if (!is(negControls, "vector") | length(negControls)!=nrChannel | mode(negControls)!="character") 
+      stop(sprintf("'negControls' should be a vector of regular expressions with length %d", nrChannel))
+    
+    ## negControls = lapply(negControls, myTolower)
+  } else {
+    negControls=as.vector(rep("^neg$", nrChannel))
+  }
+}## if configured
 
   ## Define the bins for the histograms (channel-dependent)
   if(x$state["configured"]) {
-    if(timeCounter) {
+    if(progressReport)  {
       timeCounter=timeCounter+2
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+    }
 
     brks = apply(if(x$state["normalized"]) { x$xnorm } else { x$xraw },
       4, range, na.rm=TRUE)
-    #brks = apply(brks, 2, function(s) seq(s[1], s[2], length=ceiling(nrWell/10)))
     brks = apply(brks, 2, function(s) pretty(s, n=ceiling(nrWell/10))) 
     if(!is(brks, "list")) brks=split(brks, col(brks))
-# put as list also for the case ch=1 or for the case when brks have = length for each channel 
-    }
+    ## put as list also for the case ch=1 or for the case when brks have = length for each channel 
+  }
 
   ## QC per plate & channel
 
@@ -306,9 +308,10 @@ for(p in 1:nrPlate){
         }## for channel
       }## if length w
 
-      if(timeCounter) {
+      if(progressReport) {
         timeCounter=timeCounter+(nrReplicate*nrChannel)*(1+2*fz)
-        updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+        updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+      }
 
     }## for p plates
   }##if configured
@@ -326,29 +329,27 @@ for(p in 1:nrPlate){
     writeLines(txt, file.path(outdir, nm[w]))
     url[w, "Filename"] = nm[w]
 
-   if(timeCounter) {
-      timeCounter=timeCounter + 0.01
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
-
+   if(progressReport) {
+     timeCounter=timeCounter + 0.01
+     updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
   }
 
   cat("<CENTER>", file=con)
   writeHTMLtable(exptab, url=url, con=con)
   cat("</CENTER><BR><BR>", file=con)
 
-
-
   ## Per experiment QC
   plotTable = QMexperiment(x, outdir, con, posControls, negControls, isTwoWay=twoWay, namePos=namePos)
 
-   if(timeCounter) {
-      timeCounter=timeCounter+(5*nrReplicate*nrChannel)
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+  if(progressReport) {
+    timeCounter=timeCounter+(5*nrReplicate*nrChannel)
+    updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+  }
 
   ## Score table and screen-wide QC
   ## To do (wh 16.5.2006): the code within this monster if-statement would probably better be encapsulated in a separate helper function?
   if(x$state["scored"]) {
-## Checks whether the number of channels has changed after normalization
+    ## Checks whether the number of channels has changed after normalization
     trueNrCh = dim(x$xraw)[4]
     w=1:length(x$score)
     out=data.frame(
@@ -365,10 +366,11 @@ for(p in 1:nrPlate){
     for (ch in 1:trueNrCh)
       out[sprintf("xrawAnno_r%d_ch%d", 1:nrReplicate, ch)] = matrix(xrawWellAnno[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
 
-  if(timeCounter) {
+    if(progressReport) {
       timeCounter=timeCounter+ nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
-
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+    }
+    
     ## include also the raw values for each replicate and channel	 
     for (ch in 1:trueNrCh)
       out[sprintf("raw_r%d_ch%d", 1:nrReplicate, ch)] = matrix(x$xraw[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate)
@@ -386,10 +388,11 @@ for(p in 1:nrPlate){
         } ## if
       } ## if
     } ## for ch
-
-  if(timeCounter) {
+    
+    if(progressReport) {
       timeCounter=timeCounter+ 3*nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+    }
 
     ## raw/plateMedian
     xn = array(as.numeric(NA), dim=dim(x$xraw))
@@ -400,15 +403,13 @@ for(p in 1:nrPlate){
           xn[, p, r, ch] = x$xraw[, p, r, ch] / median(x$xraw[samples, p, r, ch], na.rm=TRUE)
     }
 
-  if(timeCounter) {
+    if(progressReport) {
       timeCounter=timeCounter+ 3*nrChannel
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
-
-
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+    }
 
     for (ch in 1:trueNrCh)
       out[sprintf("raw/PlateMedian_r%d_ch%d", 1:nrReplicate, ch)] = signif(matrix(xn[,,,ch], nrow = nrWell*nrPlate, ncol = nrReplicate), 3)
-
 
     if(x$state["annotated"]) {
       out = cbind(out, x$geneAnno)
@@ -418,22 +419,20 @@ for(p in 1:nrPlate){
       ttInfo = "Table of scored probes"
     }
 
-## 01.06.2006 Export everything to topTable.txt
+    ## Export everything to topTable.txt
     ## consider only the wells with sample and controls, at least for one of the replicates
-#     toconsider = which(!apply(out[,grep("xrawAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
-#     out = out[toconsider, ]
-#     toconsider = !is.na(out$score)
-#     out = out[toconsider,]
+    ##     toconsider = which(!apply(out[,grep("xrawAnno",names(out))], 1, function(u) all(u=="flagged") || any(u=="empty") || any(u=="other")))
+    ##     toconsider = !is.na(out$score)
+    ##     out = out[toconsider,]
     out = out[order(out$score, decreasing=TRUE), ]
     out$score = round(out$score, 2)
     write.table(out, file=file.path(outdir, "topTable.txt"), sep="\t", row.names=FALSE, col.names=TRUE, quote = FALSE)
 
-    if(timeCounter) {
+    if(progressReport) {
       timeCounter=timeCounter+ nrChannel
       updateProgress(100*timeCounter/totalTime, autoKill=!TRUE)
     }
-
-##  
+    
     if ("map" %in% names(imageScreenArgs)) {
       mapx = imageScreenArgs$map 
       imageScreenArgs = imageScreenArgs[!names(imageScreenArgs) %in% "map"] 
@@ -445,7 +444,7 @@ for(p in 1:nrPlate){
                     fun = function(map=mapx) return(do.call("imageScreen", args=append(list(x=x, map=map),imageScreenArgs))),
                     print=FALSE, isImageScreen=TRUE)
 
-    if(timeCounter) {
+    if(progressReport) {
       timeCounter=timeCounter + 4*nrChannel
       updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
     }
@@ -464,16 +463,17 @@ for(p in 1:nrPlate){
     }
 
 
-   if(timeCounter) {
+    if(progressReport) {
       timeCounter=timeCounter+ 2*nrChannel + nrPlate*(x$state["scored"])*fzs*2
-      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)}
-
+      updateProgress(100*timeCounter/totalTime, autoKill = !TRUE)
+    }
   } ## if scored
-
+  
   writeHTMLtable4plots(plotTable, con=con)
 
-  if(timeCounter) {
-      updateProgress(100, autoKill = !TRUE)}
+  if(progressReport) {
+    updateProgress(100, autoKill = !TRUE)
+  }
 
   writetail(con)
   return(indexFile)

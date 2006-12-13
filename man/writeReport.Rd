@@ -6,8 +6,14 @@
   Creates a directory with HTML pages of linked tables and plots
   documenting the contents of a \code{cellHTS} object.}
 \usage{
-writeReport(x, outdir=file.path(getwd(), x$name),
-  force=FALSE, plotPlateArgs=FALSE, imageScreenArgs=NULL, posControls, negControls)
+writeReport(x,
+  outdir=file.path(getwd(), x$name),
+  force=FALSE,
+  plotPlateArgs=FALSE,
+  imageScreenArgs=NULL,
+  progressReport = interactive(),
+  posControls,
+  negControls)
 }
 
 \arguments{
@@ -20,13 +26,15 @@ writeReport(x, outdir=file.path(getwd(), x$name),
     if \code{outdir} exists and is not empty.
     If \code{force} is \code{TRUE}, the function overwrites (removes and recreates)
     \code{outdir}, otherwise it casts an error.}
-  \item{plotPlateArgs}{either a list with parameters for the plate plots the
-    per plate quality report pages, or a logical with value \code{FALSE}.
+  \item{plotPlateArgs}{either a list with parameters for the plate plots
+    of the per plate quality report pages, or a logical scalar with values
+    \code{FALSE} or \code{TRUE}.
     If \code{FALSE}, the plate plots are omitted, this option is
     here because the production of the plate plots takes a long time.
     See details.}
   \item{imageScreenArgs}{a list with parameters for the function
-    \code{\link[cellhts]{imageScreen}}. See details.} 
+    \code{\link[cellhts]{imageScreen}}. See details.}
+  \item{progressReport}{a logical, should a progress report window be displayed?}
   \item{posControls}{a list or vector of regular expressions specifying the name of the positive controls. See details.}
   \item{negControls}{a vector of regular expressions specifying the name of the negative controls. See details.}
 }
