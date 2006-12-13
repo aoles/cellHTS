@@ -224,7 +224,7 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
             ##                 this assumes that the data are on multplicative scale.
             ## positive and negative scale: this may happen when we have scored the replicates 
             ##                 separately and saved the results in x$xnorm; determine the difference 
-            ##                 between the aritmetic mean between pos and negative controls.
+            ##                 between the arithmetic mean between pos and negative controls.
 
             currentPos = posCtrls[[ch]][[pname]]
             dr = if(allPositives) {
