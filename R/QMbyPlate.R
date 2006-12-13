@@ -1,3 +1,4 @@
+
 myImageMap <- function(object, tags, imgname) {
 
   if(!is.matrix(object)||ncol(object)!=4)
@@ -206,84 +207,84 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
     value=drInh, comment=I(commInh)))
 
 
-} else {##if isTwoWay
+    } else {
+      ##---------------------------------------
+      ##  One Way
+      ##----------------------------------------
+      if (!is.null(posCtrls[[ch]])) {
+        ## for each different positive control:
+        for (pname in names(posCtrls[[ch]])) {
+          if (pname=="pos" & length(posCtrls[[ch]])==1) pn="" else pn = sprintf("'%s'",pname)
 
+          ## 1. Dynamic range (neg / pos controls)
+          if(length(posCtrls[[ch]][[pname]])>0 && length(negCtrls[[ch]])>0) {
 
+            ## see the data scale.
+            ## positive scale: go to log-scale, average and take difference, then re-exponentiate
+            ##                 this assumes that the data are on multplicative scale.
+            ## positive and negative scale: this may happen when we have scored the replicates 
+            ##                 separately and saved the results in x$xnorm; determine the difference 
+            ##                 between the aritmetic mean between pos and negative controls.
 
-if (!is.null(posCtrls[[ch]])) {
-## for each different positive control:
-for (pname in names(posCtrls[[ch]])) {
-
-if (pname=="pos" & length(posCtrls[[ch]])==1) pn="" else pn = sprintf("'%s'",pname)
-
-      ## 1. Dynamic range (neg / pos controls)
-      if(length(posCtrls[[ch]][[pname]])>0 && length(negCtrls[[ch]])>0) {
-
-    ## see the data scale.
-    ## positive scale: go to log-scale, average and take difference, then re-exponentiate
-    ##                 this assumes that the data are on multplicative scale.
-    ## positive and negative scale: this may happen when we have scored the replicates 
-    ##                 separately and saved the results in x$xnorm; determine the difference 
-    ##                 between the aritmetic mean between pos and negative controls.
-
-    currentPos = posCtrls[[ch]][[pname]]
-    if (allPositives) 
-      dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
-        mean(log(v[currentPos]), na.rm=TRUE) - mean(log(v[negCtrls[[ch]]]), na.rm=TRUE))
-    else  
-      dr = apply(x[,,,ch, drop=FALSE], 3, function(v)
-        mean(v[currentPos], na.rm=TRUE)- mean(v[negCtrls[[ch]]], na.rm=TRUE))
-
-     dr[is.na(dr)]=as.numeric(NA)
-      ## consider also the dynamic range for each individual replicate
-      for (r in 1:maxRep) {
-       if (r %in% whHasData[[ch]]) { 
-           if (is.na(dr[r])) commR = I("No available values for one of the controls") else commR = I("")
-           if (allPositives) drval = round(exp(dr[r]), 2) else drval = round(abs(dr[r]), 2)
-           qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %s)",pn, r)), value=drval, comment=commR)) 
-       } else {
-       qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %s)",pn, r)), value=NA, comment=I(sprintf("Replicate %s is missing", r))))}
-     }
-    if (allPositives) 
-       dr = round(exp(mean(dr, na.rm=TRUE)), 2) 
-    else 
-       dr = round(abs(mean(dr, na.rm=TRUE)), 2) 
+            currentPos = posCtrls[[ch]][[pname]]
+            dr = if(allPositives) {
+              apply(x[,,,ch, drop=FALSE], 3, function(v)
+                    exp(abs(mean(log(v[currentPos]), na.rm=TRUE) - mean(log(v[negCtrls[[ch]]]), na.rm=TRUE))))
+            } else {
+              apply(x[,,,ch, drop=FALSE], 3, function(v)
+                    abs(mean(    v[currentPos] , na.rm=TRUE) - mean(    v[negCtrls[[ch]]] , na.rm=TRUE)))
+            }
+            dr = round(dr, 2)
+            
+            ## consider also the dynamic range for each individual replicate
+            for (r in 1:maxRep) {
+              if (r %in% whHasData[[ch]]) { 
+                commR = I(if (is.na(dr[r])) "No available values for one of the controls" else "")
+                qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %s)",pn, r)),
+                  value=dr[r], comment=commR)) 
+              } else {
+                qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %s)",pn, r)),
+                  value=NA, comment=I(sprintf("Replicate %s is missing", r))))
+              }
+            } ## for r
+    
+            dr = if (allPositives) 
+              round(exp(mean(log(dr), na.rm=TRUE)), 2) 
+            else 
+              round(mean(dr, na.rm=TRUE), 2)
  
- if (is.na(dr)) { 
-   dr = as.numeric(dr)
-   comm="No available values for one of the controls in all replicates" 
- } else {
-   comm = "" 
- } 
+            if (is.na(dr)) { 
+              comm="No available values for one of the controls in all replicates" 
+            } else {
+              comm = "" 
+            } 
 
-} else { ## if length pos & neg
-    dr = as.numeric(NA)
-    comm = "No controls ('pos' and 'neg') were found."
-    for (u in 1:maxRep) 
-       qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %d)",pn,u)), value=dr, comment=I(comm)))
-} ## else length pos & neg
+          } else { ## if length pos & neg
+            dr = as.numeric(NA)
+            comm = "No controls ('pos' and 'neg') were found."
+            for (u in 1:maxRep) 
+              qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %d)",pn,u)), value=dr, comment=I(comm)))
+          } ## else length pos & neg
 
- qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s", pn)), 
-     value=dr, comment=I(comm)))
-}## for names(posCtrls[[ch]])
-
+          qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s", pn)), 
+            value=dr, comment=I(comm)))
+        } ## for names(posCtrls[[ch]])
 
 
-} else {## if !is.null(posCtrls[[ch]])
-for (pname in namePos) {
-    if (pname=="pos" & length(posCtrls[[ch]])==1) pn="" else pn = sprintf("'%s'",pname)
-    dr = as.numeric(NA)
-    comm = "No controls ('pos' and 'neg') were found."
-    for (u in 1:maxRep) 
-       qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %d)",pn,u)), value=dr, comment=I(comm)))
- qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s", pn)), 
-     value=dr, comment=I(comm)))
-}## for namePos
+      } else {
+        ## if !is.null(posCtrls[[ch]])
+        for (pname in namePos) {
+          if (pname=="pos" & length(posCtrls[[ch]])==1) pn="" else pn = sprintf("'%s'",pname)
+          dr = as.numeric(NA)
+          comm = "No controls ('pos' and 'neg') were found."
+          for (u in 1:maxRep) 
+            qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %d)",pn,u)), value=dr, comment=I(comm)))
+          qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s", pn)), 
+            value=dr, comment=I(comm)))
+        }## for namePos
 
-}## else !is.null(posCtrls[[ch]])
-}## else isTwoWay
-
-
+      }## else !is.null(posCtrls[[ch]])
+    }## else isTwoWay
 
     ## 2. Correlation coefficient (just for samples wells)
     if (nrRep==2) {
