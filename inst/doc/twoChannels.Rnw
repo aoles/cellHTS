@@ -272,7 +272,7 @@ x <- normalizePlates(x,normalizationMethod="median")
 @ 
 %
 <<set cut-off for R1, echo=TRUE, results=hide>>=
-ctoff <- apply(x$xnorm[,,,2], 3, quantile, probs=0.05, na.rm=TRUE)
+ctoff <- apply(x$xnorm[,,,1], 3, quantile, probs=0.05, na.rm=TRUE)
 @ 
 %
 
