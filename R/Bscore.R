@@ -81,8 +81,8 @@ if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(xn)[
 	rowcol = 2^rowcol  # no problem, because the extra 0s where again set to NAs
         xn[, p, r, ch] = 2^xn[, p, r, ch]
       }
-      rowcol.effects[,p,r,ch] = rowcol
-      residuals[,p,r,ch] = m$residuals
+      rowcol.effects[,p,r,ch] = as.vector(t(rowcol))
+      residuals[,p,r,ch] = as.vector(t(m$residuals))
       if (adjustPlateMedian) 
        overall.effects[,p,r,ch]=m$overall
    }
