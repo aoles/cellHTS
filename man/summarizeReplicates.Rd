@@ -18,7 +18,7 @@ summarizeReplicates(x, zscore, summary = "min")
     or "-", specifying the sign to use for the calculated 
     \emph{z}-scores (see details).}
   \item{summary}{a character string indicating how to summarize between replicated measurements. 
-    One of "min" (default), "mean", "min", or "rms" can be used (see details).}
+    One of "min" (default), "mean", "max", "rms", "closestToZero", or "FurthestFromZero" can be used (see details).}
 }
 \details{
  Given the normalized values given in the slot \code{xnorm} of \code{x}, a single \emph{z}-score is calculated for each probe.
@@ -34,11 +34,11 @@ summarizeReplicates(x, zscore, summary = "min")
  such a phenotype will be represented by a negative \emph{z}-score.  
  This option can be set to calculate the results to the commonly used convention.
  
- Finally, a single \emph{z}-score per probe is calculated by summarizing between scored replicates. If \code{summary="mean"}, 
- the average of replicate values is considered; if 
+ Finally, a single \emph{z}-score per probe is calculated by summarizing between scored replicates. If \code{summary="mean"}, the average of replicate values is considered; if 
 \code{summary="max"}, then the maximum of replicate
- intensities is taken; if \code{summary="min"}, the minimum is considered, instead (conservative); if \code{summary="rms"}, the 
-square root of the mean squared value of the replicates (root mean square) is taken as a summary function.
+ intensities is taken; if \code{summary="min"}, the minimum is considered, instead (conservative); if \code{summary="rms"}, the square root of the mean squared value of the replicates (root mean square) is taken as a summary function;
+if \code{summary="closestToZero"}, the value closest to zero is taken as a summary (ueful when both sides of the distribution of z-score values are of interest);
+if \code{summary="furthestFromZero"}, the value furthest from zero is taken as a summary (ueful when both sides of the distribution of z-score values are of interest)
 }
 
 \value{

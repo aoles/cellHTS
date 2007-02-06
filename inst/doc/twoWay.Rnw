@@ -264,7 +264,7 @@ The normalized intensities are stored in the slot
 
 Below, we call the function \Rfunction{summarizeReplicates} to determine the 
 $z$-score values for each replicate, and then summarize 
-the replicated $z$-score values by taking the average.
+the replicated $z$-score values by taking the average. A more conservative approach would be to consider the $z$-score value closest to zero between replicates (\Robject{summary}='closestToZero').
 %
 <<summarizeReplicates>>=
 x <- summarizeReplicates(x, zscore="+", summary="mean") 

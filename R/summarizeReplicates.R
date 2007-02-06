@@ -32,11 +32,22 @@ summarizeReplicates=function(x, zscore, summary="min") {
     ifelse(length(x)>=1, min(x), as.numeric(NA))
   }
 
+  myFurthestFromZero = function(x) {
+    x = x[!is.na(x)]
+    ifelse(length(x)>=1, x[abs(x)==max(abs(x))][1], as.numeric(NA))
+  }
+
+  myClosestToZero = function(x) {
+    x = x[!is.na(x)]
+    ifelse(length(x)>=1, x[abs(x)==min(abs(x))][1], as.numeric(NA))
+  }
+
   ## Root mean square: square root of the mean squared value of the replicates
   myRMS = function(x) {
     x = x[!is.na(x)]
     ifelse(length(x)>=1, sqrt(sum(x^2)/length(x)), as.numeric(NA))
   }
+
 
   ## 2) Summarize between replicates:
   avr   = switch(summary,
@@ -44,6 +55,8 @@ summarizeReplicates=function(x, zscore, summary="min") {
     max  = apply(mx, 1, myMax),
     min  = apply(mx, 1, myMin),
     rms = apply(mx, 1, myRMS),
+    closestToZero = apply(mx, 1, myClosestToZero),
+    furthestFromZero = apply(mx, 1, myFurthestFromZero),
     stop(sprintf("Invalid value '%s' for argument 'summary'", summary)))
 
   x$score = avr

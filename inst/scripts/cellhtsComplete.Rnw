@@ -379,7 +379,9 @@ choices of summary function between replicates are the minimum, the
 maximum, and the mean. In the first case, the analysis 
 would be particularly
 conservative: all replicate values have to be high in order for
-$z_{k}$ to be high.  In order to compare our results with those
+$z_{k}$ to be high. For the cases where both sides of the distribution of $z$-score values are of interest, alternative summary options for the replicates are to select the value closest to zero (conservative approach) by setting \Robject{summary}='closestToZero' or the value furthest from zero 
+(\Robject{summary}='furthestFromZero').
+In order to compare our results with those
 obtained in the paper of Boutros \textit{et al.}~\cite{Boutros2004},
 we choose to consider the mean as a summary:
 %
