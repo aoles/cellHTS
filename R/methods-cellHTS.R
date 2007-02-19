@@ -1,7 +1,7 @@
 ##----------------------------------------
 ## print 
 ##----------------------------------------
-print.cellHTS = function(x, ...) {
+print.cellHTS = function(x) {
   d=dim(x$xraw)
   cat(sprintf("cellHTS object of name '%s'\n", x$name))
   cat(sprintf("%d plates with %d wells, %d replicates, %d channel%s. State:\n",
@@ -13,7 +13,7 @@ print.cellHTS = function(x, ...) {
 ##----------------------------------------
 ## annotate
 ##----------------------------------------
-annotate.cellHTS = function(x, geneIDFile, ...) {
+annotate.cellHTS = function(x, geneIDFile) {
   geneIDs = read.table(geneIDFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", quote="",fill=TRUE)
 
 
@@ -48,46 +48,45 @@ annotate.cellHTS = function(x, geneIDFile, ...) {
 ##----------------------------------------
 ## configure
 ##----------------------------------------
-configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
+configure.cellHTS = function(x, confFile, logFile, descripFile) {
   conf = read.table(confFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
 
   ## Check if the screen log file was given
   if(!missing(logFile)) {
-
-  slog = read.table(logFile,  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
-  ## Check if the screen log file is empty
-  if (!dim(slog)[1])
+    slog = read.table(logFile,  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
+    ## Check if the screen log file is empty
+    if (nrow(slog)==0)
+      slog = NULL
+    else
+      checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
+                   numeric=character(0))
+  } else {
     slog = NULL
-  else
-    checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
-                 numeric=character(0))
-} else { slog = NULL }
+  }
 
   descript = readLines(descripFile)
 
-  ## backward compatibility...
+  ## backward compatibility
   colnames(conf) = sub("^Pos$", "Position", colnames(conf))
   checkColumns(conf, confFile, mandatory=c("Batch", "Well", "Content"),
                numeric=c("Batch"))
 
-
-
   if ("Position" %in% colnames(conf)) {
-  ## check consistency between 'Position' and 'Well' columns
-  badRows = which(conf$Position!=pos2i(conf$Well, x$pdim))
-  if(length(badRows)>0) {
-    if(length(badRows)>5)
-      badRows = badRows[1:5]
-    msg = paste("The columns 'Position' and 'Well' in ", confFile, " are inconsistent:\n",
-                 paste("Row ", badRows, ": ", conf$Position[badRows], " != ", conf$Well[badRows],
-                       sep="", collapse="\n"),
-                 sep="")
-    stop(msg)
+    ## check consistency between 'Position' and 'Well' columns
+    badRows = which(conf$Position!=pos2i(conf$Well, x$pdim))
+    if(length(badRows)>0) {
+      if(length(badRows)>5)
+        badRows = badRows[1:5]
+      msg = paste("The columns 'Position' and 'Well' in ", confFile, " are inconsistent:\n",
+        paste("Row ", badRows, ": ", conf$Position[badRows], " != ", conf$Well[badRows],
+              sep="", collapse="\n"),
+        sep="")
+      stop(msg)
+    }
+  } else {
+    ## creates the "Position" column
+    conf$Position=pos2i(conf$Well, x$pdim)
   }
-} else {
-# creates the "Position" column
-conf$Position=pos2i(conf$Well, x$pdim)
-}
 
   ## expect prod(x$pdim) * x$nrBatch rows
   nrWpP   = prod(x$pdim)
@@ -143,7 +142,7 @@ Filename' column in the screen log file '", logFile, "' contains invalid entries
 ##----------------------------------------
 ## export data to file as .txt
 ##----------------------------------------
-writeTab.cellHTS = function(x, file=paste(x$name, "txt", sep="."), ...) {
+writeTab.cellHTS = function(x, file=paste(x$name, "txt", sep=".")) {
 
   toMatrix = function(y, prefix) {
     m = matrix(y, nrow=prod(dim(y)[1:2]), ncol=dim(y)[3:4])
