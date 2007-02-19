@@ -1,7 +1,17 @@
+
+checkDots = function(...) {
+  v = list(...)
+  if(length(v)>0) {
+    print(str(v))
+    stop("Unused arguments.")
+  }
+}
+
 ##----------------------------------------
 ## print 
 ##----------------------------------------
-print.cellHTS = function(x) {
+print.cellHTS = function(x, ...) {
+  checkDots(...)
   d=dim(x$xraw)
   cat(sprintf("cellHTS object of name '%s'\n", x$name))
   cat(sprintf("%d plates with %d wells, %d replicates, %d channel%s. State:\n",
@@ -13,29 +23,27 @@ print.cellHTS = function(x) {
 ##----------------------------------------
 ## annotate
 ##----------------------------------------
-annotate.cellHTS = function(x, geneIDFile) {
+annotate.cellHTS = function(x, geneIDFile, ...) {
+  checkDots(...)
+  
   geneIDs = read.table(geneIDFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", quote="",fill=TRUE)
-
-
 
   checkColumns(geneIDs, geneIDFile, mandatory=c("Plate", "Well", "GeneID"),
                numeric=c("Plate"))
 
-# sort the data by Plate and then by well
- geneIDs = geneIDs[order(geneIDs$Plate, geneIDs$Well),]
+  ## sort the data by Plate and then by well
+  geneIDs = geneIDs[order(geneIDs$Plate, geneIDs$Well),]
+  
   ## Some checkings for dimension of "Plate" and "Well"
   ## expect prod(x$pdim) * x$nrPlate rows
   nrWpP   = prod(x$pdim)
   nrPlate = dim(x$xraw)[2]
-
 
   if (!((nrow(geneIDs)==nrWpP*nrPlate) && all(pos2i(geneIDs$Well, x$pdim)==rep(1:nrWpP, times=nrPlate)) &&
        all(geneIDs$Plate == rep(1:nrPlate, each=nrWpP))))
     stop(paste("Invalid input file '", geneIDFile, "': expecting ", nrWpP*nrPlate,
                " rows, one for each well and for each plate. Please see the vignette for",
                " an example.\n", sep=""))
-
-
 
   ## flag 'NA' values in the "GeneID" column:
   geneIDs$GeneID[geneIDs$GeneID %in% "NA"] = NA
@@ -48,7 +56,9 @@ annotate.cellHTS = function(x, geneIDFile) {
 ##----------------------------------------
 ## configure
 ##----------------------------------------
-configure.cellHTS = function(x, confFile, logFile, descripFile) {
+configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
+  checkDots(...)
+  
   conf = read.table(confFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
 
   ## Check if the screen log file was given
@@ -123,8 +133,7 @@ configure.cellHTS = function(x, confFile, logFile, descripFile) {
 
     mt = match(slog$Filename, x$plateList$Filename)
     if(any(is.na(mt)))
-      stop(paste("'
-Filename' column in the screen log file '", logFile, "' contains invalid entries\n",
+      stop(paste("'Filename' column in the screen log file '", logFile, "' contains invalid entries\n",
                  "(i.e. files that were not listed in the plateList file):\n",
                  paste(slog$Filename[is.na(mt)], collapse=", "), "\n", sep=""))
     ipl  = x$plateList$Plate[mt]
@@ -142,8 +151,9 @@ Filename' column in the screen log file '", logFile, "' contains invalid entries
 ##----------------------------------------
 ## export data to file as .txt
 ##----------------------------------------
-writeTab.cellHTS = function(x, file=paste(x$name, "txt", sep=".")) {
-
+writeTab.cellHTS = function(x, file=paste(x$name, "txt", sep="."), ...) {
+  checkDots(...)
+  
   toMatrix = function(y, prefix) {
     m = matrix(y, nrow=prod(dim(y)[1:2]), ncol=dim(y)[3:4])
     colnames(m) = sprintf("%sr%dc%d", prefix, rep(1:dim(y)[3], dim(y)[4]), rep(1:dim(y)[4], each=dim(y)[3]))	
