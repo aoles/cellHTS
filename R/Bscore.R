@@ -10,9 +10,8 @@
 ## 
 ## added by LPB (July 2006)
 ## if we don't want to remove plate effects, use adjustPlateMedian=FALSE
-## if model.log=TRUE, the model is fitted on log2 scale, but the output results (normalized values, overall effect, residuals and rowcol.effects) are given in the original scale.
 
-Bscore <- function(x, what="xraw", adjustPlateMedian=TRUE, model.log=FALSE, scale=TRUE, save.model=FALSE) {
+Bscore <- function(x, what="xraw", adjustPlateMedian=TRUE, scale=TRUE, save.model=FALSE) {
 
  ## Check the status of the 'cellHTS' object
   if(!x$state["configured"])
@@ -22,8 +21,6 @@ Bscore <- function(x, what="xraw", adjustPlateMedian=TRUE, model.log=FALSE, scal
   xdat <- x[[what]]
 
 if (save.model) {
-#row.effects = array(as.numeric(NA), dim=c(x$pdim["nrow"],dim(x$xraw)[2:4]))
-#col.effects = array(as.numeric(NA), dim=c(x$pdim["ncol"],dim(x$xraw)[2:4]))
 residuals = array(as.numeric(NA), dim=dim(xn))
 rowcol.effects = array(as.numeric(NA), dim=dim(xn))
 if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(xn)[2:4]))
@@ -38,7 +35,7 @@ if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(xn)[
     for(r in 1:(dim(xdat)[3]))
       for(ch in 1:(dim(xdat)[4])) {
 #       y must be a numeric matrix with "plate rows" in rows and "plate columns" in columns:
-        if (model.log) y <- ysamp <- log2(xdat[, p, r, ch]) else y <- ysamp <- xdat[, p, r, ch]
+        y <- ysamp <- xdat[, p, r, ch]
         if(!all(is.na(y))) {
         ysamp[!samples]=NA
         ysamp = matrix(ysamp,
@@ -62,27 +59,16 @@ if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(xn)[
 
 # if the effect is NA in both column and row elements, restore the NA value:
   if (sum(isNA)) rowcol[as.logical(isNA)] = NA
-
     #res is a matrix plate row * plate column
     if (scale) 
-      xn[, p, r, ch] = as.vector(t(res))/mad(m$residuals, na.rm=TRUE) 
+      xn[, p, r, ch] = as.vector(t(res))/mad(res, na.rm=TRUE) 
     else 
       xn[, p, r, ch] = as.vector(t(res))
 
     if (save.model) {
-       #col.effects[,p,r,ch] = m$col
-       #row.effects[,p,r,ch] = m$row
-       #residuals[,p,r,ch] = m$residuals
-
-      if (model.log) {
-      ## put back to original scale
-        m$residuals = 2^m$residuals
-        m$overall = 2^m$overall
-	rowcol = 2^rowcol  # no problem, because the extra 0s where again set to NAs
-        xn[, p, r, ch] = 2^xn[, p, r, ch]
-      }
       rowcol.effects[,p,r,ch] = as.vector(t(rowcol))
-      residuals[,p,r,ch] = as.vector(t(m$residuals))
+      #residuals[,p,r,ch] = as.vector(t(m$residuals)) ## DON'T USE m$residuals, otherwise we'll have more NA 
+       residuals[,p,r,ch] = as.vector(t(res))
       if (adjustPlateMedian) 
        overall.effects[,p,r,ch]=m$overall
    }
@@ -92,8 +78,6 @@ if (adjustPlateMedian) overall.effects = array(as.numeric(NA), dim=c(1, dim(xn)[
 x$xnorm = xn
 
 if (save.model) {
-#x$col.effects = col.effects
-#x$row.effects = row.effects
 x$residuals = residuals
 x$rowcol.effects = rowcol.effects
 if (adjustPlateMedian) 

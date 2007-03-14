@@ -22,16 +22,6 @@ normalizeChannels = function(x, fun=function(r1,r2) r2/r1, log=FALSE, adjustPlat
 
   if (!missing(adjustPlates)) {
 
-    ## if (adjustPlates=="Bscore") {
-    ##    if(missing(BscoreArgs)) {
-    ##      BscoreArgs=NULL
-    ##    }else{
-    ## for safety
-    ##      if(log) BscoreArgs$model.log=FALSE    <--- how important is this? currently this is not checked, but one could query the "..."
-    ##      BscoreArgs = BscoreArgs[names(BscoreArgs) %in% c("adjustPlateMedian", "model.log", "scale", "save.model")]
-    ##    }
-    ## }
-
     ## Apply the chosen plate-wise normalization function
     x = switch(adjustPlates,
       mean = scaleByPlateMean(x, what="xnorm", isInLogScale=log),

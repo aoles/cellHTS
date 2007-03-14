@@ -10,13 +10,12 @@
   Optionally, a transformation to \emph{z}-scores can be performed.
 }
 \usage{
-Bscore(x, what="xraw", adjustPlateMedian = TRUE, model.log = FALSE, scale = TRUE, save.model = FALSE)
+Bscore(x, what="xraw", adjustPlateMedian = TRUE, scale = TRUE, save.model = FALSE)
 }
 \arguments{
   \item{x}{a \code{cellHTS} object that has already been configured. See details.}
   \item{what}{a character indicating the slot of \code{x} to consider: \code{"xraw"} (default) or \code{"xnorm"}.}
   \item{adjustPlateMedian}{a logical value indicating whether the estimated average of each plate should also be substracted to the raw intensity values.}
-  \item{model.log}{a logical value. If \code{TRUE}, the per-plate models will be applied after \code{\link{log2}} transformation. However, the outputs of this function will be given in the original scale.}
   \item{scale}{a logical value indicating if the per-plate model residuals should be further scaled by their variance. See details.}
   \item{save.model}{a logical value specifying whether the per-plate models should be saved, and given as output. See details.}
 }
@@ -45,9 +44,7 @@ Bscore_{ijp} = r_{ijp}/MAD_p
 If \code{adjustPlateMedian} is set to \code{FALSE}, the estimated overall plate average 
 (\eqn{\hat{\mu}_p}{mu_p}) is not removed from the intensity values \eqn{y_{ijp}}'s.
 
-If \code{model.log=TRUE}, the model is fitted on \code{\link{log2}} scale, but the output results (normalized values, overall effect, residuals and rowcol.effects) are given in the original scale.
-
-If \code{save.model=TRUE}, the models residuals, row and column offsets and overall offsets are stored in the slots \code{residuals}, \code{rowcol.effects} and \code{overall.effects} of the \code{cellHTS} object \code{x}.
+If \code{save.model=TRUE}, the models residuals (\eqn{r_{ijp}}'s), row and column offsets and overall offsets are stored in the slots \code{residuals}, \code{rowcol.effects} and \code{overall.effects} of the \code{cellHTS} object \code{x}.
 }
 
 \value{

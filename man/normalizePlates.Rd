@@ -34,7 +34,7 @@ The normalization is performed in a plate-by-plate fashion.
     \item If \code{normalizationMethod="negatives"} (scaling by the negative controls), for each plate and replicate, each measurement is divided by the median of the measurements on the plate negative controls.
     \item If \code{normalizationMethod="NPI"} (normalized percent inhibition), each measurement is subtracted from the average of the intensities on the plate positive controls, and this result is divided by the difference between 
           the means of the measurements on the positive and the negative controls.
-    \item If \code{normalizationMethod="Bscore"} (B score), for each plate and replicate, the \link[cellHTS:Bscore]{B score method} is applied to remove plate effects and row and column biases.
+    \item If \code{normalizationMethod="Bscore"} (B score), for each plate and replicate, the \link[cellHTS:Bscore]{B score method} is applied to remove plate effects and row and column biases. NOTE: if the argument 'transform' is given, the \link[cellHTS:Bscore]{B score method} is applied AFTER data transformation.
 } 
 
 If \code{transform} is not missing, the chosen data transformation is applied. 
