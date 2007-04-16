@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{Analysis of two-way cell-based assays}
+%\VignetteIndexEntry{Supplement: two-way assays}
 %\VignetteKeywords{Two-way assays, cell based assays}
 %\VignettePackage{cellHTS}
 

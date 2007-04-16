@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{End-to-end analysis of cell-based screens}
+%\VignetteIndexEntry{Main vignette: End-to-end analysis of cell-based screens}
 %\VignetteKeywords{Cell based assays}
 %\VignettePackage{cellHTS}
 
@@ -32,7 +32,8 @@ pagecolor=darkblue,raiselinks,plainpages,pdftex]{hyperref}
 \begin{document}
 
 %------------------------------------------------------------
-\title{Short version of the vignette \emph{End-to-end analysis of cell-based screens: from raw intensity readings
+\title{Short version of the vignette 
+\emph{End-to-end analysis of cell-based screens: from raw intensity readings
   to the annotated hit list}}
 %------------------------------------------------------------
 \author{Michael Boutros, L\'igia Br\'as and Wolfgang Huber}
