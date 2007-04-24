@@ -22,8 +22,8 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
     importFun = function(f) {
       txt = readLines(f)
       sp  = strsplit(txt, "\t")
-      well     = sapply(sp, "[", 2)
-      val     = sapply(sp, "[", 3)
+      well = sapply(sp, "[", 2)
+      val  = sapply(sp, "[", 3)
       out = list(data.frame(well=I(well), val=as.numeric(val)),
         txt = I(txt))
       return(out)
@@ -42,40 +42,27 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
     stop("The output of 'importFun' must be a list with 2 components; the first component should be a 'data.frame' with slots 'well' and 'val'.")
 
 
-Let = c()
-Num = c()
-## check the plate format
-for (fi in f) {
-        well = importFun(fi)[[1]]$well
-      ## for safety
-        well = as.character(well)
-      ##  check if the plate format is correct
-        let = substr(well, 1, 1)
-        num = substr(well, 2, 3)
-        let = match(let, LETTERS)
-        num = as.integer(num)
-        Let=c(Let, max(let))
-	Num=c(Num, max(num))
-}
+  ## auto-determine the plate format
+  well = as.character(importFun(f[1])[[1]]$well)
+  let = substr(well, 1, 1)
+  num = substr(well, 2, 3)
+  let = match(let, LETTERS)
+  num = as.integer(num)
+  if(any(is.na(let))||any(is.na(num)))
+    stop(sprintf("Malformated column 'well' in input file %s", f[1]))
+  
+  pdim = c(nrow=max(let), ncol=max(num))
+  if(verbose)
+    cat(sprintf("Found data in %d x %d (%d well) format.\n", pdim[1], pdim[2], prod(pdim)))
 
-## automatically determines the plate format
-pdim = c(nrow=max(Let), ncol=max(Num))
-if (!(prod(pdim) %in% c(96, 384)) ) 
-  stop(sprintf("Invalid plate format! Allowed formats are 96- or 384-well plates!"))
-
-# 
-#   pdim = switch(plateType,
-#     "96"  = c(nrow=8, ncol=12),
-#     "384" = c(nrow=16, ncol=24),
-#     stop("'plateType' must be 96 or 384")
-#   ) 
-
+  ## Should we check whether these are true?
+  ##     "96"  = c(nrow=8, ncol=12),
+  ##     "384" = c(nrow=16, ncol=24),
 
   nrRep   = max(pd$Replicate)
   nrPlate = max(pd$Plate)
 
   combo = paste(pd$Plate, pd$Replicate)
-
 
   ## Channel: if not given, this implies that there is just one
   if("Channel" %in% colnames(pd)) {
@@ -130,12 +117,9 @@ if (!(prod(pdim) %in% c(96, 384)) )
 
   status = character(nrow(pd))
 
-  if(verbose)
-    cat("Reading ")
-
   for(i in 1:nrow(pd)) {
     if(verbose)
-      cat(pd[i, "Filename"], "")
+      cat("\rReading file ", i, ": ", pd[i, "Filename"], sep="")
 
     ff = grep(pd[i, "Filename"], dfiles, ignore.case=TRUE)
 
@@ -148,20 +132,10 @@ if (!(prod(pdim) %in% c(96, 384)) )
       names(intensityFiles)[i] = dfiles[ff]
 
       status[i] = tryCatch({
-#         txt = readLines(f)
-#         sp  = strsplit(txt, "\t")
-#         plateID = sapply(sp, "[", 1)
-#         pos     = sapply(sp, "[", 2)
-#         val     = sapply(sp, "[", 3)
-#         pos     = pos2i(pos, pdim)
-#         val     = as.numeric(val)
-#         intensityFiles[[i]] = txt
-#         xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = val
-
-          out = importFun(f)
-          pos = pos2i(out[[1]]$well, pdim)
-          intensityFiles[[i]] = out[[2]]
-          xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = out[[1]]$val
+        out = importFun(f)
+        pos = pos2i(out[[1]]$well, pdim)
+        intensityFiles[[i]] = out[[2]]
+        xraw[pos, pd$Plate[i], pd$Replicate[i], channel[i]] = out[[1]]$val
   	"OK"
       },
               warning = function(e) {
@@ -178,11 +152,10 @@ if (!(prod(pdim) %in% c(96, 384)) )
 
   res = list(name=name, 
     xraw=xraw, pdim=pdim, batch=batch,
-    plateList=cbind(pd[,1,drop=FALSE], I(status), pd[,-1,drop=FALSE]),
+    plateList=cbind(pd[,1,drop=FALSE], status=I(status), pd[,-1,drop=FALSE]),
     intensityFiles=intensityFiles,
     state=c("configured"=FALSE, "normalized"=FALSE, "scored"=FALSE, "annotated" = FALSE))
 
   class(res) = "cellHTS"
-
   return(res)
 }
