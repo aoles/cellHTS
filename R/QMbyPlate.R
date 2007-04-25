@@ -473,9 +473,9 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
       plotTable[count+1, 1] = sprintf("<H4 align=left>Replicate %d</H4>\n", as.integer(r))
       if (r %in% whHasData[[ch]]){
         makePlot(file.path(basePath, subPath), con=con,
-                 name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz/2*maxRep, fun = function() {
-                   par(mai=c(1,0.25,0.01,0.1))
-                   hist(x[,,r,ch], xlab ="intensity", breaks=brks[[ch]],
+                 name=sprintf("hist_Channel%d_%02d",ch,r), w=plsiz, h=plsiz*.6, fun = function() {
+                   par(mai=c(0.7,0.25,0.01,0.1))
+                   hist(x[,,r,ch], xlab ="", breaks=brks[[ch]],
                         col = gray(0.95), yaxt = "n", main="")
                    rug(x[,,r,ch])
                  }, print=FALSE)

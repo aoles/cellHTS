@@ -440,8 +440,9 @@ for(p in 1:nrPlate){
       mapx=TRUE  # make the mapping by default
     }
 
-    res <- makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
-                    fun = function(map=mapx) return(do.call("imageScreen", args=append(list(x=x, map=map),imageScreenArgs))),
+    res = makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
+                    fun = function(map=mapx)
+                      do.call("imageScreen", args=append(list(x=x, map=map), imageScreenArgs)),
                     print=FALSE, isImageScreen=TRUE)
 
     if(progressReport) {
