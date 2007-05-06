@@ -9,7 +9,7 @@
 }
 \usage{
 normalizeChannels(x,
-    fun = function(r1, r2, thresh) ifelse(r1>thresh, log2(r2/r1), -Inf),
+    fun = function(r1, r2, thresh) ifelse(r1>thresh, log2(r2/r1), as.numeric(NA)),
     funargs = list(thresh=0.7),
     adjustPlates, zscore, ...)
 }
