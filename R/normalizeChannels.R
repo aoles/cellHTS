@@ -9,7 +9,7 @@
 normalizeChannels = function(x,
     fun = function(r1, r2, thresh) ifelse(r1>thresh, log2(r2/r1), -Inf),
     funargs = list(thresh=0.7),
-    adjustPlates, zscore, ...){
+    adjustPlates, zscore, ...) {
 
   if(!x$state["configured"])
     stop("Please configure 'x' (using the function 'configure.cellHTS') before normalization.")
@@ -19,9 +19,9 @@ normalizeChannels = function(x,
 
   ## Apply the chosen plate-wise normalization function
   if (!missing(adjustPlates)) {
-    x = switch(adjustPlates,
+    nx = switch(adjustPlates,
       mean = scaleByPlateMean(x),
-      median = scaleByPlateMedian(x),
+      median = cellHTS:::scaleByPlateMedian(x),
       shorth = scaleByPlateShorth(x),
       negatives = scaleByPlateNegatives(x),
       POC = POC(x, ...),
@@ -29,14 +29,16 @@ normalizeChannels = function(x,
       Bscore = Bscore(x, ...),  
       stop(sprintf("Invalid value '%s' for argument 'adjustPlates'", adjustPlates)))
 
-    x$xraw = x$xnorm
-  } 
+    dat = nx$xnorm
+  } else {
+    dat = x$xraw
+  }
 
   ## The argument 'fun' allows using different normalizations, and also to define
   ## the numerator/denominator for the ratio (i.e. R1/R2 or R2/R1)
   x$xnorm = array(
-     do.call("fun", append(list(r1=x$xraw[,,,1], r2=x$xraw[,,,2]), funargs)),
-            dim=c(dim(x$xraw)[1:3], 1))
+     do.call("fun", append(list(r1=dat[,,,1], r2=dat[,,,2]), funargs)),
+            dim=c(dim(dat)[1:3], 1))
   
   ## calculates the z-scores, separately for each replicate
   if(!missing(zscore))

@@ -337,11 +337,12 @@ For example, by setting it to \Robject{"median"}, the \Rfunction{normalizeChanne
 applies plate median normalization by dividing or subtracting (if data has been log 
 transformed) each value by the median of values in that plate.
 
-Below, we apply \Rfunction{normalizeChannels} to take the log ratio $R_2/R_1$ using the data values in \Robject{x\$xraw}, and then use plate median normalization to remove plate-to-plate 
+Below, we apply \Rfunction{normalizeChannels} to take the log ratio $R_2/R_1$ using
+the data values in \Robject{x\$xraw}, and then use plate median normalization to remove plate-to-plate 
 variations:
 %
 <<Ratio R2/R1>>=
-x <- normalizeChannels(x, fun=function(r1,r2) r2/r1, log=TRUE, adjustPlates="median")
+x <- normalizeChannels(x, adjustPlates="median")
 @ 
 %
 The normalized intensities are stored in the slot
