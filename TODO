@@ -1,0 +1,5 @@
+Three options for calculation of the denominator in the calcZscores() function:
+(i) screenwide (currently, this is the only option)
+(ii) separately for each plate
+(iii) separately for each batch of plates
+Wh thinks that (iii) should be the default.
