@@ -1,5 +1,24 @@
+
+calcZscores:
+(wh 8.5.2007)
+==============
 Three options for calculation of the denominator in the calcZscores() function:
 (i) screenwide (currently, this is the only option)
 (ii) separately for each plate
 (iii) separately for each batch of plates
 Wh thinks that (iii) should be the default.
+
+
+normalizeChannels:
+(wh 11.5.2007)
+==================
+This function should be reversed to the behaviour it had before May
+2007, in order to avoid frustration with users that have been using
+it. However, it should be deprecated (i.e. give a deprecation 
+warning and a suggestion to use a new function "summarizeChannels").
+This new function "summarizeChannels" should do what normalizeChannels
+do now. The threshold "0.7" should not be default. Users should be
+forced to think about it and set it themselves.
+
+ 
+
