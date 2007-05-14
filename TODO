@@ -21,4 +21,32 @@ do now. The threshold "0.7" should not be default. Users should be
 forced to think about it and set it themselves.
 
  
+per experiment quality report:
+(wh 14.5.2007)
+==============================
+Should also report a measure of reproducibility when there are >2 
+replicates. Are there any n-dimensional generalisations of the 
+Spearman rank correlation? Perhaps sth like the size of the 
+residuals of a linear regression of the ranked values.
 
+writeReport is much too slow. We need to find the time suckers and make 
+it more efficient.
+ 
+
+configure
+(wh 14.5.2007)
+==============================
+Should take a "path" argument, similar as readPlateData
+
+export 
+(wh 14.5.2007)
+==============================
+There should be a simple option to export complete cellHTS objects
+to Spotfire; details of how to do this need to be worked together with
+Spotfire users in MB's lab.
+
+S4
+(wh 14.5.2007)
+==============================
+cellHTS class should be made S4. On the long run, this will make our
+code easier to maintain and less breakable.
