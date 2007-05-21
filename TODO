@@ -1,12 +1,4 @@
-
-calcZscores:
-(wh 8.5.2007)
-==============
-Three options for calculation of the denominator in the calcZscores() function:
-(i) screenwide (currently, this is the only option)
-(ii) separately for each plate
-(iii) separately for each batch of plates
-Wh thinks that (iii) should be the default.
+In have tried to order them roughly in order of importance & feasibility:
 
 
 normalizeChannels:
@@ -21,6 +13,22 @@ do now. The threshold "0.7" should not be default. Users should be
 forced to think about it and set it themselves.
 
  
+configure
+(wh 14.5.2007)
+==============================
+Should take a "path" argument, similar as readPlateData
+
+
+calcZscores:
+(wh 8.5.2007)
+==============
+Three options for calculation of the denominator in the calcZscores() function:
+(i) screenwide (currently, this is the only option)
+(ii) separately for each plate
+(iii) separately for each batch of plates
+Wh thinks that (iii) should be the default.
+
+
 per experiment quality report:
 (wh 14.5.2007)
 ==============================
@@ -29,14 +37,30 @@ replicates. Are there any n-dimensional generalisations of the
 Spearman rank correlation? Perhaps sth like the size of the 
 residuals of a linear regression of the ranked values.
 
-writeReport is much too slow. We need to find the time suckers and make 
-it more efficient.
- 
+Histogrammes of intensities could have rugs at the bottom in different
+colours indicating the values of the controls.
 
-configure
+
+S4
 (wh 14.5.2007)
 ==============================
-Should take a "path" argument, similar as readPlateData
+cellHTS class should be made S4. On the long run, this will make our
+code easier to maintain and less breakable.
+
+
+writeReport
+(wh 14.5.2007)
+==============
+writeReport is much too slow. We need to find the time suckers and make 
+it more efficient. The progress report gives numbers that are
+misleading (e.g. people have complained that it gets stuck forever at "99%").
+ 
+The screenview currently contains hyperlinks to the gene
+annotations. It would also be nice to show the underlying raw data
+values. However, not sure whether HTML image map is the right thing to
+do, are there more efficient ways? Is there a free alternative to
+Spotfire? Ggobi?
+
 
 export 
 (wh 14.5.2007)
@@ -45,8 +69,15 @@ There should be a simple option to export complete cellHTS objects
 to Spotfire; details of how to do this need to be worked together with
 Spotfire users in MB's lab.
 
-S4
-(wh 14.5.2007)
+
+Standalone .exe with GUI
+(wh 21.5.2007)
 ==============================
-cellHTS class should be made S4. On the long run, this will make our
-code easier to maintain and less breakable.
+explore whether it is possible to provide a standalone product (e.g.
+an .exe file or a CD) that allows Windows users to run a basic
+analysis in cellHTS through a GUI without installation or seeing 
+the commandline. This is not intended to replace the programmatic
+version; it is intended as a "gateway drug" or for teaching. Need to
+discuss with Robert the technical aspects, but it should be possible 
+without major programming, just putting together existing tools.
+
