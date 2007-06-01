@@ -12,6 +12,12 @@ This new function "summarizeChannels" should do what normalizeChannels
 do now. The threshold "0.7" should not be default. Users should be
 forced to think about it and set it themselves.
 
+The path through normalisation and between channels summarisation is a
+bit confusing right now (e.g. the 'isInLogScale' arguments of the 
+scaleByPlateMean etc. functions: when is the data supposed to be
+logged; how to avoid that people do not log twice, and that they do
+log at the right time) - can this be simplified?
+
  
 configure
 (wh 14.5.2007)
