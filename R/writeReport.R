@@ -437,7 +437,7 @@ for(p in 1:nrPlate){
       mapx = imageScreenArgs$map 
       imageScreenArgs = imageScreenArgs[!names(imageScreenArgs) %in% "map"] 
     } else {
-      mapx=TRUE  # make the mapping by default
+      mapx=FALSE  # DO NOT make the mapping by default (changed on 18.06.2007, because this can take lots of time when there are many plates)
     }
 
     res = makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,

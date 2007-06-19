@@ -50,6 +50,12 @@ if \code{summary="furthestFromZero"}, the value furthest from zero is taken as a
   Moreover, the processing status of the \code{cellHTS} object is updated
   in the slot \code{state} to \code{state["scored"]= TRUE}.}
 
+\seealso{
+  \code{\link[cellHTS:normalizePlates]{normalizePlates}},
+  \code{\link[cellHTS:summarizeChannels]{summarizeChannels}}
+}
+
+
 \author{W. Huber \email{huber@ebi.ac.uk}, Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \examples{

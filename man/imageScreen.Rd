@@ -26,6 +26,13 @@ When the annotation mapping is performed, by default, \code{anno} is set to:
 }
 }
 
+\seealso{
+  \code{\link[cellHTS:normalizePlates]{normalizePlates}},
+  \code{\link[cellHTS:summarizeChannels]{summarizeChannels}},
+  \code{\link[cellHTS:summarizeReplicates]{summarizeReplicates}},
+  \code{\link[cellHTS:writeReport]{writeReport}}
+}
+
 \author{Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \examples{

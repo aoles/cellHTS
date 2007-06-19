@@ -2,52 +2,43 @@
 \alias{normalizeChannels}
 \concept{multi-channel screens}
 \concept{normalization}
-\title{Normalization and transformation of dual-channel data}
+\title{Normalization of dual-channel data and data transformation}
 \description{
-  Normalizes and/or transforms dual-channel data \code{xraw} of a
-  \code{cellHTS} object by applying the function defined in \code{fun}.
+  Normalizes and/or transforms dual-channel data \code{xraw} of a given \code{cellHTS} object by applying the function defined in \code{fun}. The default is to take the ratio between the second and first channels (\eqn{\frac{r_2}{r_1}}{r2/r1}). Correction of plate-to-plate variations may also be performed.
 }
 \usage{
-normalizeChannels(x,
-    fun = function(r1, r2, thresh) ifelse(r1>thresh, log2(r2/r1), as.numeric(NA)),
-    funargs = list(thresh=0.7),
-    adjustPlates, zscore, ...)
+normalizeChannels(x, fun = function(r1,r2) r2/r1, log = FALSE, adjustPlates, zscore, posControls, negControls, ...)
 }
 \arguments{
-  \item{x}{a \code{cellHTS} object that has been configured.}
-  \item{fun}{a user-defined function for the two channel summarization.
-    \code{fun} takes two numeric vectors and returns a numeric vector of
-    the same length. The default is to take the log2-ratio between the
-    second and first channels, with a threshold on \code{r1} shown above
-    in the \emph{Usage} section.}
-  \item{funargs}{List with arguments for \code{fun}.}
-  \item{adjustPlates}{scalar character string indicating the
-    normalization method to apply to adjust for plate-to-plate variations
-    (and possibly well-to-well variations). This is done \emph{before}
-    after applying \code{fun}.
-    Allowed values are \code{"median"}, \code{"mean"}, \code{"shorth"},
-    \code{"POC"}, \code{"NPI"}, \code{"negatives"} and
-    \code{\link{Bscore}}.
-    If \code{adjustPlates} is missing (the default), no plate-wise
-    correction will be performed. }
+  \item{x}{a cellHTS object that has already been configured. See details.}
+  \item{fun}{a function defined by the user to relate the signal in the
+    two channels \code{r1} and \code{r2}. \code{fun} takes two
+    numeric vectors and returns a numeric vector of the same length. The
+    default is to take the ratio between the second and first channels.}
+  \item{log}{a logical value indicating whether the result obtained after applying 
+    \code{fun} should be \code{\link{log2}} transformed. The default is \code{log = FALSE}, 
+    and the data is not \code{log2} transformed.}
+  \item{adjustPlates}{character string indicating the correction method to apply to adjust for plate-to-plate variations (and  eventually well-to-well variations), after applying \code{fun} and eventually log transforming the values. Allowed values are \code{"median"}, \code{"mean"}, \code{"shorth"}, \code{"POC"}, \code{"NPI"}, \code{"negatives"} and \code{\link{Bscore}}. If \code{adjustPlates} is missing (the default), no plate-wise correction will be performed. See details.}
   \item{zscore}{indicates if the \emph{z}-scores should be determined after
     normalization and transformation. If missing (default),
-    the data will not be scored. Otherwise, this argument is passed on
-    to \code{link{calcZscores}} as the \code{sign} argument; it should be
-    a character string, either "+" or "-", specifying the sign to use
-    for the \emph{z}-scores..}
-  \item{...}{Further arguments that get passed on to the function
-    implementing the normalization method chosen by \code{adjustPlates}.} 
+    the data will not be scored. Otherwise, it should be a character
+    string, either "+" or "-", specifying the sign to use for the calculated 
+    \emph{z}-scores. See details.}
+  \item{posControls}{a vector of regular expressions giving the name of the positive control(s). See details.}
+  \item{negControls}{a vector of regular expressions giving the name of the negative control(s). See details.}
+  \item{...}{Further arguments that get passed on to the function implementing the normalization method chosen by \code{adjustPlates}. Currently, this is only used for  \code{\link{Bscore}}. } 
 }
 
 \details{
 For each plate and replicate of a two-color experiment, the function
 defined in \code{fun} is applied to relate the intensity values in the
-two channels of the \code{cellHTS} object. The default is to ... (FIXME).
+two channels of the \code{cellHTS} object. The default is to calculate
+the ratio between the second and the first channels, but other options can be defined.
 
-If \code{adjustPlates} is not missing, the obtained values will be
-corrected for plate effects \emph{before} applying \code{fun},
-by considering the chosen normalization method. The available options are:
+If \code{log = TRUE}, the data obtained after applying \code{fun} is \code{log2} transformed. 
+The default is \code{log = FALSE}.
+
+If \code{adjustPlates} is not missing, the obtained values will be further corrected for plate effects by considering the chosen normalization method. The available options are:
 \itemize{
     \item If \code{adjustPlates="median"} (median scaling), plates effects are corrected by dividing each measurement 
           by the median value across wells annotated as \code{sample} in \code{x$wellAnno}, for each plate and replicate.
@@ -77,8 +68,6 @@ in the signal will be represented by a positive \emph{z}-score, whereas setting 
 such a phenotype will be represented by a negative \emph{z}-score.  
 This option can be set to calculate the results to the commonly used convention.
 
-FIXME: here, let's please just refer to the manual pages of the
-individual normalization functions, not duplicate information.
 
 The arguments \code{posControls} and/or \code{negControls} are required
 for applying the normalization methods based on the control measurements
@@ -116,16 +105,20 @@ Additional outputs may be given if
 the \code{\link[cellHTS:Bscore]{Bscore}} function.
 }
 
-\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
+\seealso{
+\code{\link{normalizePlates}}, 
+\code{\link{summarizeChannels}},
+\code{\link{Bscore}},
+}
+
+\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber
+  \email{huber@ebi.ac.uk}}
 
 \examples{
  \dontrun{
     datadir <- system.file("DualChannelScreen", package = "cellHTS")
     x <- readPlateData("Platelist.txt", "TwoColorData", path=datadir)
-    confFile <- system.file("DualChannelScreen", "Plateconf.txt", package="cellHTS")
-    logFile  <- system.file("DualChannelScreen", "Screenlog.txt", package="cellHTS")
-    descripFile <- system.file("DualChannelScreen", "Description.txt", package="cellHTS")
-    x <- configure(x, confFile, logFile, descripFile)
+    x <- configure(x, "Plateconf.txt", "Screenlog.txt", "Description.txt", path=datadir)
     table(x$wellAnno)
 
     ## Define the controls for the different channels:

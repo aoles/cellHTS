@@ -52,7 +52,7 @@ writeReport(x,
    passed on to \code{\link[cellhts]{imageScreen}}:
    \code{ar}, aspect ratio,
    \code{zrange}, range,
-   \code{map}, logical value indicating whether tooltips with the annotation should be added to the plot,
+   \code{map}, logical value indicating whether tooltips with the annotation should be added to the plot (default value is FALSE),
    \code{anno}, gene annotation for the image map.
 
   \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]} or to \code{dim(x$xnorm)[4]}, in case \code{x} contains multi-channel data that has been normalized by combining the values from two or more channels).
@@ -69,7 +69,7 @@ writeReport(x,
 
 In case of a two-way assay, where two types of "positive" controls are used in the screen ("activators" and "inhibitors"), \code{posControls} should be defined as a list with two components (called \code{act} and \code{inh}), each of which should be vectors of regular expressions of the same length as the current number of reporters (as explained above).  
 
-By default, tooltips doing the mapping between the probe annotation and the plate wells are added to the plate plots and to the overall screen plot. If the cellHTS object \code{x} is annotated, the probe annotation used the information contained whether in \code{x$geneAnno$GeneSymbol}, or \code{x$geneAnno$GeneID}, if the former is missing. Otherwise, the mapping simply uses the well identifiers.
+By default, tooltips doing the mapping between the probe annotation and the plate wells are not added to the plate plots and to the overall screen plot. If the cellHTS object \code{x} is annotated, the probe annotation used the information contained whether in \code{x$geneAnno$GeneSymbol}, or \code{x$geneAnno$GeneID}, if the former is missing. Otherwise, the mapping simply uses the well identifiers.
 }
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},

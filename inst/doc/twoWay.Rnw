@@ -120,7 +120,8 @@ source(file.path(dataPath, "importData.R"))
 %
 Finally, we call \Rfunction{readPlateData}:
 <<readPlateData, results=hide>>=
-x <- readPlateData("Platelist.txt", importFun=importData, name=experimentName, path=dataPath)
+x <- readPlateData("Platelist.txt", 
+  importFun=importData, name=experimentName, path=dataPath)
 @ 
 %
 <<showX>>=
@@ -145,21 +146,23 @@ The \emph{plate configuration file} gives the information about the
 content of the plate wells, which is used by the software to annotate the 
 measured data. The first lines of this file are shown in 
 Table~\ref{tab:plateconfiguration}.
-For the sample data, there is no \emph{screen log file}, meaning that no measurements
+For the sample data, there is no 
+\emph{screen log file}, meaning that no measurements
 were marked to be flagged during the assay.
-Another file necessary for the configuration step of the \Robject{cellHTS} object is the 
-\emph{screen description file}, which gives a general description of the screen.
+Another file necessary for the configuration step 
+of the \Robject{cellHTS} object is the 
+\emph{screen description file}, which gives a 
+general description of the screen.
 %
 <<configure the data>>=
-confFile <- file.path(dataPath, "Plateconf.txt")
-descripFile  <- file.path(dataPath, "Description.txt")
-x <- configure(x, confFile=confFile, descripFile = descripFile)
+x <- configure(x, confFile="Plateconf.txt", 
+     descripFile = "Description.txt", path=dataPath)
 @ 
 %
 In this data set, instead of using the default names \emph{pos} and \emph{neg} for 
 positive and negative controls, respectively, we have used the names of the target genes.
-Thus, the well annotation in this sample plate looks like this~\footnote{Note that when 
-reading the plate configuration file, the \Rfunction{configure} function 
+Thus, the well annotation in this sample plate looks like this~\footnote{Note that when reading the plate configuration file, the 
+\Rfunction{configure} function 
 puts the content of the column \emph{Content} 
 in lowercase. However, the orignal content of this column 
 (and the complete plate configuration file) is stored in \Robject{x\$plateConf}, 
@@ -180,18 +183,18 @@ the file contains the optional column \emph{GeneSymbol}, whose content will be u
 the tooltips display in the HTML quality reports that will be produced later on.
 %
 <<annotate the data>>=
-geneIDFile <- file.path(dataPath, "GeneIDs.txt")
-x <- annotate(x, geneIDFile)
+x <- annotate(x, geneIDFile="GeneIDs.txt", path=dataPath)
 @ 
 %
 % Create the table for plateConf
 <<plateConfscreenLogTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(confFile, "plate configuration", selRows=1:4, 
-  preName="twoWay")
+cellHTS:::tableOutput(file.path(dataPath, "Plateconf.txt"), 
+    "plate configuration", selRows=1:4, preName="twoWay")
 @ 
 %% Create the table for screen annotation:
 <<geneIDsTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6, preName="twoWay")
+cellHTS:::tableOutput(file.path(dataPath, "GeneIDs.txt"), "gene ID", 
+  selRows = 3:6, preName="twoWay")
 @ 
 
 

@@ -23,7 +23,7 @@ Bscore(x, what="xraw", adjustPlateMedian = TRUE, scale = TRUE, save.model = FALS
 \details{
 The normalization is performed in a per-plate fashion using the B score method. 
 This function can be called direclty, or indirectly, using \code{\link[cellHTS:normalizePlates]{normalizePlates}} or 
-\code{\link[cellHTS:normalizeChannels]{normalizeChannels}}. 
+\code{\link[cellHTS:summarizeChannels]{summarizeChannels}}. 
 In the B score method, the residual \eqn{r_{ijp}} of the measurement for row \emph{i} and column \emph{j} on the \emph{p}-th plate is obtained by fitting a \link[stats:medpolish]{two-way median polish}, in order to account for both row and column effects within the plate:
 
 \deqn{r_{ijp} = y_{ijp} - \hat{y}_{ijp} = y_{ijp} - (\hat{\mu}_p + \hat{R}_{ip} + \hat{C}_{jp})}{%
@@ -66,7 +66,7 @@ in the slot \code{state} to \code{x$state["normalized"]=TRUE}.
   \code{\link[stats:medpolish]{medpolish}},
   \code{\link[cellHTS:plotSpatialEffects]{plotSpatialEffects}},
   \code{\link[cellHTS:normalizePlates]{normalizePlates}},
-  \code{\link[cellHTS:normalizeChannels]{normalizeChannels}}
+  \code{\link[cellHTS:summarizeChannels]{summarizeChannels}}
 }
 
 \references{

@@ -1,10 +1,13 @@
 ## (C) Michael Boutros and Wolfgang Huber, Nov 2005
+
+PLATETYPE_DEPR_MSG = "The argument 'plateType' is deprecated. Please don't use it."
+
 readPlateData = function(filename, path=dirname(filename), name, importFun, verbose=TRUE, plateType)
 {
   file = basename(filename)
   dfiles = dir(path)
 
-  if(!missing(plateType)) warning("The argument 'plateType' is deprecated!")
+  if(!missing(plateType)) .Deprecated(msg=PLATETYPE_DEPR_MSG)
 
   if(!(is.character(path)&&length(path)==1))
     stop("'path' must be character of length 1")
@@ -119,7 +122,7 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
 
   for(i in 1:nrow(pd)) {
     if(verbose)
-      cat("\rReading file ", i, ": ", pd[i, "Filename"], sep="")
+      cat(" Reading file ", i, ": ", pd[i, "Filename"], ";", sep="")
 
     ff = grep(pd[i, "Filename"], dfiles, ignore.case=TRUE)
 

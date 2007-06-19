@@ -210,32 +210,22 @@ The next step of the analysis is to annotate the measured data with
 information on controls and to flag invalid measurements. The software
 expects the information on the controls in a so-called \emph{plate
 configuration file} (see Section~\ref{sec:plateconf}).  This is a
-tab-delimited file with one row per well.
-%
-<<confFile>>=
-confFile = file.path(dataPath, "Plateconf.txt")
-@ 
-%
+tab-delimited file with one row per well. 
 Selected lines of this file are shown in Table~\ref{tab:plateconfiguration}. 
+
 Individual measurements can be flagged as invalid in the so-called
 \emph{screen log file} (see Section~\ref{sec:screenlog}). 
-%
-<<logFile>>=
-logFile  = file.path(dataPath, "Screenlog.txt")
-@ 
-%
 The first 5 lines of this file are shown in Table~\ref{tab:screenlog}. 
+
 The \emph{screen description} file contains a general description of
 the screen, its goal, the conditions under which it was performed,
 references, and any other information that is pertinent to the
 biological interpretation of the experiments. 
-<<descripFile>>=
-descripFile  = file.path(dataPath, "Description.txt")
-@ 
-%
+
 We now apply this information to the data object \Robject{x}.
 <<annotatePlateRes>>=
-x = configure(x, confFile, logFile, descripFile)
+x = configure(x, confFile="Plateconf.txt", logFile="Screenlog.txt", 
+    descripFile="Description.txt", path=dataPath)
 @ 
 %
 Note that the function \Rfunction{configure}\footnote{More precisely,
@@ -244,12 +234,14 @@ takes \Robject{x}, the result from Section~\ref{sec:read}, as an
 argument, and we then overwrite \Robject{x} with the result of
 this function. If no screen log file is available for the experiment, 
 the argument \Robject{logFile} of the function \Rfunction{configure} 
-should be ommitted.
+should be omitted.
 %%
 %% Create the example table for plateConf and screenLog
 <<plateConfscreenLogTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(confFile, "plate configuration", selRows=25:28)
-cellHTS:::tableOutput(logFile, "screen log", selRows=1:3)
+cellHTS:::tableOutput(file.path(dataPath, "Plateconf.txt"), 
+     "plate configuration", selRows=25:28)
+cellHTS:::tableOutput(file.path(dataPath, "Screenlog.txt"), 
+      "screen log", selRows=1:3)
 @ 
 
 %%--------------------------------------------------
@@ -446,12 +438,12 @@ Table~\ref{tab:geneID}, where we have associated each probe with
 CG-identifiers for the genes of \textit{Drosophila melanogaster}.
 %
 <<geneIDs>>=
-geneIDFile = file.path(dataPath, "GeneIDs_Dm_HFA_1.1.txt")
-x = annotate(x, geneIDFile)
+x = annotate(x, geneIDFile="GeneIDs_Dm_HFA_1.1.txt", path=dataPath)
 @ 
 %% Create the example table:
 <<geneIDsTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(geneIDFile, "gene ID", selRows = 3:6)
+cellHTS:::tableOutput(file.path(dataPath, "GeneIDs_Dm_HFA_1.1.txt"), 
+    "gene ID", selRows = 3:6)
 @ 
 %
 An optional column named \textit{GeneSymbol} can be included in the 

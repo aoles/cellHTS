@@ -36,4 +36,5 @@ A list with two components:
     sapply(out$isInBoth, sum)
     sapply(1:2, function(z) table(screens[[z]]$geneAnno$Plate[out$isInBoth[[z]]]))
 }
-\keyword{manip}screens <- list(x)
+
+\keyword{manip}

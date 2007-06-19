@@ -157,18 +157,18 @@ Morevoer, we also add the information contained in the
 \emph{screen description file}, which gives a general description of the screen.
 %
 <<configure the data>>=
-confFile <- file.path(dataPath, "Plateconf.txt")
-logFile <- file.path(dataPath, "Screenlog.txt")
-descripFile <- file.path(dataPath, "Description.txt")
-x <- configure(x, confFile, logFile, descripFile)
+x <- configure(x, "Plateconf.txt", "Screenlog.txt",
+  "Description.txt", path=dataPath) 
 @ 
 %
 
 %%
 %% Create the table for plateConf and screenLog
 <<plateConfscreenLogTable, results=hide, echo=FALSE>>=
-cellHTS:::tableOutput(confFile, "plate configuration", selRows=1:4, preName="twoChannels")
-cellHTS:::tableOutput(logFile, "screen log", selRows=1:2, preName="twoChannels")
+cellHTS:::tableOutput(file.path(dataPath, "Plateconf.txt"), 
+    "plate configuration", selRows=1:4, preName="twoChannels")
+cellHTS:::tableOutput(file.path(dataPath, "Screenlog.txt"), 
+    "screen log", selRows=1:2, preName="twoChannels")
 @ 
 
 In this data set, instead of using the default names \emph{pos} 
@@ -268,7 +268,7 @@ to each replicate and channel using the function
 \Rfunction{normalizePlates}:
 %
 <<plateMedianChannels>>=
-x <- normalizePlates(x,normalizationMethod="median")
+x <- normalizePlates(x, normalizationMethod="median")
 @ 
 %
 <<set cut-off for R1, echo=TRUE, results=hide>>=
@@ -278,8 +278,6 @@ ctoff <- apply(x$xnorm[,,,1], 3, quantile, probs=0.05, na.rm=TRUE)
 
 %
 <<FvsRcorrected, fig=TRUE, results=hide, echo=FALSE, include=FALSE, width=6, height=3>>=
-par(mfrow=c(1,2))
-par(mai=c(0.9,0.9,0.1,0.1))
 R <- getMatrix(x$xnorm, channel=1, na.rm=FALSE)
 F <- getMatrix(x$xnorm, channel=2, na.rm=FALSE)
 
@@ -291,7 +289,7 @@ ylim <- range(F, na.rm=TRUE)
 xlim <- range(R, na.rm=TRUE)
 require("geneplotter")
 
-par(mfrow=c(1,ncol(F)))
+par(mfrow=c(1,ncol(F)), mai=c(1.15,1.15, 0.3,0.3))
 for (r in 1:ncol(F)) {
 ind <- apply(cbind(R[,r],F[,r]), 1, function(z) any(is.na(z)))
 plot(R[!ind,r],F[!ind,r], col= densCols(cbind(R[!ind,r], F[!ind,r])), pch=16,cex=0.7,
@@ -313,13 +311,17 @@ the plate median corrected intensity values in the constitutive channel
 %
 
 Figure~\ref{twoChannels-FvsRcorrected} shows the plate median corrected intensities in $R_2$ versus $R_1$ channels, together with the calculated threshold and the positive and negative controls of the pathway-inducible reporter $R_2$. The wells with intensity values below the 
-calculated threshold are shown in grey and will be set to "NA" in \Robject{x\$xraw}. The 
-subsequent preprocessing will be applied on this array.
+calculated threshold are shown in grey and will be set to "NA" in the slot \Robject{xraw}.
+Since we further want to apply an alternative normalization procedure to the data (see below), 
+we will create a new \Rpackage{cellHTS} object called \Robject{y} by copying 
+the contents of \Robject{x}, and then flag the low intensity $R_1$ values in \Robject{y\$xraw}. 
+%The subsequent preprocessing will be applied on this array.
 %
 <<masking, results=hide>>=
-for(r in 1:dim(x$xnorm)[3]) {
-ind <- x$xnorm[,,r,1]<=ctoff[r]
-x$xraw[,,r,][ind] <- NA
+y <- x
+for(r in 1:dim(y$xnorm)[3]) {
+ind <- y$xnorm[,,r,1]<=ctoff[r]
+y$xraw[,,r,][ind] <- NA
 }
 @ 
 %
@@ -337,18 +339,44 @@ For example, by setting it to \Robject{"median"}, the \Rfunction{normalizeChanne
 applies plate median normalization by dividing or subtracting (if data has been log 
 transformed) each value by the median of values in that plate.
 
-Below, we apply \Rfunction{normalizeChannels} to take the log ratio $R_2/R_1$ using
-the data values in \Robject{x\$xraw}, and then use plate median normalization to remove plate-to-plate 
-variations:
+Below, we apply \Rfunction{normalizeChannels} to take the $\log_2$ ratio $R_2/R_1$ using
+the data values in \Robject{y\$xraw}, and then use plate median normalization 
+to remove plate-to-plate variations:
 %
 <<Ratio R2/R1>>=
-x <- normalizeChannels(x, adjustPlates="median")
+y <- normalizeChannels(y, adjustPlates="median")
 @ 
 %
 The normalized intensities are stored in the slot
-\Robject{x\$xnorm}. This is an array of the same size as
-\Robject{x\$xraw}, except in the last dimension (number of channels).  
+\Robject{y\$xnorm}. This is an array of the same size as
+\Robject{y\$xraw}, except in the last dimension (number of channels).  
 
+As noted above, the \Rfunction{normalizeChannels} is deprecated, and currently we 
+advice the use of the function \Rfunction{summarizeChannels}, 
+which was designed to take the raw measurements in \Robject{xraw} and correct them 
+for plate effects \emph{before} summarizing the two channels. 
+Note that the step of plate correction is optional, 
+because the argument \Robject{adjustPlates} can also be omitted when calling this function.
+In our case, we first adjust each channel separately by performing plate median scaling 
+(\Robject{adjustPlates = median}). Then, we apply the function given 
+in the \Robject{fun} argument of
+\Rfunction{summarizeChannels}. In this function, we define a low intensity 
+threshold for the measurements in the constitutive channel $R_1$, 
+which will be set to the $5\%$ quantile of the overall plate median corrected intensities 
+in this channel. For the positions where the plate median corrected intentities in $R_1$ channel 
+are above this threshold, we relate the two channels plate median corrected measurements 
+by taking the $\log_2$ ratio of $R_2/R_1$, while the other positions are set to ``NA''.
+We call this function below on \Robject{x}, which contains the original raw data. 
+%
+<<alternativeNormalization>>=
+x = summarizeChannels(x, 
+         fun = function(r1, r2, thresh=quantile(r1, probs=0.05, na.rm=TRUE)) 
+           ifelse(r1>thresh, log2(r2/r1), as.numeric(NA)),
+      adjustPlates="median") 
+@ 
+%
+Considering this last preprocessing procedure, 
+we proceed with the analysis using the data stored in \Robject{x}.
 Below, we call the \Rfunction{summarizeReplicates} function to determine the 
 $z$-score values for each replicate, and then summarize 
 the replicated $z$-score values by taking the average.
@@ -359,16 +387,20 @@ x <- summarizeReplicates(x, zscore="-", summary="mean")
 @ 
 %
 The resulting single $z$-score value per probe is stored in the
-slot \Robject{x\$score}. Figure~\ref{twoChannels-boxplotzscore} shows the boxplots of 
-the $z$-scores for the different types of probes.
+slot \Robject{x\$score}. The left side of Figure~\ref{twoChannels-scores} shows the boxplots of 
+the $z$-scores for the different types of probes, while the right side of the figure shows 
+the $z$-scores for the whole screen as an image plot.
 %
-<<boxplotzscore, fig=TRUE, include=FALSE, width=7, height=6>>=
+<<scores, fig=TRUE, include=FALSE, width=7, height=6>>=
+par(mfrow=c(1,2))
 ylim <- quantile(x$score, c(0.001, 0.999), na.rm=TRUE)
 boxplot(x$score ~ x$wellAnno, col="lightblue", outline=FALSE, ylim=ylim)
+imageScreen(x, zrange=c(-2,4))
 @ 
 %
-\myincfig{twoChannels-boxplotzscore}{0.7\textwidth}{Boxplots of $z$-scores 
-for the different types of probes.}
+\myincfig{twoChannels-scores}{0.7\textwidth}{$z$-scores for the screen. 
+Left Panel: Boxplots of $z$-scores for the different types of probes. 
+Right Panel: Screen-wide image plot.}
 %
 Now that the data have been preprocessed and scored, we call again 
 \Rfunction{writeReport} and use a web browser to view the resulting report.

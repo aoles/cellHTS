@@ -34,7 +34,7 @@ The maximum and the minimum values are calculated using all the values in
   \code{\link[prada:plotPlate]{plotPlate}},
   \code{\link[cellhts:Bscore]{Bscore}},
   \code{\link[cellhts:normalizePlates]{normalizePlates}},
-  \code{\link[cellhts:normalizeChannels]{normalizeChannels}}
+  \code{\link[cellhts:summarizeChannels]{summarizeChannels}}
 }
 
 \examples{

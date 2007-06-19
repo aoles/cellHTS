@@ -7,7 +7,7 @@
 }
 \usage{
 configure(x, \dots)
-\method{configure}{cellHTS}(x, confFile, logFile, descripFile, \dots)
+\method{configure}{cellHTS}(x, confFile, logFile, descripFile, path, \dots)
 }
 \arguments{
   \item{x}{a \code{cellHTS} object.}
@@ -23,6 +23,9 @@ configure(x, \dots)
     This argument is just passed on to the \code{\link{readLines}}
     function, so any of the valid argument
     types for \code{\link{readLines}} are valid here, too.}
+  \item{path}{optional; a character of length one indicating the path in
+    which to find the configuration files. Useful when the files are locate in the same directory, 
+    but should be omitted otherwise.}
   \item{\dots}{additional parameters - ignored.}
 }
 
@@ -48,6 +51,10 @@ Moreover, the processing status of the \code{cellHTS} object is updated in the s
 
 There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annotate.cellHTS}.}
 
+\seealso{
+  \code{\link[cellHTS:readPlateData]{readPlateData}}
+}
+
 \author{Wolfgang Huber \email{huber@ebi.ac.uk}, Ligia Braz \email{ligia@ebi.ac.uk}}
 
 \references{..}
@@ -56,10 +63,7 @@ There are methods \code{print.cellHTS}, \code{configure.cellHTS} and \code{annot
 \dontrun{
     datadir <- system.file("KcViabSmall", package = "cellHTS")
     x <- readPlateData("Platelist.txt", "KcViabSmall", path=datadir)
-    confFile <- system.file("KcViabSmall", "Plateconf.txt", package="cellHTS")
-    logFile <- system.file("KcViabSmall", "Screenlog.txt", package="cellHTS")
-    descripFile <- system.file("KcViabSmall", "Description.txt", package="cellHTS")
-    x <- configure(x, confFile, logFile, descripFile)
+    x <- configure(x, "Plateconf.txt", "Screenlog.txt", "Description.txt", path=datadir)
 }
 }
 \keyword{manip}

@@ -23,12 +23,18 @@ print.cellHTS = function(x, ...) {
 ##----------------------------------------
 ## annotate
 ##----------------------------------------
-annotate.cellHTS = function(x, geneIDFile, ...) {
+annotate.cellHTS = function(x, geneIDFile, path=dirname(geneIDFile), ...) {
   checkDots(...)
-  
-  geneIDs = read.table(geneIDFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", quote="",fill=TRUE)
+ 
+  file = basename(geneIDFile)
+  dfiles = dir(path)
 
-  checkColumns(geneIDs, geneIDFile, mandatory=c("Plate", "Well", "GeneID"),
+  if(!(is.character(path)&&length(path)==1))
+    stop("'path' must be character of length 1")
+
+  geneIDs = read.table(file.path(path, file), sep="\t", header=TRUE, as.is=TRUE, na.string="", quote="",fill=TRUE)
+
+  checkColumns(geneIDs, file, mandatory=c("Plate", "Well", "GeneID"),
                numeric=c("Plate"))
 
   ## sort the data by Plate and then by well
@@ -56,14 +62,23 @@ annotate.cellHTS = function(x, geneIDFile, ...) {
 ##----------------------------------------
 ## configure
 ##----------------------------------------
-configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
+configure.cellHTS = function(x, confFile, logFile, descripFile, path, ...) {
   checkDots(...)
-  
-  conf = read.table(confFile, sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
+
+# If 'path' is given, we assume that all the files are in this directory.
+if (!missing(path)) 
+  if(!(is.character(path)&&length(path)==1))
+    stop("'path' must be character of length 1")
+
+  ppath = ifelse(missing(path), dirname(confFile), path)
+  confFile = basename(confFile)
+  conf = read.table(file.path(ppath, confFile), sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
 
   ## Check if the screen log file was given
   if(!missing(logFile)) {
-    slog = read.table(logFile,  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
+    ppath = ifelse(missing(path), dirname(logFile), path)
+    logFile = basename(logFile)
+    slog = read.table(file.path(ppath, logFile),  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
     ## Check if the screen log file is empty
     if (nrow(slog)==0)
       slog = NULL
@@ -74,7 +89,10 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
     slog = NULL
   }
 
-  descript = readLines(descripFile)
+
+   ppath = ifelse(missing(path), dirname(descripFile), path)
+   descripFile = basename(descripFile)
+   descript = readLines(file.path(ppath, descripFile))
 
   ## backward compatibility
   colnames(conf) = sub("^Pos$", "Position", colnames(conf))
@@ -130,8 +148,18 @@ configure.cellHTS = function(x, confFile, logFile, descripFile, ...) {
 
   ## Process screenlog
   if (!is.null(slog)) {
+## To avoid problems with different case in filename extensions
+    dfiles = sapply(x$plateList$Filename, function(z) { 
+          a = unlist(strsplit(z, ".", fixed=TRUE))
+          a = a[-length(a)] } )
 
-    mt = match(slog$Filename, x$plateList$Filename)
+    lfiles = sapply(slog$Filename, function(z) { 
+          a = unlist(strsplit(z, ".", fixed=TRUE))
+          a = a[-length(a)] } )
+
+    mt = match(lfiles, dfiles)
+    #mt = match(tolower(slog$Filename), tolower(x$plateList$Filename))
+
     if(any(is.na(mt)))
       stop(paste("'Filename' column in the screen log file '", logFile, "' contains invalid entries\n",
                  "(i.e. files that were not listed in the plateList file):\n",
