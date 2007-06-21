@@ -27,8 +27,7 @@ annotate.cellHTS = function(x, geneIDFile, path=dirname(geneIDFile), ...) {
   checkDots(...)
  
   file = basename(geneIDFile)
-  dfiles = dir(path)
-
+ 
   if(!(is.character(path)&&length(path)==1))
     stop("'path' must be character of length 1")
 

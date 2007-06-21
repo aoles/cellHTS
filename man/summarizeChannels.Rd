@@ -31,8 +31,7 @@ summarizeChannels(x,
     correction will be performed. }
   \item{zscore}{indicates if the \emph{z}-scores should be determined after
     normalization and transformation. If missing (default),
-    the data will not be scored. Otherwise, this argument is passed on
-    to \code{\link{calcZscores}} as the \code{sign} argument; it should be
+    the data will not be scored. Otherwise, it should be
     a character string, either "+" or "-", specifying the sign to use
     for the \emph{z}-scores.}
   \item{...}{Further arguments that get passed on to the function
