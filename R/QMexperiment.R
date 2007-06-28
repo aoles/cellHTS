@@ -183,7 +183,7 @@ boxplotwithNA <- function(x, fac, batch,...) {
   bdiff = diff(batch)
   if(sum(bdiff)>0) {
     ind = 1:length(batch)
-    abline(v=ind[as.logical(bdiff)]+0.5, lty=2, col="darkgrey")
+    abline(v=ind[as.logical(bdiff)]+0.5, lty=1)
   } 
 
 }
@@ -273,7 +273,7 @@ controlsplot <- function(xvals, yvals, batch, ...) {
   bdiff=diff(batch)
   if(sum(bdiff)>0) {
     ind = unique(unlist(xvals))
-    abline(v=ind[as.logical(bdiff)]+0.5, lty=2, col="darkgrey")
+    abline(v=ind[as.logical(bdiff)]+0.5, lty=1)
   } 
   return(list(xvals, yvals))
 }

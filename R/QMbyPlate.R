@@ -65,6 +65,10 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
      inhCtrls = vector("list", length=nrChannel)
   } else {## if isTwoWay
   posCtrls = vector("list", length=nrChannel)
+posCtrls = lapply(posCtrls, function(z) { 
+z = vector("list", length=length(namePos)) 
+names(z) = namePos
+return(z) })
   }
   mt = match(wellAnno, names(wellTypeColor))
   samples  = which(mt==which(names(wellTypeColor)=="sample"))
@@ -77,11 +81,9 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
         inhCtrls[[ch]] = which(regexpr(posControls$inh[ch], wellAnno, perl=TRUE)>0)
     }else{## if isTwoWay
       if (!(posControls[ch] %in% c(NA, ""))) {
-        posCtrls[[ch]] = which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0)
-        wa = split(posCtrls[[ch]], wellAnno[posCtrls[[ch]]])
-        posCtrls[[ch]] = wa
-        names(posCtrls[[ch]]) = namePos[match(names(posCtrls[[ch]]), tolower(namePos))]
-        if (!all(names(posCtrls[[ch]]) == namePos)) posCtrls = lapply(posCtrls[[ch]], sort)
+        wa = which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0)
+        wa = split(wa, wellAnno[wa])
+        posCtrls[[ch]][match(names(wa), tolower(namePos))] = wa
       }## if posControls
     }## else if isTwoWay
 
@@ -103,7 +105,8 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
     ##                 separately and saved the results in x$xnorm; determine the difference 
     ##                 between the aritmetic mean between pos and negative controls.
 
-    allPositives = prod(range(x[,,,ch], na.rm=TRUE))>0
+    allPositives = ifelse(all(is.na(x[,,,ch])), TRUE, prod(range(x[,,,ch], na.rm=TRUE))>0)
+
 
     if(isTwoWay){
       ## 1.a) Dynamic range (neg / activators)
@@ -261,7 +264,7 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
 
           } else { ## if length pos & neg
             dr = as.numeric(NA)
-            comm = "No controls ('pos' and 'neg') were found."
+            comm = "No controls ('pos' and/or 'neg') were found."
             for (u in 1:maxRep) 
               qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %d)",pn,u)), value=dr, comment=I(comm)))
           } ## else length pos & neg
@@ -292,7 +295,7 @@ QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
       comm = ""
      } else {
        cc = as.numeric(NA)
-       comm = sprintf("%d replicates", nrRep)
+       comm = sprintf("%d replicate(s)", nrRep)
     }
    qm = rbind(qm, data.frame(metric=I("Spearman rank correlation"), value=cc, comment=I(comm)))
 
