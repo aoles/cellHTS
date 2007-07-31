@@ -5,17 +5,12 @@
     for (f in fname){
       datadir <- paste("../", f, sep="")
       x <- readPlateData("Platelist.txt", f, path=datadir)
-      confFile <- paste(datadir, "Plateconf.txt", sep="/")
-      logFile  <- paste(datadir, "Screenlog.txt", sep="/")
-      descripFile  <- paste(datadir, "Description.txt", sep="/")
-      x <- configure(x, confFile, logFile, descripFile)
+      x <- configure(x, "Plateconf.txt", "Screenlog.txt", "Description.txt", path=datadir)
       if (f==fname[1]){
-        geneIDFile <- paste(datadir, "GeneIDs_Dm_HFA_1.1.txt", sep="/")
-        KcViab <- annotate(x, geneIDFile)
+        KcViab <- annotate(x, "GeneIDs_Dm_HFA_1.1.txt", path=datadir)
         save(KcViab, file=sprintf("../../data/%s.rda", f), compress=TRUE)
       }else{
-        geneIDFile <- paste(datadir, "GeneIDs_Dm_HFAsubset_1.1.txt", sep="/")
-        KcViabSmall <- annotate(x, geneIDFile)
+        KcViabSmall <- annotate(x, "GeneIDs_Dm_HFAsubset_1.1.txt", path=datadir)
         save(KcViabSmall, file=sprintf("../../data/%s.rda", f), compress=TRUE)
       }
     }
