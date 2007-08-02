@@ -1,6 +1,6 @@
 Package: cellHTS
-Version: 1.7.8
-Date: 31 July 2007
+Version: 1.7.9
+Date: 2 August 2007
 Title: Analysis of cell-based screens
 Author: Wolfgang Huber <huber@ebi.ac.uk>, Ligia Bras <ligia@ebi.ac.uk>, Michael Boutros <m.boutros@dkfz.de>
 Maintainer: Ligia Bras <ligia@ebi.ac.uk>

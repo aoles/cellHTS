@@ -11,13 +11,13 @@ plotSpatialEffects = function(x, whichChannel=1, plateRange) {
     stop("Please apply to 'x' the 'Bscore' function with the parameter 'save.model=TRUE' before calling this function.")
 
   if(whichChannel > dim(x$rowcol.effects)[4])
-    stop("Should a correct channel number using 'whichChannel'!")  
+    stop("Choose a valid channel number using 'whichChannel'!")  
 
   if (missing(plateRange)) {
     plateRange = 1:dim(x$xraw)[2]
   } else  {
     if(!is(plateRange, "vector") | !all(plateRange %in% 1:dim(x$xraw)[2]))
-     stop(sprintf("\n 'plateRange' should a vector with values ranging from 1 to %s \n
+     stop(sprintf("\n 'plateRange' should a vector of integers between 1 and %s \n
      giving the ID number of the plates to display", dim(x$xraw)[2]))
   }
 
