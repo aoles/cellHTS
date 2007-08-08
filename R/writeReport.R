@@ -79,6 +79,10 @@ writeReport = function(x,
   if(!inherits(x, "cellHTS"))
     stop("'x' must be a 'cellHTS' object")
 
+  if (!is.logical(progressReport))
+    stop("'progressReport' must be a logical value.")
+
+
   nrWell    = dim(x$xraw)[1]
   nrPlate   = dim(x$xraw)[2]
   nrReplicate = dim(x$xraw)[3]
