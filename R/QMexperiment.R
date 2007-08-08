@@ -24,7 +24,8 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
         wa = split(posCtrls[[ch]], wellAnno[posCtrls[[ch]]])
         posCtrls[[ch]] = wa
         names(posCtrls[[ch]]) = namePos[match(names(posCtrls[[ch]]), tolower(namePos))]
-        if (!all(names(posCtrls[[ch]]) == namePos)) posCtrls = lapply(posCtrls[[ch]], sort)
+        if (!all(names(posCtrls[[ch]]) == namePos)) posCtrls[[ch]] = posCtrls[[ch]][order(names(posCtrls[[ch]]))]
+                   #posCtrls = lapply(posCtrls[[ch]], sort)
       }## if posControls
     }## else if isTwoWay
 
