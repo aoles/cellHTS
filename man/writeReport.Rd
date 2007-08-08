@@ -99,8 +99,8 @@ By default, tooltips doing the mapping between the probe annotation and the plat
     x <- summarizeReplicates(x, summary="min")
     writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs=list(zrange=c(-4,4)))
     }
-    ## to turn off the tooltips in the overall screen image plot:
-    ## writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs = list(zrange=c(-4,4), map=FALSE))
+    ## to turn on the tooltips in the overall screen image plot:
+    ## writeReport(x, force=TRUE, plotPlateArgs = list(), imageScreenArgs = list(zrange=c(-4,4), map=TRUE))
 }
 
 \keyword{manip}
