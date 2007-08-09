@@ -89,9 +89,12 @@ scaleByPlateNegatives = function(x, negControls, what="xraw", isInLogScale=FALSE
         neg = regexpr(negControls[ch], wellAnno, perl=TRUE)>0 } 
       if (!sum(neg)) stop(sprintf("No negative controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch))
       
-      for(r in 1:(dim(x[[what]])[3]))
+      for(r in 1:(dim(x[[what]])[3])) {
+
+        if(all(is.na(x[[what]][neg, p, r, ch]))) { 
+           stop(sprintf("No values for negative controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch)) }
         if(isInLogScale) xn[, p, r, ch] = x[[what]][, p, r, ch] - median(x[[what]][neg, p, r, ch], na.rm=TRUE) else xn[, p, r, ch] = x[[what]][, p, r, ch] / median(x[[what]][neg, p, r, ch], na.rm=TRUE)
-    } }
+    } } }
   x$xnorm = xn
   return(x)
 }

@@ -28,9 +28,11 @@ xn = array(as.numeric(NA), dim=dim(x[[what]]))
 	  pos = regexpr(posControls[ch], wellAnno, perl=TRUE)>0 } 
         if (!sum(pos)) stop(sprintf("No positive controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch))
 
-	for(r in 1:(dim(x[[what]])[3]))
-        xn[, p, r, ch] = 100 * x[[what]][, p, r, ch] / mean(x[[what]][pos, p, r, ch], na.rm=TRUE)
-  } }
+	for(r in 1:(dim(x[[what]])[3])) {
+
+           if(all(is.na(x[[what]][pos, p, r, ch]))) { stop(sprintf("No values for positive controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch)) }
+            xn[, p, r, ch] = 100 * x[[what]][, p, r, ch] / mean(x[[what]][pos, p, r, ch], na.rm=TRUE)
+  } }}
   x$xnorm = xn
   return(x)
 }

@@ -40,8 +40,13 @@ NPI = function(x, posControls, negControls, what="xraw"){
 	neg = regexpr(negControls[ch], wellAnno, perl=TRUE)>0 }
 	if (sum(pos)==0 | sum(neg)==0) stop(sprintf("No positive or/and negative controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch))
 
-    for(r in 1:(dim(x[[what]])[3]))
-        xn[, p, r, ch] = (mean(x[[what]][pos, p, r, ch], na.rm=TRUE) - x[[what]][, p, r, ch]) / (mean(x[[what]][pos, p, r, ch], na.rm=TRUE) - mean(x[[what]][neg, p, r, ch], na.rm=TRUE))
+    for(r in 1:(dim(x[[what]])[3])){
+        if(all(is.na(x[[what]][pos, p, r, ch])) | 
+              all(is.na(x[[what]][neg, p, r, ch]))) { stop(sprintf("No values for positive or/and negative controls were found in plate %s, channel %d! Please, use a different normalization function.", p, ch)) }
+        xn[, p, r, ch] = (mean(x[[what]][pos, p, r, ch], na.rm=TRUE) - x[[what]][, p, r, ch]) / (mean(x[[what]][pos, p, r, ch], na.rm=TRUE) - mean(x[[what]][neg, p, r, ch], na.rm=TRUE)) 
+
+
+ }
   }}
 
   x$xnorm = xn
