@@ -5,7 +5,7 @@
 ##    divided by the number of rows)
 ## zrange is the range of values to be mapped into the color scale.
 ##   If the argument "zrange" is missing, it will be set to zrange=range(x$score, na.rm=TRUE)
-## tool tips added with the help of Florian Hanhe (August 2006)
+## tool tips added with the help of Florian Hahne (August 2006)
 
 imageScreen <- function (x, ar=3/5, zrange, map=FALSE, anno) {
 

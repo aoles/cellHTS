@@ -27,7 +27,6 @@ The following elements are recognized for \code{plotPlateArgs} and
     \code{xcol}, the color scheme for the intensity plate plot,
     \code{xrange}, the intensity range to which the colors are mapped.
    If an element is not specified, default values are used.
-}
 
 }
 

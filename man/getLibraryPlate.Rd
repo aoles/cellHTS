@@ -11,7 +11,7 @@ getLibraryPlate(x)
   \item{x}{a \code{cellHTS} object.}
 }
 \details{
-  The \code{cellHTS} object \code{x} contains data from a screening experiment where every set of four consecutive 96-well plates was combined into a 384-well plate. Therefore, the only available plate identifiers are for the assay plate format (384-well plates). The way the four 96-well plates are transferred to a 384-well plate during an experiment is as follows: the robot stars by transferring the samples from the first 96-well plate into the first quadrant of the 384-well plate, and so on.}
+  The \code{cellHTS} object \code{x} contains data from a screening experiment where every set of four consecutive 96-well plates was combined into a 384-well plate. Therefore, the only available plate identifiers are for the assay plate format (384-well plates). The way the four 96-well plates are transferred to a 384-well plate during an experiment is as follows: the robot stars by transferring the samples from the first 96-well plate into the first quadrant of the 384-well plate, and so on.
 }
 
 \value{An S3 object of class \code{cellHTS}, which extends the argument \code{x} by the following element:
