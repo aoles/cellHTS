@@ -150,7 +150,7 @@ return(z) })
 
     } else { ##if length(actCtrls)
        drAct <- as.numeric(NA)
-       commAct <- "No controls ('activators' and 'neg') were found."
+       commAct <- "No controls ('activators' and/or 'neg') were found."
 	   for (u in 1:maxRep) 
              qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range Activators (replicate %d)",u)), 
                value=drAct, comment=I(commAct)))
@@ -198,7 +198,7 @@ return(z) })
 
     } else { ##if length(inhCtrls)
        drInh <- as.numeric(NA)
-       commInh <- "No controls ('inhibitors' and 'neg') were found."
+       commInh <- "No controls ('inhibitors' and/or 'neg') were found."
 	   for (u in 1:maxRep) 
              qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range Inhibitors (replicate %d)",u)), 
                value=drInh, comment=I(commInh)))
@@ -214,13 +214,13 @@ return(z) })
       ##---------------------------------------
       ##  One Way
       ##----------------------------------------
-      if (!is.null(posCtrls[[ch]])) {
+      if (!all(sapply(posCtrls[[ch]], is.null)) && length(negCtrls[[ch]])>0) {
         ## for each different positive control:
         for (pname in names(posCtrls[[ch]])) {
           if (pname=="pos" & length(posCtrls[[ch]])==1) pn="" else pn = sprintf("'%s'",pname)
 
           ## 1. Dynamic range (neg / pos controls)
-          if(length(posCtrls[[ch]][[pname]])>0 && length(negCtrls[[ch]])>0) {
+          if(length(posCtrls[[ch]][[pname]])>0) {
 
             ## see the data scale.
             ## positive scale: go to log-scale, average and take difference, then re-exponentiate
@@ -279,7 +279,7 @@ return(z) })
         for (pname in namePos) {
           if (pname=="pos" & length(posCtrls[[ch]])==1) pn="" else pn = sprintf("'%s'",pname)
           dr = as.numeric(NA)
-          comm = "No controls ('pos' and 'neg') were found."
+          comm = "No controls ('pos' and/or 'neg') were found."
           for (u in 1:maxRep) 
             qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s (replicate %d)",pn,u)), value=dr, comment=I(comm)))
           qm = rbind(qm, data.frame(metric=I(sprintf("Dynamic range %s", pn)), 

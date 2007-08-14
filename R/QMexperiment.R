@@ -20,12 +20,13 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
     }else{## if isTwoWay
       if (!(posControls[ch] %in% c(NA, ""))) {
         posCtrls[[ch]] = which(regexpr(posControls[ch], wellAnno, perl=TRUE)>0)
-        #if (length(namePos)) {
-        wa = split(posCtrls[[ch]], wellAnno[posCtrls[[ch]]])
-        posCtrls[[ch]] = wa
-        names(posCtrls[[ch]]) = namePos[match(names(posCtrls[[ch]]), tolower(namePos))]
-        if (!all(names(posCtrls[[ch]]) == namePos)) posCtrls[[ch]] = posCtrls[[ch]][order(names(posCtrls[[ch]]))]
+        if (length(posCtrls[[ch]])) {
+           wa = split(posCtrls[[ch]], wellAnno[posCtrls[[ch]]])
+           posCtrls[[ch]] = wa
+           names(posCtrls[[ch]]) = namePos[match(names(posCtrls[[ch]]), tolower(namePos))]
+           if (!all(names(posCtrls[[ch]]) == namePos)) posCtrls[[ch]] = posCtrls[[ch]][order(names(posCtrls[[ch]]))]
                    #posCtrls = lapply(posCtrls[[ch]], sort)
+      }
       }## if posControls
     }## else if isTwoWay
 
@@ -83,7 +84,7 @@ QMexperiment = function(x, path, con, posControls, negControls, isTwoWay=FALSE, 
                  sprintf("boxplot_%d_%d.pdf", r, ch), sprintf("boxplot_%d_%d.png", r, ch)) 
       count = count + 1 
 
-      if ( ( nrPos[ch]>0) & (nrNeg[ch]>0) & (x$state["normalized"]) ) {
+      if ( nrPos[ch] & nrNeg[ch] & x$state["normalized"] ) {
         if (nrPlate==1)
           xbp = matrix(x$xnorm[,,r,ch])
         else

@@ -65,6 +65,11 @@ Three options for calculation of the denominator in the calcZscores() function:
 (iii) separately for each batch of plates
 Wh thinks that (iii) should be the default.
 
+# --------------
+(lpb 03.08.2007) 
+Done for cellHTS2.
+# --------------
+
 
 per experiment quality report:
 (wh 14.5.2007)
