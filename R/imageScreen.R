@@ -1,4 +1,4 @@
-## (C) Ligia Braz 2006
+## (C) Ligia Bras 2006
 ##
 ## x is a 'cellhts' object
 ## ar is the aspect ratio for the image plot (i.e. number columns
@@ -48,13 +48,12 @@ imageScreen <- function (x, ar=3/5, zrange, map=FALSE, anno) {
        else
          anno <- x$geneAnno$GeneID
     }else{##else if annotated
-       anno <- paste("position", rep(pos, nrPlates))
+      # anno <- paste("position", rep(pos, nrPlates))
+       anno <- rep(sprintf("position %d", pos), nrPlates)
     }##else annotated
   }## else !missing anno
 
   anno <- paste(anno, " (plate ", rep(1:nrPlates, each=nrWells), ", well ", rep(x$plateConf$Well, nrPlates), ")", sep="")
-
-
 
   ## replace NA by zero (because it will be neutral for the current analysis)
   sc.true <- sc <- x$score
@@ -139,6 +138,7 @@ if (map) {
   text(seq(0.5*nColBar+1.5, length(xbar)*nColBar+1, by=nColBar), y=ifelse(extraRows==10, 3, 0.25*extraRows),
        offset=0, cex = 1, srt=90, labels=c(paste(c("< ", rep("", length(xval)-2), ">"), xval, sep="")))
 
+
   if(map){
     xlim = c(0, nc)
     ylim = c(0, nr)
@@ -159,9 +159,9 @@ if (map) {
     nnr <- nr-length(rowSpacer)
     plate <- rep((0:(nnc-1))%/%pCol+1, nnr) + rep(seq(0, nrPlates-1, by=nrCol),
                                                    each=prod(pRow, pCol, nrCol))  
-    tit <- paste(as.vector(t(newmatan[nr:1,])), ": score=",
-                 signif(as.vector(t(newmat.true[nr:1,])),3), sep="")
-    imap <- cbind(u2px(x0), u2py(y0), u2px(x1), u2py(y1), tit)
+    tit <- paste(as.vector(t(newmatan[nr:1,])), 
+            sprintf(": score=%g", signif(as.vector(t(newmat.true[nr:1,])),3)), sep="")
+    imap <- matrix(c(u2px(x0), u2py(y0), u2px(x1), u2py(y1)), ncol=4, nrow=length(x0), byrow=FALSE)
 #    NArows = (rep(rowSpacer, each=nc)-1)*nc + rep(1:nc, length(rowSpacer))
 #    NAcols =  nc*(0:(nr-1)) + rep(colSpacer, each=nr)
 #    imap <- imap[-unique(c(NArows, NAcols)), ]
@@ -169,15 +169,21 @@ if (map) {
     Spacers <- array(TRUE, dim=dim(newmat))
     Spacers[rowSpacer,] <- FALSE
     Spacers[,colSpacer] <- FALSE
-    imap <- imap[as.vector(t(Spacers)),]
+    Spacers <- as.vector(t(Spacers))
     #empty <- regexpr("NA: score=NA", imap[,5])>0
     isEmpty <- which(plate>nrPlates)
-    if (length(isEmpty)!=0) {
-      imap <- imap[-isEmpty,]
+    if (length(isEmpty)) {
+      imap <- imap[Spacers,][-isEmpty,] 
+      tit <- tit[Spacers][-isEmpty] 
       plate <- plate[-isEmpty]
+    } else {
+      imap <- imap[Spacers,]
+      tit <- tit[Spacers] 
     }
-   imap[,1:4] <- as.integer(imap[,1:4])
+
+   imap[] <- as.integer(imap)
  #   return(myImageMap(imap[,1:4], list(TITLE=imap[,5], href=paste(plate[-isEmpty], "index.html", sep="/")), "imageScreen.png"))
-    return(list(obj=imap[,1:4], tag=list(TITLE=imap[,5], href=paste(plate, "index.html", sep="/"))))
+    return(list(obj=imap, tag=list(TITLE=tit, HREF=paste(plate, "index.html", sep="/"))))
   }
 }
+

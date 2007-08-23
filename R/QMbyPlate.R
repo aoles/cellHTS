@@ -4,24 +4,33 @@ myImageMap <- function(object, tags, imgname) {
   if(!is.matrix(object)||ncol(object)!=4)
     stop("'object' must be a matrix with 4 columns.")
 
-  for(i in seq(along=tags))
-    if(length(tags[[i]])!=nrow(object))
-      stop(paste("'tags[[", i, "]] must have as many elements as 'object' has rows (",
-                 nrow(object),").", sep=""))
+
+  len <- lapply(tags, length)
+  if(any(len!=nrow(object))) stop(sprintf("Elements of the list 'tag' must have a length equal to the number of rows of 'object' (%g).", nrow(object)))
 
   mapname <- paste("map", gsub(" |/|#", "_", imgname), sep="_")
-  out <- paste("<IMG SRC=\"", imgname, "\" USEMAP=#", mapname, " BORDER=2>", 
-                         "<MAP NAME=\"", mapname, "\">", sep="")
-  for(i in 1:nrow(object)) {
-    out = paste(out, "<AREA SHAPE=\"rect\" COORDS=\"", paste(object[i,], collapse=","),
-                "\"", sep="")
-    for(t in seq(along=tags))
-      out = paste(out, " ", names(tags)[t], "=\"", tags[[t]][i], "\"", sep="")
-    out = paste(out, "\">", sep="")
-  }
-}
+  #out <- paste("<IMG SRC=\"", imgname, "\" USEMAP=#", mapname, " BORDER=2>",                          "<MAP NAME=\"", mapname, "\">", sep="")
+   outin <- paste("<IMG SRC=\"", imgname, "\" USEMAP=#", mapname, " BORDER=2>",                          "<MAP NAME=\"", mapname, "\">", sep="")
 
-## ---------------------------------------------------------------------------
+   stopifnot(names(tags) == c("TITLE", "HREF"))
+
+   out <- lapply(1:nrow(object), function(i) { 
+
+       paste(paste("<AREA SHAPE=\"rect\" COORDS=\"", paste(object[i,], collapse=","),
+                "\"", sep=""), paste(" ", paste(names(tags), "=\"", 
+                c(tags[["TITLE"]][i], tags[["HREF"]][i]), 
+                "\"", sep=""), collapse=" "), "\">", sep="")
+          } 
+       ) 
+
+## add all together:
+#"
+out <- paste(unlist(out), collapse="")
+out <- paste(outin, out, sep="")
+
+} #myImageMap
+
+#"# ---------------------------------------------------------------------------
 QMbyPlate <- function(x, wellAnno, pdim, name, basePath, subPath, geneAnno,
                       plotPlateArgs, brks, finalWellAnno, posControls, 
                  	  negControls, isTwoWay=FALSE, namePos) {

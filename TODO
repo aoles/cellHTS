@@ -82,6 +82,10 @@ residuals of a linear regression of the ranked values.
 Histogrammes of intensities could have rugs at the bottom in different
 colours indicating the values of the controls.
 
+# --------------
+(lpb 14.08.2007) 
+Done for cellHTS2.
+# --------------
 
 S4
 (wh 14.5.2007)
