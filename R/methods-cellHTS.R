@@ -74,18 +74,15 @@ if (!missing(path))
   conf = read.table(file.path(ppath, confFile), sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
 
   ## Check if the screen log file was given
+  slog <- NULL
   if(!missing(logFile)) {
     ppath = ifelse(missing(path), dirname(logFile), path)
     logFile = basename(logFile)
     slog = read.table(file.path(ppath, logFile),  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
     ## Check if the screen log file is empty
-    if (nrow(slog)==0)
-      slog = NULL
-    else
-      checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
+    if (nrow(slog))
+       checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),
                    numeric=character(0))
-  } else {
-    slog = NULL
   }
 
 
