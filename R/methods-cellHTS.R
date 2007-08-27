@@ -136,12 +136,13 @@ if (!missing(path))
 
   ## Process the configuration file into wellAnno slot
   ## and set all 'empty' wells to NA in x
+  xraw <- x$xraw
   conf$Content = tolower(conf$Content)  ## ignore case!
   wellAnno = factor(rep(NA, nrWpP*nrPlate), levels=unique(conf$Content))
   for(p in seq(along=x$batch)) {
     wa = conf$Content[ conf$Batch==x$batch[p] ]
     wellAnno[(1:nrWpP)+nrWpP*(p-1)] = wa
-    x$xraw[ wa=="empty", p,,] = NA
+    xraw[ wa=="empty", p,,] = NA
   }
   x$wellAnno=wellAnno
 
@@ -168,10 +169,11 @@ if (!missing(path))
     ich  = x$plateList$Channel[mt]
     ipos = pos2i(slog$Well, x$pdim)
     stopifnot(!any(is.na(ipl)), !any(is.na(irep)), !any(is.na(ich)))
-    x$xraw[cbind(ipos, ipl, irep, ich)] = NA 
+    xraw[cbind(ipos, ipl, irep, ich)] = NA 
   } 
 
   x$state["configured"] = TRUE
+  x$xraw = xraw
   return(x)
 }
 
