@@ -20,6 +20,7 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
   ## consistency check for "importFun"
   if (!missing(importFun)) {
     if (!is(importFun, "function")) stop("'importFun' should be a function to use to read the raw data files")
+
   } else {
     ## default function (compatible with the file format of the plate reader)
     importFun = function(f) {
@@ -39,7 +40,7 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
   
   f = file.path(path, dfiles[a])
 
-  ## check if 'imporFun' gives the output in the desired form
+  ## check if 'imporFun' gives the output in the desired format
   aux = importFun(f[1])
   if (which(unlist(lapply(aux, is, "data.frame"))) != 1 | !all(c("val", "well") %in% names(aux[[1]])) | length(aux)!=2)
     stop("The output of 'importFun' must be a list with 2 components; the first component should be a 'data.frame' with slots 'well' and 'val'.")
@@ -87,7 +88,13 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
   if("Batch" %in% colnames(pd)) {
     sp = split(pd$Batch, pd$Plate)
     plate = as.numeric(names(sp))
-    stopifnot(!any(is.na(plate)), setequal(plate, 1:nrPlate))
+    if(any(is.na(plate))) stop("There are missing values in column 'Plate' of the input plate list file!")
+    if(!setequal(plate, 1:nrPlate)) {
+      misPlate <- setdiff(1:nrPlate, plate)
+      stop(sprintf("No result files are available for %s %s! Please correct your plate list file!", 
+         ifelse(length(misPlate)==1,"plate","plates"), paste(misPlate, collapse=", ")
+       ))
+     }
     for(j in seq(along=sp)) {
       b = as.integer(unique(sp[[j]]))
       if(length(b)!=1)
@@ -100,7 +107,13 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
     pd$Batch = rep(as.integer(1), nrow(pd))
     sp = split(pd$Batch, pd$Plate)
     plate = as.numeric(names(sp))
-    stopifnot(setequal(plate, 1:nrPlate))
+    if(any(is.na(plate))) stop("There are missing values in column 'Plate' of the input plate list file!")
+    if(!setequal(plate, 1:nrPlate)) {
+      misPlate <- setdiff(1:nrPlate, plate)
+      stop(sprintf("No result files are available for %s %s! Please correct your plate list file!", 
+         ifelse(length(misPlate)==1,"plate","plates"), paste(misPlate, collapse=", ")
+       ))
+     }
   }
 
 
@@ -160,5 +173,18 @@ readPlateData = function(filename, path=dirname(filename), name, importFun, verb
     state=c("configured"=FALSE, "normalized"=FALSE, "scored"=FALSE, "annotated" = FALSE))
 
   class(res) = "cellHTS"
+
+
+## output the possible errors that were encountered along the way:
+  whHadProbs = which(status!="OK")
+  if(length(whHadProbs)>0 & verbose) {
+    idx = whHadProbs[1:min(5, length(whHadProbs))]
+    msg = paste("Please check the following problems encountered while reading the data:\n",
+      "\tFilename \t Error\n", "\t",
+      paste(res$plateList$Filename[idx], status[idx], sep="\t", collapse="\n\t"),
+      if(length(whHadProbs)>5) sprintf("\n\t...and %d more.\n", length(whHadProbs)-5), "\n", sep="")
+    stop(msg)
+  }
+
   return(res)
 }

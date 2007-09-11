@@ -37,8 +37,9 @@ annotate.cellHTS = function(x, geneIDFile, path=dirname(geneIDFile), ...) {
                numeric=c("Plate"))
 
   ## sort the data by Plate and then by well
-  geneIDs = geneIDs[order(geneIDs$Plate, geneIDs$Well),]
-  
+  wpos <- pos2i(geneIDs$Well, x$pdim)# to avoid problems of bad ordering because of using "A1" instead of "A01":
+  geneIDs = geneIDs[order(geneIDs$Plate, wpos),]
+
   ## Some checkings for dimension of "Plate" and "Well"
   ## expect prod(x$pdim) * x$nrPlate rows
   nrWpP   = prod(x$pdim)
