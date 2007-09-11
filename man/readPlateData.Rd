@@ -55,7 +55,7 @@ For example, to import plate data files from EnVision plate reader, set \code{im
   \item{xraw}{an array of dimension plateSize x number of plates x
     number of replicates x number of channels, containing the imported
     measurement data.}
-  \item{pdim}{a numeric vector of length 2 containg the number of rows
+  \item{pdim}{a numeric vector of length 2 containing the number of rows
     and columns in a plate. The product of these two numbers is the
     first dimension of \code{xraw}. This corresponds to the plate    	
 format used in the screen, and it is automatically determined from the plate result files. The allowed formats are 96-well  or 384-well plates.

@@ -61,6 +61,7 @@ stopifnot(sapply(dat, "[", 1) ==LETTERS[1:meta$nrRows])
 # put as a row-wise vector
 dat <- as.vector(as.numeric(sapply(dat, "[", -1)))
 nums <- rep(1:meta$nrColumns, meta$nrRows)
+nums <- sapply(nums, function(i) if(i<10) paste(0, i, sep="") else i)  # to up in the format letters+2digits
 lets <- rep(LETTERS[1:meta$nrRows], each=meta$nrColumns)
 wells <- paste(lets, nums, sep="")
 
