@@ -81,7 +81,7 @@ equal to the final number of reporters, which in this case is always
 one. By default, if \code{posControls} is not given, "pos" will be taken
 as the name for the wells containing positive controls. Similarly, if
 \code{negControls} is missing, by default "neg" will be considered as
-the name used to annotated the negative controls. The content of
+the name used to annotate the negative controls. The content of
 \code{posControls} and \code{negControls} will be passed to
 \code{\link[base:regexpr]{regexpr}} for pattern matching within the well
 annotation given in \code{x$wellAnno} (see examples).  The arguments
