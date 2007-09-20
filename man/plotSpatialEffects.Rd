@@ -18,17 +18,17 @@ plotSpatialEffects(x, whichChannel = 1, plateRange)
 
 \details{
 The function plots the \link[prada:plotPlate]{plate plots} displaying the row and column offsets (stored in slot \code{rowcol.effects} of the \code{cellHTS} object \code{x}) within the plates in \code{plateRange}, and for channel \code{whichChannel}, as determined by the \link[cellHTS:Bscore]{B score method}.
-Before plotting the spatial offsets, the values within the chosen channel (\code{whichChannel}) are transformed in order to be confined in the range \eqn{[-1, 1]}, as follows:
+Before plotting the spatial offsets, the values within the chosen channel (\code{whichChannel}) are transformed in order to be confined in the range \eqn{[0, 1]}, as follows:
 
 \deqn{y^t = \frac{(y - min(y))}{max(y)-min(y)}}{%
 yt = (y - min(y))/(max(y) - min(y))}
 
 Here, \eqn{y^t}{yt} are the transformed values, and \eqn{y} the estimated spatial effects.
-The maximum and the minimum values are calculated using all the values in 
+The maximum and the minimum values are calculated using all of the values in 
 \code{x$rowcol.effects[,,,whichChannel]}.
 }
 
-\author{Ligia Braz \email{ligia@ebi.ac.uk}}
+\author{Ligia P. Bras \email{ligia@ebi.ac.uk}}
 
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},
