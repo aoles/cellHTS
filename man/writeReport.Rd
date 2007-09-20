@@ -69,7 +69,7 @@ writeReport(x,
 
 In case of a two-way assay, where two types of "positive" controls are used in the screen ("activators" and "inhibitors"), \code{posControls} should be defined as a list with two components (called \code{act} and \code{inh}), each of which should be vectors of regular expressions of the same length as the current number of reporters (as explained above).  
 
-By default, tooltips doing the mapping between the probe annotation and the plate wells are not added to the plate plots and to the overall screen plot. If the cellHTS object \code{x} is annotated, the probe annotation used the information contained whether in \code{x$geneAnno$GeneSymbol}, or \code{x$geneAnno$GeneID}, if the former is missing. Otherwise, the mapping simply uses the well identifiers.
+By default, tooltips doing the mapping between the probe annotation and the plate wells are not added to the plate plots and to the overall screen plot. If the cellHTS object \code{x} is annotated, the probe annotation is based on the information contained whether in \code{x$geneAnno$GeneSymbol}, or \code{x$geneAnno$GeneID}, if the former is missing. Otherwise, the mapping simply uses the well identifiers.
 }
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},
