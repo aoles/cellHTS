@@ -13,27 +13,42 @@ which BioMart databases it covers:
 > listMarts()
 \end{Sinput}
 \begin{Soutput}
-$biomart
-[1] "dicty"    "ensembl"  "snp"      "vega"     "uniprot"  "msd"      "wormbase"
-
-$version
-[1] "DICTYBASE (NORTHWESTERN)"    "ENSEMBL 40 (SANGER)"        
-[3] "SNP 40 (SANGER)"             "VEGA 40 (SANGER)"           
-[5] "UNIPROT PROTOTYPE 4-5 (EBI)" "MSD PROTOTYPE 4 (EBI)"      
-[7] "WORMBASE CURRENT (CSHL)"    
-
-$host
-[1] "www.dictybase.org" "www.biomart.org"   "www.biomart.org"  
-[4] "www.biomart.org"   "www.biomart.org"   "www.biomart.org"  
-[7] "www.biomart.org"  
-
-$path
-[1] ""                     "/biomart/martservice" "/biomart/martservice"
-[4] "/biomart/martservice" "/biomart/martservice" "/biomart/martservice"
-[7] "/biomart/martservice"
-
-$vschema
-[1] "dicty"   "default" "default" "default" "default" "default" "default"
+                          name
+1                      ensembl
+2     compara_mart_homology_46
+3  compara_mart_pairwise_ga_46
+4  compara_mart_multiple_ga_46
+5                          snp
+6             genomic_features
+7                         vega
+8                      uniprot
+9                          msd
+10        ENSEMBL_MART_ENSEMBL
+11                 wormbase176
+12                       dicty
+13                    rgd_mart
+14                   SSLP_mart
+15          pepseekerGOLD_mart
+16                       pride
+17       Pancreatic_Expression
+                                                version
+1                             ENSEMBL 46 GENES (SANGER)
+2                          ENSEMBL 46 HOMOLOGY (SANGER)
+3               ENSEMBL 46 PAIRWISE ALIGNMENTS (SANGER)
+4               ENSEMBL 46 MULTIPLE ALIGNMENTS (SANGER)
+5                        ENSEMBL 46 VARIATION  (SANGER)
+6                  ENSEMBL 46 GENOMIC FEATURES (SANGER)
+7                                     VEGA 21  (SANGER)
+8                               UNIPROT PROTOTYPE (EBI)
+9                                   MSD PROTOTYPE (EBI)
+10                                       GRAMENE (CSHL)
+11                                      WORMBASE (CSHL)
+12                             DICTYBASE (NORTHWESTERN)
+13                                      RGD GENES (MCW)
+14                     RGD MICROSATELLITE MARKERS (MCW)
+15                 PEPSEEKER (UNIVERSITY OF MANCHESTER)
+16                                          PRIDE (EBI)
+17 PANCREATIC EXPRESSION DATABASE (INSTITUTE OF CANCER)
 \end{Soutput}
 \end{Schunk}
 %
@@ -42,56 +57,16 @@ which we select the \textit{D. melanogaster} dataset.
 %
 \begin{Schunk}
 \begin{Sinput}
-> mart = useMart("ensembl")
+> mart <- useMart("ensembl", dataset = "dmelanogaster_gene_ensembl")
 \end{Sinput}
 \end{Schunk}
 % 
-\begin{Schunk}
-\begin{Sinput}
-> listDatasets(mart = mart)
-\end{Sinput}
-\begin{Soutput}
-                      dataset    version
-1     gaculeatus_gene_ensembl           
-2      lafricana_gene_ensembl           
-3    scerevisiae_gene_ensembl       SGD1
-4  cintestinalis_gene_ensembl       JGI2
-5   ptroglodytes_gene_ensembl    CHIMP1A
-6      etelfairi_gene_ensembl           
-7     ocuniculus_gene_ensembl           
-8       hsapiens_gene_ensembl     NCBI36
-9        ggallus_gene_ensembl    WASHUC1
-10 tnigroviridis_gene_ensembl TETRAODON7
-11      mmulatta_gene_ensembl     MMUL_1
-12       btaurus_gene_ensembl   Btau_2.0
-13      aaegypti_gene_ensembl           
-14   rnorvegicus_gene_ensembl    RGSC3.4
-15     csavignyi_gene_ensembl           
-16      celegans_gene_ensembl     CEL150
-17     trubripes_gene_ensembl      FUGU4
-18 dnovemcinctus_gene_ensembl           
-19      agambiae_gene_ensembl     AgamP3
-20   xtropicalis_gene_ensembl     JGI4.1
-21        drerio_gene_ensembl     ZFISH6
-22    mdomestica_gene_ensembl    BROADO3
-23 dmelanogaster_gene_ensembl    BDGP4.3
-24     mmusculus_gene_ensembl    NCBIM36
-25   cfamiliaris_gene_ensembl    BROADD1
-\end{Soutput}
-\end{Schunk}
-%
-\begin{Schunk}
-\begin{Sinput}
-> mart = useDataset("dmelanogaster_gene_ensembl", mart)
-\end{Sinput}
-\end{Schunk}
-%
 We can query the available gene attributes and filters for the
 selected dataset using the following functions.
 \begin{Schunk}
 \begin{Sinput}
-> attrs = listAttributes(mart)
-> filts = listFilters(mart)
+> attrs <- listAttributes(mart)
+> filts <- listFilters(mart)
 \end{Sinput}
 \end{Schunk}
 %
@@ -104,7 +79,7 @@ query). We use the \Rfunction{getBM} function of the package
 %
 \begin{Schunk}
 \begin{Sinput}
-> myGetBM = function(att) getBM(attributes = c("ensembl_gene_id", 
+> myGetBM <- function(att) getBM(attributes = c("ensembl_gene_id", 
 +     att), filter = "ensembl_gene_id", values = unique(x$geneAnno$GeneID), 
 +     mart = mart)
 \end{Sinput}
@@ -119,9 +94,9 @@ especially from gene ID to GO categories~\cite{GO}.
 %
 \begin{Schunk}
 \begin{Sinput}
-> bm1 = myGetBM(c("chromosome_name", "start_position", "end_position", 
+> bm1 <- myGetBM(c("chromosome_name", "start_position", "end_position", 
 +     "description"))
-> bm2 = myGetBM(c("flybase_name"))
+> bm2 <- myGetBM(c("flybasename_gene"))
 > bm3 = myGetBM(c("go", "go_description"))
 \end{Sinput}
 \end{Schunk}
@@ -156,11 +131,11 @@ where necessary.
 %
 \begin{Schunk}
 \begin{Sinput}
-> id = x$geneAnno$GeneID
-> bmAll = cbind(oneRowPerId(bm1, id), oneRowPerId(bm2, id), oneRowPerId(bm3, 
+> id <- x$geneAnno$GeneID
+> bmAll <- cbind(oneRowPerId(bm1, id), oneRowPerId(bm2, id), oneRowPerId(bm3, 
 +     id))
-> bdgpbiomart = cbind(x$geneAnno, bmAll)
-> x$geneAnno = bdgpbiomart
+> bdgpbiomart <- cbind(x$geneAnno, bmAll)
+> x$geneAnno <- bdgpbiomart
 \end{Sinput}
 \end{Schunk}
 

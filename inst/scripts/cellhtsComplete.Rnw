@@ -721,14 +721,13 @@ Now we can create the category matrix. Conceptually, this a matrix
 with one column for each probe and one row for each category. 
 The matrix element \Robject{[i,j]} is \Robject{1} if probe 
 \Robject{j} belongs to the \Robject{j}-th category, and \Robject{0} 
-if not. In practice, this matrix would be rather large (and perhaps 
-exhaust the memory of your computer), hence we use a type of sparse 
-matrix representation, implemented by the \Rclass{graph} object 
-\Robject{categs}. This bipartite graph's nodes correspond to the rows 
-and columns of the matrix and there is an edge if the matrix element 
-is non-zero.
-
-%One distraction is GO terms GO:0000067,  which is annotated to some of the genes, but is obsolete.
+if not. 
+%In practice, this matrix would be rather large (and perhaps 
+%exhaust the memory of your computer), hence we use a type of sparse 
+%matrix representation, implemented by the \Rclass{graph} object 
+%\Robject{categs}. This bipartite graph's nodes correspond to the rows 
+%and columns of the matrix and there is an edge if the matrix element 
+%is non-zero.
 
 % <<find obsolete GO ids, echo=FALSE, eval=FALSE>>=
 % names(x$score) = x$geneAnno$GeneID
@@ -736,6 +735,7 @@ is non-zero.
 % goids = strsplit(x$geneAnno$go[sel], ", ")
 % genes = rep(x$geneAnno$GeneID[sel], listLen(goids))
 % ux = unique(unlist(goids, use.names=FALSE))
+% require(GO)
 % s1 = ux %in% ls(GOMFANCESTOR)
 % s2 = ux %in% ls(GOBPANCESTOR)
 % s3 = ux %in% ls(GOCCANCESTOR)
@@ -744,7 +744,8 @@ is non-zero.
 % @ 
 
 <<obsolete GO ids>>=
-obsolete = c("GO:0005489", "GO:0005659", "GO:0005660")
+#obsolete = c("GO:0005489", "GO:0005659", "GO:0005660")
+obsolete <-c("GO:0005489", "GO:0005660")
 @ 
 
 Some distractions are the GO terms 
@@ -763,26 +764,43 @@ cache(categs <- cateGOry(genes, unlist(goids, use.names=FALSE)))
 We will select only those categories that contain at least 3 and 
 no more than 1000 genes.
 <<cat2>>=
-remGO = which(regexpr("^GO:", nodes(categs)) > 0)
-nrMem = listLen(edges(categs)[remGO])
-remGO = remGO[nrMem>1000 | nrMem <3]
-categs = subGraph(nodes(categs)[-remGO], categs)
+nrMem <- rowSums(categs) # number of genes per category
+remGO <- which(nrMem < 3 | nrMem > 1000)
+categs <- categs[-remGO,,drop=FALSE]
+# see if there are genes that don't belong to any category after applying the filter
+nrMem <- rowSums(t(categs))
+rem <- which(nrMem==0)
+if(length(rem)!=0) categs <- categs[,-rem, drop=FALSE]
 @ 
 %
 As the statistic for the category analysis we use the $z$-score. After
 selecting the subset of genes that actually have GO annotation,
 %
 <<cat3>>=
-stats = x$score[ sel & (names(x$score) %in% nodes(categs)) ]
+stats <- x$score[ sel & (names(x$score) %in% colnames(categs)) ]
 @
+There are some replicated probes in \Robject{stats}. We will handle this by taking the maximum value between replicate probes (non-conservative approach):
+<<handle replicates>>=
+## handle duplicated genes in stats:
+isDup <- duplicated(names(stats))
+table(isDup)
+dupNames <- names(stats)[isDup]
+sp <- stats[names(stats) %in% dupNames]
+sp <- split(sp, names(sp))
+table(sapply(sp, length)) 
+aux <- stats[!isDup]
+aux[names(sp)] <- sapply(sp, max)
+stats <- aux
+rm(aux)
+@ 
 %
-we are ready to call the category summary functions:
+We are ready to call the category summary functions:
 %
 <<cat6>>=
-acMean  = applyByCategory(stats, categs)
-acTtest = applyByCategory(stats, categs, FUN=function(v) t.test(v, stats)$p.value)
-acNum   = applyByCategory(stats, categs, FUN=length)
-isEnriched = (acTtest<=1e-3) & (acMean>0.5)
+acMean <- applyByCategory(stats, categs)
+acTtest <- applyByCategory(stats, categs, FUN=function(v) t.test(v, stats)$p.value)
+acNum <- applyByCategory(stats, categs, FUN=length)
+isEnriched <- (acTtest<=1e-2) & (acMean>0.5)
 @ 
 %
 A volcano plot of the $-\log_{10}$ of the $p$-value \Robject{acTtest} versus
@@ -791,7 +809,7 @@ Figure~\ref{cellhtsComplete-volcano}. For a given category, the $p$-value is cal
 $t$-test against the null hypothesis that there is no difference between the mean
 $z$-score of all probes and the mean $z$-score of the probes in that category. 
 To select the enriched categories (\Robject{isEnriched}), we considered a significance
-level of $0.1\%$ for the $t$-test, and a per category mean $z$-score greater
+level of $1\%$ for the $t$-test, and a per category mean $z$-score greater
 than $0.5$. This led to the \Sexpr{sum(isEnriched)} categories marked in red in
 Figure~\ref{cellhtsComplete-volcano} are listed in Table~\ref{tab:enrichedGoCateg}.
 
@@ -815,7 +833,7 @@ stopifnot(identical(names(acMean), names(acTtest)),
 %
 <<enrichedGoCateg, echo=FALSE, results=hide>>=
 enrichedGOCateg = names(which(isEnriched))
-
+require("GO")
 res = data.frame(
    "$n$" = acNum[isEnriched], 
     "$z_{\\mbox{\\scriptsize mean}}$" = signif(acMean[isEnriched],2), 
