@@ -1,4 +1,11 @@
 
+## A wrapper for 'sd' that returns sd(NA) == NA rather than an error,
+##   as what 'sd' does, due to a change by BDR to the R 2.7 candidate
+sdWithNA = function(x) {
+  x = x[!is.na(x)]
+  if(length(x)>0L) sd(x) else as.numeric(NA)
+}
+
 myImageMap <- function(object, tags, imgname) {
 
   if(!is.matrix(object)||ncol(object)!=4)
@@ -543,11 +550,11 @@ return(z) })
       ## plot global title
       plotTable[count+1, ch+1] = "<H5 align=center><FONT color=#494F8A>PLATE PLOT(S)</FONT></H5>\n"
 
-        ## plot title
-        plotTable[count+2, 1] = "<H5 align=left>Standard deviation across replicates</H5>\n"
+      ## plot title
+      plotTable[count+2, 1] = "<H5 align=left>Standard deviation across replicates</H5>\n"
 
       ## platePlot of sd
-      psd = apply(x[,,,ch,drop=FALSE], 1, sd, na.rm=TRUE)
+      psd = apply(x[,,,ch,drop=FALSE], 1, sdWithNA)
 
       if(!all(is.na(psd))){
 

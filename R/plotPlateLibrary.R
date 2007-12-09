@@ -42,13 +42,14 @@ if(is.null(plotPlateArgs$xrange)) {
         stopifnot(is(plotPlateArgs$xrange, "vector") & length(plotPlateArgs$xrange)==2)}
 
 if (plotSd) {
-psd.lib = apply(libxraw[,,,,drop=FALSE], 1:2, sd, na.rm=TRUE)
-psd.plate = apply(xraw[,,,,drop=FALSE], 1, sd, na.rm=TRUE)
+  psd.lib   = apply(libxraw[,,,,drop=FALSE], 1:2, sdWithNA)
+  psd.plate = apply(   xraw[,,,,drop=FALSE], 1, sdWithNA)
 
-     if(is.null(plotPlateArgs$sdrange)) {
-        plotPlateArgs$sdrange = c(0, quantile(psd.plate, 0.95, na.rm=TRUE))
-         } else {
-     stopifnot(is(plotPlateArgs$sdrange, "vector") & length(plotPlateArgs$sdrange)==2) }
+  if(is.null(plotPlateArgs$sdrange)) {
+    plotPlateArgs$sdrange = c(0, quantile(psd.plate, 0.95, na.rm=TRUE))
+  } else {
+    stopifnot(is(plotPlateArgs$sdrange, "vector") & length(plotPlateArgs$sdrange)==2)
+  }
 }
 
 pushViewport(viewport(layout = grid.layout(nrLibPlates + 1, dim(xraw)[3] + plotSd))) 
