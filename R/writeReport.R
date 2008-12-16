@@ -446,7 +446,7 @@ for(p in 1:nrPlate){
 
     res = makePlot(outdir, con=con, name="imageScreen", w=7, h=7, psz=6,
                     fun = function(map=mapx)
-                      do.call("imageScreen", args=append(list(x=x, map=map), imageScreenArgs)),
+                      do.call(imageScreen, args=append(list(x=x, map=map), imageScreenArgs)),
                     print=FALSE, isImageScreen=TRUE)
 
     if(progressReport) {

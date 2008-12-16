@@ -30,7 +30,7 @@ summarizeChannels = function(x,
   ## The argument 'fun' allows using different normalizations, and also to define
   ## the numerator/denominator for the ratio (i.e. R1/R2 or R2/R1)
   x$xnorm = array(
-     do.call("fun", list(r1=dat[,,,1], r2=dat[,,,2])),
+     do.call(fun, list(r1=dat[,,,1], r2=dat[,,,2])),
 #append(list(r1=x$xnorm[,,,1], r2=x$xnorm[,,,2]), funargs)),
             dim=c(dim(dat)[1:3], 1))
 
