@@ -30,13 +30,16 @@ configure(x, \dots)
 }
 
 \details{
-  \item{confFile}{This file is expected to be a tab-delimited file with
-at least three columns, and column names \code{Batch}, \code{Well} and \code{Content}. The contents of \code{Batch} are expected to be integer.}
-  \item{logFile}{If given as an argument, it is expected to be a tab-delimited file with
-at least three columns, and column names \code{Filename}, \code{Well},
-and \code{Flag}. Further columns are allowed.}
-  \item{descripFile}{This file is the screen description file with
-general information about the screen.}
+  \itemize{
+    \item{confFile}{This file is expected to be a tab-delimited file with
+    at least three columns, and column names \code{Batch}, \code{Well} and
+    \code{Content}. The contents of \code{Batch} are expected to be integer.} 
+    \item{logFile}{If given as an argument, it is expected to be a
+    tab-delimited file with at least three columns, and column names
+    \code{Filename}, \code{Well}, and \code{Flag}. Further columns are allowed.}
+    \item{descripFile}{This file is the screen description file with
+    general information about the screen.}
+  }
   
 Data from wells that are annotated as \emph{empty} are ignored and are set to NA in \code{x} in slot \code{xraw}.  
 }

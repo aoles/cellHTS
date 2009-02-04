@@ -21,8 +21,12 @@ annotate(x, \dots)
   \item{\dots}{additional parameters - ignored.}
 }
 \details{
-  \item{geneIDFile}{This file is expected to be a tab-delimited file with at least three columns, and column names \code{Plate}, \code{Well} and \code{GeneID}. The contents of \code{Plate} are expected to be integer. Further columns are allowed.}
-
+  \itemize{
+    \item{geneIDFile}{This file is expected to be a tab-delimited file with at
+    least three columns, and column names \code{Plate}, \code{Well} and
+    \code{GeneID}. The contents of \code{Plate} are expected to be
+    integer. Further columns are allowed.} 
+  }
 }
 
 \value{An S3 object of class \code{cellHTS}, which extends the argument \code{x} by the following element:
