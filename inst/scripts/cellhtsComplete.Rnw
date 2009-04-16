@@ -896,7 +896,6 @@ values calculated herein. Each panel corresponds to one 384-well plate.
 Axis labels are not pretty - they overlap with neighboring panels due to space constraints.}
 %
 <<scoresComparison,echo=FALSE,results=hide,fig=TRUE,include=FALSE,width=5,width=5>>=
-require("geneplotter")
 par(mfrow=c(7,9), mai=c(0,0,0,0))
 for(i in 1:max(data2003$Plate)) {
    sel = (data2003$Plate==i)
