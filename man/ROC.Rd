@@ -18,9 +18,9 @@ ROC(x, positives, negatives)
 \arguments{
   \item{x}{a \code{cellHTS} object that has already been scored (see details).}
   \item{positives}{a list or vector of regular expressions specifying the name of the positive controls. 
-   See the details for the argument \code{posControls} of \code{\link[cellhts]{writeReport}} function.}
+   See the details for the argument \code{posControls} of \code{\link[cellHTS]{writeReport}} function.}
   \item{negatives}{a vector of regular expressions specifying the name of the negative controls. 
-   See the details for the argument \code{negControls} of \code{\link[cellhts]{writeReport}} function.}
+   See the details for the argument \code{negControls} of \code{\link[cellHTS]{writeReport}} function.}
   \item{col}{the graphical parameter for color; see \code{\link{par}} for details.}
   \item{type}{the graphical parameter giving the type of plot desired; see \code{\link{par}} for details.}
   \item{main}{the graphical parameter giving the desired title of plot; see \code{\link{par}} for details.}

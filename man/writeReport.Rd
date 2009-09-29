@@ -33,7 +33,7 @@ writeReport(x,
     here because the production of the plate plots takes a long time.
     See details.}
   \item{imageScreenArgs}{a list with parameters for the function
-    \code{\link[cellhts]{imageScreen}}. See details.}
+    \code{\link[cellHTS]{imageScreen}}. See details.}
   \item{progressReport}{a logical, should a progress report window be displayed?}
   \item{posControls}{a list or vector of regular expressions specifying the name of the positive controls. See details.}
   \item{negControls}{a vector of regular expressions specifying the name of the negative controls. See details.}
@@ -49,23 +49,36 @@ writeReport(x,
    If an element is not specified, default values are used.
 
    The following elements are recognized for \code{imageScreenArgs} and
-   passed on to \code{\link[cellhts]{imageScreen}}:
+   passed on to \code{\link[cellHTS]{imageScreen}}:
    \code{ar}, aspect ratio,
    \code{zrange}, range,
-   \code{map}, logical value indicating whether tooltips with the annotation should be added to the plot (default value is FALSE),
-   \code{anno}, gene annotation for the image map.
+   \code{map}, logical value indicating whether tooltips with the
+   annotation should be added to the plot (default value is FALSE),
+   \code{anno}, gene annotation for the image map. 
 
-  \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]} or to \code{dim(x$xnorm)[4]}, in case \code{x} contains multi-channel data that have been normalized by combining the values from two or more channels).
-  By default, if \code{posControls} is not given, "pos" will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default "neg" will be considered as the name used to annotate the negative controls. 
+  \code{posControls} and \code{negControls} should be given as a vector
+  of regular expression patterns specifying the name of the positive(s)
+  and negative(s) controls, respectivey, as provided in the plate
+  configuration file (and stored in \code{x$wellAnno}). The length of
+  these vectors should be equal to the number of reporters used in the
+  screen (\code{dim(x$xraw)[4]} or to \code{dim(x$xnorm)[4]}, in case
+  \code{x} contains multi-channel data that have been normalized by
+  combining the values from two or more channels). 
+  By default, if \code{posControls} is not given, "pos" will be taken as
+  the name for the wells containing positive controls. Similarly, if
+  \code{negControls} is missing, by default "neg" will be considered as
+  the name used to annotate the negative controls.  
   The content of \code{posControls} and \code{negControls} will be
-  passed to \code{\link[base:regexpr]{regexpr}} for pattern matching
+  passed to \code{\link[base:grep]{regexpr}} for pattern matching
   within the well annotation given in \code{x$wellAnno} (see
   examples). If no controls are available for a given channel, use
   \code{""} or \code{NA} for that channel. For example,
   \code{posControls = c("", "(?i)^diap$")} means that channel 1 has no
   positive controls, while "diap" is the positive control for channel 2.
 
-  The arguments \code{posControls} and \code{negControls} are particularly useful in multi-channel data since the controls might be reporter-specific, or after normalizing multi-channel data.
+  The arguments \code{posControls} and \code{negControls} are
+  particularly useful in multi-channel data since the controls might be
+  reporter-specific, or after normalizing multi-channel data. 
 
 In case of a two-way assay, where two types of "positive" controls are used in the screen ("activators" and "inhibitors"), \code{posControls} should be defined as a list with two components (called \code{act} and \code{inh}), each of which should be vectors of regular expressions of the same length as the current number of reporters (as explained above).  
 
@@ -73,7 +86,7 @@ By default, tooltips doing the mapping between the probe annotation and the plat
 }
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},
-  \code{\link[cellhts:imageScreen]{imageScreen}}
+  \code{\link[cellHTS:imageScreen]{imageScreen}}
 }
 
 \value{
@@ -82,13 +95,15 @@ By default, tooltips doing the mapping between the probe annotation and the plat
   file, this is an HTML file which can be read by a web browser.
 }
 
-\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
+\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber
+  \email{huber@ebi.ac.uk}} 
 
 \examples{
     data(KcViabSmall)
     ## pCtrls <- c("pos") 
     ## nCtrls <- c("neg") 
-    ## or for safety reasons (not a problem for the current well annotation, however) 
+    ## or for safety reasons (not a problem for the current well
+    ## annotation, however)  
     ## pCtrls <- c("^pos$") 
     ## nCtrls <- c("^neg$")
     ## writeReport(KcViabSmall, posControls=pCtrls, negControls=nCtrls)

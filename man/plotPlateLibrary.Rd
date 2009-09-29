@@ -32,7 +32,7 @@ The following elements are recognized for \code{plotPlateArgs} and
 
 \seealso{
   \code{\link[prada:plotPlate]{plotPlate}},
-  \code{\link[cellhts:getLibraryPlate]{getLibraryPlate}}
+  \code{\link[cellHTS:getLibraryPlate]{getLibraryPlate}}
 }
 
 \author{Ligia Braz \email{ligia@ebi.ac.uk}}

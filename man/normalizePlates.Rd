@@ -51,12 +51,31 @@ For example, with a \code{zscore="-"} a strong decrease in the signal will be re
 such a phenotype will be represented by a negative \emph{z}-score.  
 This option can be set to calculate the results to the commonly used convention.
 
-  The arguments \code{posControls} and \code{negControls} are required for applying the normalization methods based on the control measurements (that is, when \code{normalizationMethod="POC"}, or \code{normalizationMethod="NPI"}, or \code{normalizationMethod="negatives"}). 
-  \code{posControls} and \code{negControls} should be given as a vector of regular expression patterns specifying the name of the positive(s) and negative(s) controls, respectivey, as provided in the plate configuration file (and stored in \code{x$wellAnno}). The length of these vectors should be equal to the number of reporters used in the screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case \code{x} contains multi-channel data that have been normalized by combining the values from two or more channels.
-  By default, if \code{posControls} is not given, \emph{pos} will be taken as the name for the wells containing positive controls. Similarly, if \code{negControls} is missing, by default \emph{neg} will be considered as the name used to annotate the negative controls. 
-  The content of \code{posControls} and \code{negControls} will be passed to \code{\link[base:regexpr]{regexpr}} for pattern matching within the well annotation given in \code{x$wellAnno} (see examples for \code{\link[cellHTS:summarizeChannels]{summarizeChannels}}). The arguments \code{posControls} and \code{negControls} are particularly useful in
-multi-channel data since the controls might be reporter-specific, or
-after normalizing multi-channel data. 
+  The arguments \code{posControls} and \code{negControls} are required
+  for applying the normalization methods based on the control
+  measurements (that is, when \code{normalizationMethod="POC"}, or
+  \code{normalizationMethod="NPI"}, or
+  \code{normalizationMethod="negatives"}).  
+  \code{posControls} and \code{negControls} should be given as a vector
+  of regular expression patterns specifying the name of the positive(s)
+  and negative(s) controls, respectivey, as provided in the plate
+  configuration file (and stored in \code{x$wellAnno}). The length of
+  these vectors should be equal to the number of reporters used in the
+  screen (\code{dim(x$xraw)[4]}) or to \code{dim(x$xnorm)[4]}, in case
+  \code{x} contains multi-channel data that have been normalized by
+  combining the values from two or more channels. 
+  By default, if \code{posControls} is not given, \emph{pos} will be
+  taken as the name for the wells containing positive
+  controls. Similarly, if \code{negControls} is missing, by default
+  \emph{neg} will be considered as the name used to annotate the
+  negative controls.  
+  The content of \code{posControls} and \code{negControls} will be
+  passed to \code{\link[base:grep]{regexpr}} for pattern matching within
+  the well annotation given in \code{x$wellAnno} (see examples for
+  \code{\link[cellHTS:summarizeChannels]{summarizeChannels}}). The
+  arguments \code{posControls} and \code{negControls} are particularly
+  useful in multi-channel data since the controls might be reporter-specific, or
+  after normalizing multi-channel data. 
 }
 
 \value{
@@ -72,7 +91,8 @@ Additional outputs may be given if
 the \code{\link[cellHTS:Bscore]{Bscore}} function.
 }
 
-\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber \email{huber@ebi.ac.uk}}
+\author{Ligia Braz \email{ligia@ebi.ac.uk}, Wolfgang Huber
+  \email{huber@ebi.ac.uk}} 
 
 \seealso{
   \code{\link[cellHTS:Bscore]{Bscore}},

@@ -11,7 +11,7 @@ imageScreen(x, ar = 3/5, zrange, map = FALSE, anno)
 \item{ar}{the desired aspect ration for the image plot (i.e. number of columns per number of rows)} 
 \item{zrange}{the range of values to be mapped into the color
       scale. If missing, zrange will be set to the range of \code{x$score}.}
-\item{map}{a logical value that determines whether an image map should be created using tooltips to indicate the annotation at each position. It only makes sense to set it to \code{TRUE} when the function is called from \code{\link[cellhts]{writeReport}}, so the default is \code{FALSE}.}
+\item{map}{a logical value that determines whether an image map should be created using tooltips to indicate the annotation at each position. It only makes sense to set it to \code{TRUE} when the function is called from \code{\link[cellHTS]{writeReport}}, so the default is \code{FALSE}.}
 \item{anno}{optional input giving the annotation information for the mapping. It should be a vector of the same size as
 \code{x$score}. See details.}
 }
