@@ -1,11 +1,11 @@
 Package: cellHTS
-Version: 1.25.0
+Version: 1.25.1
 Date: 10 December 2007
 Title: Analysis of cell-based screens
 Author: Wolfgang Huber <huber@ebi.ac.uk>, Ligia Bras <ligia@ebi.ac.uk>, 
         Michael Boutros <m.boutros@dkfz.de>
 Maintainer: Ligia Bras <ligia@ebi.ac.uk>
-Depends: R (>= 2.5.0), prada (>= 1.9.4), RColorBrewer, Biobase (>= 1.11.12),
+Depends: R (>= 2.10), prada (>= 1.9.4), RColorBrewer, Biobase (>= 1.11.12),
          genefilter (>= 1.11.2) 
 Suggests: Category, GO.db, vsn (>= 2.0.35)
 Description: Analysis of cell-based RNA interference screens
