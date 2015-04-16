@@ -1,0 +1,144 @@
+
+
+
+(lpb 19.06.2007) I started to add a few details about the modifications I am 
+doing. So far, I have just done those modifications that we decided that 
+should be done for **cellHTS** too. All the other updates and improvements 
+will be performed on **cellHTS2**.
+
+
+**  TO DO LIST ***
+[Roughly order by importance & feasibility]
+
+normalizeChannels:
+(wh 11.5.2007)
+==================
+This function should be reversed to the behaviour it had before May
+2007, in order to avoid frustration with users that have been using
+it. However, it should be deprecated (i.e. give a deprecation 
+warning and a suggestion to use a new function "summarizeChannels").
+This new function "summarizeChannels" should do what normalizeChannels
+do now. The threshold "0.7" should not be default. Users should be
+forced to think about it and set it themselves.
+
+# -------------
+(lpb 19.06.2007) 
+For **cellHTS**: I have renamed the above functin to "summarizeChannels" and 
+restored "normalizedChannels". I also made some modifications in "summarizeChannels" to force users to define the threshold. Since this threshold is scale dependent, given that "fun" is applied after plate adjustment (when the argument "adjustPlates" is given), I have added "thresh" as an argument to "fun", and removed the other argument "funargs". See below:
+
+summarizeChannels = function(x,
+    fun = function(r1, r2, thresh) ifelse(r1>thresh, log2(r2/r1), as.numeric(NA)),
+    #funargs = list(thresh=quantile(r1, probs=0.1, na.rm=TRUE)),
+    adjustPlates, zscore, ...) { ...
+
+
+As an example in the man pages, I define 
+   thresh= quantile(r1, probs=0.1, na.rm=TRUE)
+ 
+# --------------
+
+
+The path through normalisation and between channels summarisation is a
+bit confusing right now (e.g. the 'isInLogScale' arguments of the 
+scaleByPlateMean etc. functions: when is the data supposed to be
+logged; how to avoid that people do not log twice, and that they do
+log at the right time) - can this be simplified?
+
+ 
+configure
+(wh 14.5.2007)
+==============================
+Should take a "path" argument, similar as readPlateData
+
+# --------------
+(lpb 19.06.2007) 
+For **cellHTS** I have added the "path" argument to both "annotate" and "configure" functions, in accordance to what is done in "readPlateData".
+# --------------
+
+
+calcZscores:
+(wh 8.5.2007)
+==============
+Three options for calculation of the denominator in the calcZscores() function:
+(i) screenwide (currently, this is the only option)
+(ii) separately for each plate
+(iii) separately for each batch of plates
+Wh thinks that (iii) should be the default.
+
+# --------------
+(lpb 03.08.2007) 
+Done for cellHTS2.
+# --------------
+
+
+per experiment quality report:
+(wh 14.5.2007)
+==============================
+Should also report a measure of reproducibility when there are >2 
+replicates. Are there any n-dimensional generalisations of the 
+Spearman rank correlation? Perhaps sth like the size of the 
+residuals of a linear regression of the ranked values.
+
+Histogrammes of intensities could have rugs at the bottom in different
+colours indicating the values of the controls.
+
+# --------------
+(lpb 14.08.2007) 
+Done for cellHTS2.
+# --------------
+
+S4
+(wh 14.5.2007)
+==============================
+cellHTS class should be made S4. On the long run, this will make our
+code easier to maintain and less breakable.
+
+
+writeReport
+(wh 14.5.2007)
+==============
+writeReport is much too slow. We need to find the time suckers and make 
+it more efficient. The progress report gives numbers that are
+misleading (e.g. people have complained that it gets stuck forever at "99%").
+
+# --------------
+(lpb 19.06.2007) 
+For **cellHTS**: By default, I have set to FALSE the "map" argument 
+for doing the tootips in the image map. It taks to much time when there are many plates in the screen!
+# --------------
+
+
+The screenview currently contains hyperlinks to the gene
+annotations. It would also be nice to show the underlying raw data
+values. However, not sure whether HTML image map is the right thing to
+do, are there more efficient ways? Is there a free alternative to
+Spotfire? Ggobi?
+
+
+(wh 18.06.2007) we should make the progress bar functionality such that 
+it does not fail when there is no X server (e.g. if the script is 
+running on a server in Batch mode, or on some MAC machines.). Ideally, 
+of course, the write report will become fast enough that the progress 
+bar is no longer needed at all.
+
+
+
+export 
+(wh 14.5.2007)
+==============================
+There should be a simple option to export complete cellHTS objects
+to Spotfire; details of how to do this need to be worked together with
+Spotfire users in MB's lab.
+
+
+Standalone .exe with GUI
+(wh 21.5.2007)
+==============================
+explore whether it is possible to provide a standalone product (e.g.
+an .exe file or a CD) that allows Windows users to run a basic
+analysis in cellHTS through a GUI without installation or seeing 
+the commandline. This is not intended to replace the programmatic
+version; it is intended as a "gateway drug" or for teaching. Need to
+discuss with Robert the technical aspects, but it should be possible 
+without major programming, just putting together existing tools.
+
