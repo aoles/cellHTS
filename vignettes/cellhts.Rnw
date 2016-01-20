@@ -685,10 +685,11 @@ than necessity.
 <<transfplots, fig=TRUE, include=FALSE, width=6.5, height=9>>=
 library("vsn")
 par(mfcol=c(3,2))
-myPlots=function(z,...) {
-  hist(z[,1], 100, col="lightblue", xlab="",...)
-  meanSdPlot(z, ylim=c(0, quantile(abs(z[,2]-z[,1]), 0.95, na.rm=TRUE)), ...)
-  qqnorm(z[,1], pch='.', ...)
+myPlots=function(z, main=NULL, ...) {
+  hist(z[,1], 100, col="lightblue", xlab="", main=main, ...)
+  plot(1L, type="n", xlab="", ylab="", asp=1, ...)
+  plot(meanSdPlot(z, plot=FALSE)$gg + ggplot2::ggtitle(main), vp=gridBase::baseViewports()$figure)
+  qqnorm(z[,1], pch='.', main=main, ...)
   qqline(z[,1], col='blue')
 }
 dv = matrix(x$xnorm, nrow=prod(dim(x$xnorm)[1:2]), ncol=dim(x$xnorm)[3])
