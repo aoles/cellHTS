@@ -1,5 +1,5 @@
 Package: cellHTS
-Version: 1.41.1
+Version: 1.41.2
 Title: Analysis of cell-based screens
 Author: Wolfgang Huber <huber@ebi.ac.uk>, Ligia Bras <ligia@ebi.ac.uk>, 
         Michael Boutros <m.boutros@dkfz.de>
@@ -14,3 +14,4 @@ Reference: Michael Boutros and Ligia P. Bras L and Wolfgang Huber.
 License: Artistic-2.0
 URL: http://www.dkfz.de/signaling, http://www.ebi.ac.uk/huber
 biocViews: CellBasedAssays, Visualization
+PackageStatus: Deprecated
