@@ -14,7 +14,7 @@ summarizeChannels = function(x,
   if (!missing(adjustPlates)) {
     nx = switch(adjustPlates,
       mean = scaleByPlateMean(x),
-      median = cellHTS:::scaleByPlateMedian(x),
+      median = scaleByPlateMedian(x),
       shorth = scaleByPlateShorth(x),
       negatives = scaleByPlateNegatives(x),
       POC = POC(x, ...),

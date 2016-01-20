@@ -8,7 +8,7 @@
       addVigs2WinMenu("cellHTS") ## in Biobase
 
    if(interactive())
-     message(paste(
+     packageStartupMessage(paste(
    "\n-------------------------------------------------------------------",
    "\nA note from the 'cellHTS' package:",
    "\nThe package 'cellHTS2' offers better functionality for working with",

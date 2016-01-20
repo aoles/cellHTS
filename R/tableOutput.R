@@ -21,7 +21,7 @@ if (!gotable) out = paste("\\begin{tabular}{", paste(rep("r", ncol(x)), collapse
 
 ## output a file
 tableOutput = function(fn, nm, header=TRUE, dropColumns, selRows=1:5, preName="cellhts") {
-  r = read.table(fn, sep="\t", header=header,  na.string="", as.is=TRUE)
+  r = read.table(fn, sep="\t", header=header,  na.strings="", as.is=TRUE)
   x = r[c(selRows, 1), ]
   if(!missing(dropColumns))
    x = x[, -dropColumns]

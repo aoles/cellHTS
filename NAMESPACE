@@ -1,3 +1,9 @@
+importFrom("Biobase", "addVigs2WinMenu", "listLen")
+importFrom("prada", "devDims", "killProgress", "plotPlate", "progress", "updateProgress")
+importFrom("RColorBrewer", "brewer.pal")
+importFrom("genefilter", "shorth")
+importFrom("grid", "grid.layout", "popViewport", "pushViewport", "viewport")
+
 export("ROC",
        "annotate",
        "Bscore",

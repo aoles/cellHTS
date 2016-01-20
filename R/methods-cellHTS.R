@@ -31,7 +31,7 @@ annotate.cellHTS = function(x, geneIDFile, path=dirname(geneIDFile), ...) {
   if(!(is.character(path)&&length(path)==1))
     stop("'path' must be character of length 1")
 
-  geneIDs = read.table(file.path(path, file), sep="\t", header=TRUE, as.is=TRUE, na.string="", quote="",fill=TRUE)
+  geneIDs = read.table(file.path(path, file), sep="\t", header=TRUE, as.is=TRUE, na.strings="", quote="",fill=TRUE)
 
   checkColumns(geneIDs, file, mandatory=c("Plate", "Well", "GeneID"),
                numeric=c("Plate"))
@@ -72,14 +72,14 @@ if (!missing(path))
 
   ppath = ifelse(missing(path), dirname(confFile), path)
   confFile = basename(confFile)
-  conf = read.table(file.path(ppath, confFile), sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
+  conf = read.table(file.path(ppath, confFile), sep="\t", header=TRUE, as.is=TRUE, na.strings="", fill=TRUE)
 
   ## Check if the screen log file was given
   slog <- NULL
   if(!missing(logFile)) {
     ppath = ifelse(missing(path), dirname(logFile), path)
     logFile = basename(logFile)
-    slog = read.table(file.path(ppath, logFile),  sep="\t", header=TRUE, as.is=TRUE, na.string="", fill=TRUE)
+    slog = read.table(file.path(ppath, logFile),  sep="\t", header=TRUE, as.is=TRUE, na.strings="", fill=TRUE)
     ## Check if the screen log file is empty
     if (nrow(slog))
        checkColumns(slog, logFile, mandatory=c("Filename", "Well", "Flag"),

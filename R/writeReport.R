@@ -104,7 +104,6 @@ writeReport = function(x,
     totalTime= (2 + (x$state["configured"])*(4 + nrPlate*nrReplicate*nrChannel*(1+2*fz)) +
       0.01*sum(x$plateList$status=="OK") + (5*nrChannel*nrReplicate) +
         (x$state["scored"])*nrChannel*14 + (x$state["scored"])*fzs*nrPlate*2)
-   require("prada")
    progress(title="cellHTS is busy", message = sprintf("\nCreating HTML pages for '%s'", x$name)) 
    on.exit(killProgress(), add=TRUE)
    timeCounter=1
