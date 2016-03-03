@@ -81,7 +81,7 @@ normalization method. The available options are:
 	   divided by this value (if \code{log=FALSE}) or subtracted by
 	   it (if \code{log=TRUE}, meaning that data have been log
 	   transformed).  
-    \item If \code{adjustPlates="POC"} (percent of control), for each plate and replicate, each measurement is divided by the average of the measurements on the plate positive controls, and multipliplied by 100.
+    \item If \code{adjustPlates="POC"} (percent of control), for each plate and replicate, each measurement is divided by the average of the measurements on the plate positive controls, and multiplied by 100.
     \item If \code{adjustPlates="negatives"}, for each plate and replicate, each measurement is divided 
           by the median of the measurements on the plate negative controls. If the data values are in \code{log2} scale (\code{log=TRUE}), the per-plate factor is subtracted from each measurement, instead.
     \item If \code{adjustPlates="NPI"} (normalized percent inhibition), each measurement is subtracted from the average of the intensities on the plate positive controls, and this result is divided by the difference between 
