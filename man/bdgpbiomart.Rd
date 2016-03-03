@@ -18,7 +18,7 @@ genes online} for details. The annotations were obtained on
 8 September 2006.
 }
 \source{
-BioMart webinterface to Ensembl 37.
+BioMart web interface to Ensembl 37.
 }
 \examples{
     data(bdgpbiomart)
