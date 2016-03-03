@@ -58,7 +58,7 @@ writeReport(x,
 
   \code{posControls} and \code{negControls} should be given as a vector
   of regular expression patterns specifying the name of the positive(s)
-  and negative(s) controls, respectivey, as provided in the plate
+  and negative(s) controls, respectively, as provided in the plate
   configuration file (and stored in \code{x$wellAnno}). The length of
   these vectors should be equal to the number of reporters used in the
   screen (\code{dim(x$xraw)[4]} or to \code{dim(x$xnorm)[4]}, in case
