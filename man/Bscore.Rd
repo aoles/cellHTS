@@ -15,7 +15,7 @@ Bscore(x, what="xraw", adjustPlateMedian = TRUE, scale = TRUE, save.model = FALS
 \arguments{
   \item{x}{a \code{cellHTS} object that has already been configured. See details.}
   \item{what}{a character indicating the slot of \code{x} to consider: \code{"xraw"} (default) or \code{"xnorm"}.}
-  \item{adjustPlateMedian}{a logical value indicating whether the estimated average of each plate should also be substracted to the raw intensity values.}
+  \item{adjustPlateMedian}{a logical value indicating whether the estimated average of each plate should also be subtracted to the raw intensity values.}
   \item{scale}{a logical value indicating if the per-plate model residuals should be further scaled by their variance. See details.}
   \item{save.model}{a logical value specifying whether the per-plate models should be saved, and given as output. See details.}
 }
